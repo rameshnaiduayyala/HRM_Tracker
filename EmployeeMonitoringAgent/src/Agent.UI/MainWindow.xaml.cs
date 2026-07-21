@@ -6,7 +6,9 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Agent.Core.Interfaces;
+using Agent.Application.Services;
 using Agent.Background;
+using Agent.Infrastructure.Logging;
 
 namespace Agent.UI
 {
@@ -17,9 +19,18 @@ namespace Agent.UI
         private readonly IWorkSessionService _workSessionService;
         private readonly TelemetryWorker _telemetryWorker;
         private readonly SyncWorker _syncWorker;
+        private readonly ConfigSyncWorker _configSyncWorker;
+        private readonly UpdateWorker _updateWorker;
+        private readonly WatchdogWorker _watchdogWorker;
         private readonly IStartupService _startupService;
         private readonly ILoggerService _logger;
         private readonly IOfflineQueue _offlineQueue;
+        private readonly IEnhancedLoggerService _enhancedLogger;
+        private readonly IBreakManagementService _breakManagement;
+        private readonly IApplicationMonitoringService _appMonitoring;
+        private readonly IWebsiteMonitoringService _websiteMonitoring;
+        private readonly ISecurityService _securityService;
+        private readonly IUpdateService _updateService;
 
         private System.Windows.Forms.NotifyIcon? _notifyIcon;
 
@@ -29,9 +40,18 @@ namespace Agent.UI
             IWorkSessionService workSessionService,
             TelemetryWorker telemetryWorker,
             SyncWorker syncWorker,
+            ConfigSyncWorker configSyncWorker,
+            UpdateWorker updateWorker,
+            WatchdogWorker watchdogWorker,
             IStartupService startupService,
             ILoggerService logger,
-            IOfflineQueue offlineQueue)
+            IOfflineQueue offlineQueue,
+            IEnhancedLoggerService enhancedLogger,
+            IBreakManagementService breakManagement,
+            IApplicationMonitoringService appMonitoring,
+            IWebsiteMonitoringService websiteMonitoring,
+            ISecurityService securityService,
+            IUpdateService updateService)
         {
             InitializeComponent();
             _apiClient = apiClient;
@@ -39,9 +59,18 @@ namespace Agent.UI
             _workSessionService = workSessionService;
             _telemetryWorker = telemetryWorker;
             _syncWorker = syncWorker;
+            _configSyncWorker = configSyncWorker;
+            _updateWorker = updateWorker;
+            _watchdogWorker = watchdogWorker;
             _startupService = startupService;
             _logger = logger;
             _offlineQueue = offlineQueue;
+            _enhancedLogger = enhancedLogger;
+            _breakManagement = breakManagement;
+            _appMonitoring = appMonitoring;
+            _websiteMonitoring = websiteMonitoring;
+            _securityService = securityService;
+            _updateService = updateService;
 
             InitializeTrayIcon();
             InitializeSettings();
@@ -96,6 +125,11 @@ namespace Agent.UI
             _attendanceService.OnAttendanceStatusChanged += UpdateAttendanceUI;
             _workSessionService.OnSessionStatusChanged += UpdateSessionUI;
 
+            if (_enhancedLogger is EnhancedLoggerService enhancedLogger)
+            {
+                enhancedLogger.OnLogAdded += AddLog;
+            }
+
             _telemetryWorker.OnTrackedTimeUpdated += (secs) => Dispatcher.Invoke(() =>
             {
                 UpdateTrackedTimeUI(secs);
@@ -115,6 +149,30 @@ namespace Agent.UI
             _telemetryWorker.OnInactivityDetected += () => Dispatcher.Invoke(() =>
             {
                 ShowWindow();
+            });
+
+            _breakManagement.OnBreakStarted += (b) => Dispatcher.Invoke(() =>
+            {
+                _enhancedLogger.LogInfo($"Break started: {b.BreakType}");
+            });
+
+            _breakManagement.OnBreakEnded += (b) => Dispatcher.Invoke(() =>
+            {
+                _enhancedLogger.LogInfo($"Break ended: {b.BreakType} ({b.DurationSeconds}s)");
+            });
+
+            _appMonitoring.OnApplicationChanged += (app) => Dispatcher.Invoke(() =>
+            {
+                TxtActiveApp.Text = app.ProcessName;
+                TxtWindowTitle.Text = app.WindowTitle;
+            });
+
+            _securityService.OnTamperDetected += (isTampered) => Dispatcher.Invoke(() =>
+            {
+                if (isTampered)
+                {
+                    _enhancedLogger.LogError("SECURITY ALERT: Agent integrity violation detected!");
+                }
             });
         }
 
@@ -186,8 +244,14 @@ namespace Agent.UI
                 await RegisterDeviceAsync();
                 await _attendanceService.RefreshStatusAsync();
 
+                _configSyncWorker.Start();
+                _updateWorker.Start();
+                _ = _watchdogWorker.StartAsync();
                 _syncWorker.Start();
                 StartSyncScheduler();
+
+                await _securityService.VerifyIntegrityAsync();
+                await _securityService.RecordAuditAsync("LOGIN", $"User {email} authenticated successfully");
 
                 // Autostart tracker on daily login
                 if (!_attendanceService.IsShiftCompleted)
@@ -372,7 +436,7 @@ namespace Agent.UI
 
         private async void BreakReason_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (_workSessionService == null) return;
+            if (_breakManagement == null) return;
 
             var item = CboBreakReason.SelectedItem as System.Windows.Controls.ComboBoxItem;
             if (item == null) return;
@@ -383,12 +447,37 @@ namespace Agent.UI
             if (reason == "Working")
             {
                 _logger.Log("Returned from break status. Automatically resuming work sessions...");
+                TxtBreakStatus.Text = "";
                 if (!_workSessionService.IsSessionActive) await StartWorkSessionAsync();
             }
             else
             {
                 _logger.Log($"Transitioned to break: {reason.ToUpper()}. Pausing tracking sessions.");
+                TxtBreakStatus.Text = $"{reason}...";
                 if (_workSessionService.IsSessionActive) await StopWorkSessionAsync();
+                await _breakManagement.StartBreakAsync(reason);
+            }
+        }
+
+        private async void Update_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_updateService.AvailableVersion))
+                {
+                    _updateService.OnUpdateProgress += (progress) =>
+                    {
+                        Dispatcher.Invoke(() => TxtUpdateVersion.Text = progress);
+                    };
+
+                    await _updateService.DownloadUpdateAsync(_updateService.AvailableVersion);
+                    await _updateService.InstallUpdateAsync();
+                    UpdateAvailableBanner.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Update failed: {ex.Message}");
             }
         }
 
@@ -396,6 +485,9 @@ namespace Agent.UI
         {
             _telemetryWorker.Stop();
             _syncWorker.Stop();
+            _configSyncWorker.Stop();
+            _updateWorker.Stop();
+            _ = _watchdogWorker.StopAsync();
 
             _workSessionService.TrackedSeconds = 0;
             _workSessionService.IsTemporarilyIdle = false;
@@ -406,6 +498,31 @@ namespace Agent.UI
             AuthView.Visibility = Visibility.Visible;
             DashboardView.Visibility = Visibility.Collapsed;
             _logger.Log("Logged out from taskTracky SaaS portal.");
+        }
+
+        protected override async void OnClosed(EventArgs e)
+        {
+            _logger.Log("Agent shutting down...");
+            _telemetryWorker.Stop();
+            _syncWorker.Stop();
+            _configSyncWorker.Stop();
+            _updateWorker.Stop();
+            await _watchdogWorker.StopAsync();
+
+            if (_attendanceService.IsClockedIn)
+            {
+                _ = _attendanceService.ClockOutAsync();
+            }
+
+            _enhancedLogger.LogInfo("Agent shutdown complete.");
+
+            if (_notifyIcon != null)
+            {
+                _notifyIcon.Visible = false;
+                _notifyIcon.Dispose();
+            }
+
+            base.OnClosed(e);
         }
     }
 }

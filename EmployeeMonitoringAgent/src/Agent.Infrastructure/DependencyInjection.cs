@@ -16,26 +16,33 @@ namespace Agent.Infrastructure
     {
         public static IServiceCollection AddAgentInfrastructure(this IServiceCollection services)
         {
-            // Core & Cross-cutting Infrastructures
             services.AddSingleton<ILoggerService, LoggerService>();
+            services.AddSingleton<IEnhancedLoggerService, EnhancedLoggerService>();
 
-            // Native Windows Integrations
             services.AddSingleton<IIdleDetector, WindowsIdleDetector>();
             services.AddSingleton<IActiveWindowMonitor, WindowsActiveWindowMonitor>();
             services.AddSingleton<IScreenCaptureService, WindowsScreenCaptureService>();
             services.AddSingleton<IStartupService, WindowsRegistryStartupService>();
 
-            // Data & Network
             services.AddSingleton<IOfflineQueue, JsonOfflineQueue>();
             services.AddSingleton<IApiClient, HttpApiClient>();
 
-            // Domain / Application Services
             services.AddSingleton<IAttendanceService, AttendanceService>();
             services.AddSingleton<IWorkSessionService, WorkSessionService>();
+            services.AddSingleton<IConfigurationSyncService, ConfigurationSyncService>();
+            services.AddSingleton<IActivityMonitoringService, ActivityMonitoringService>();
+            services.AddSingleton<IApplicationMonitoringService, ApplicationMonitoringService>();
+            services.AddSingleton<IWebsiteMonitoringService, WebsiteMonitoringService>();
+            services.AddSingleton<IBreakManagementService, BreakManagementService>();
+            services.AddSingleton<IUpdateService, UpdateService>();
+            services.AddSingleton<IWatchdogService, WatchdogService>();
+            services.AddSingleton<ISecurityService, SecurityService>();
 
-            // Background Workers
             services.AddSingleton<SyncWorker>();
             services.AddSingleton<TelemetryWorker>();
+            services.AddSingleton<ConfigSyncWorker>();
+            services.AddSingleton<UpdateWorker>();
+            services.AddSingleton<WatchdogWorker>();
 
             return services;
         }
