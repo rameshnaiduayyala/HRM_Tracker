@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Agent.Application/Agent.Application.csproj" />
+    <Project Path="src/Agent.Background/Agent.Background.csproj" />
+    <Project Path="src/Agent.Core/Agent.Core.csproj" />
+    <Project Path="src/Agent.Domain/Agent.Domain.csproj" />
+    <Project Path="src/Agent.Infrastructure/Agent.Infrastructure.csproj" />
+    <Project Path="src/Agent.LocalStorage/Agent.LocalStorage.csproj" />
+    <Project Path="src/Agent.Network/Agent.Network.csproj" />
+    <Project Path="src/Agent.Tests/Agent.Tests.csproj" />
+    <Project Path="src/Agent.UI/Agent.UI.csproj" />
+    <Project Path="src/Agent.Updater/Agent.Updater.csproj" />
+    <Project Path="src/Agent.Windows/Agent.Windows.csproj" />
+  </Folder>
+</Solution>

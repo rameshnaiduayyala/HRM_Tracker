@@ -1,0 +1,525 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id        String    @id @default(uuid())
+  name      String
+  subdomain String    @unique
+  status    String    @default("ACTIVE") // ACTIVE, SUSPENDED, PENDING
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  users     User[]
+  roles     Role[]
+  companies Company[]
+
+  @@map("tenants")
+}
+
+model Company {
+  id            String           @id @default(uuid())
+  name          String
+  tenantId      String
+  tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  employees     Employee[]
+  departments   Department[]
+  projects      Project[]
+  subscriptions Subscription[]
+  auditLogs     AuditLog[]
+  settings      CompanySettings?
+  holidays      Holiday[]
+  leaveTypes    LeaveType[]
+  announcements Announcement[]
+  invoices      Invoice[]
+  shifts        Shift[]
+
+  @@map("companies")
+}
+
+model Plan {
+  id            String         @id @default(uuid())
+  name          String         @unique // e.g. "BASIC", "PRO", "ENTERPRISE"
+  price         Decimal        @db.Decimal(10, 2)
+  billingCycle  String         @default("MONTHLY") // MONTHLY, YEARLY
+  employeeLimit Int            @default(5)
+  features      String[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id])
+  status    String   @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED
+  startDate DateTime @default(now())
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscriptions")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  tenantId     String?
+  tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  roleId       String?
+  role         Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  sessions     Session[]
+  devices      Device[]
+  employees    Employee[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Employee {
+  id             String          @id @default(uuid())
+  employeeNum    String          @unique
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId      String
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  departmentId   String?
+  department     Department?     @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  teamId         String?
+  team           Team?           @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  managerId      String?
+  manager        Employee?       @relation("EmployeeToManager", fields: [managerId], references: [id], onDelete: SetNull)
+  subordinates   Employee[]      @relation("EmployeeToManager")
+  status         String          @default("ACTIVE") // ACTIVE, INACTIVE, LEAVE
+  designation    String?
+  joiningDate    DateTime        @default(now())
+  profilePic     String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  attendances    Attendance[]
+  workSessions   WorkSession[]
+  tasks          Task[]
+  leaveRequests  LeaveRequest[]
+  leaveBalances  LeaveBalance[]
+  taskTimeLogs   TaskTimeLog[]
+  projectMembers ProjectMember[]
+  payslips       Payslip[]
+
+  @@map("employees")
+}
+
+model Department {
+  id        String     @id @default(uuid())
+  name      String
+  companyId String
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  employees Employee[]
+  teams     Team[]
+
+  @@unique([name, companyId])
+  @@map("departments")
+}
+
+model Team {
+  id           String     @id @default(uuid())
+  name         String
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  employees    Employee[]
+
+  @@unique([name, departmentId])
+  @@map("teams")
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  tenantId    String?
+  tenant      Tenant?          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  permissions RolePermission[]
+  users       User[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([name, tenantId])
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  action      String           @unique // e.g. "users:read", "tasks:create"
+  description String?
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Session {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token             String   @unique
+  deviceFingerprint String?
+  expiresAt         DateTime
+  createdAt         DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model Device {
+  id          String   @id @default(uuid())
+  fingerprint String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String?
+  status      String   @default("APPROVED") // APPROVED, BLOCKED, PENDING
+  lastUsedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("devices")
+}
+
+model Attendance {
+  id         String    @id @default(uuid())
+  employeeId String
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  clockIn    DateTime  @default(now())
+  clockOut   DateTime?
+  breaks     Break[]
+  overtime   Int       @default(0) // in minutes
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("attendances")
+}
+
+model Break {
+  id           String     @id @default(uuid())
+  attendanceId String
+  attendance   Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  start        DateTime   @default(now())
+  end          DateTime?
+
+  @@map("breaks")
+}
+
+model WorkSession {
+  id         String      @id @default(uuid())
+  employeeId String
+  employee   Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  start      DateTime    @default(now())
+  end        DateTime?
+  status     String      @default("RUNNING") // RUNNING, PAUSED, COMPLETED
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  activities Activity[]
+  screenshots Screenshot[]
+
+  @@map("work_sessions")
+}
+
+model Activity {
+  id            String      @id @default(uuid())
+  workSessionId String
+  workSession   WorkSession @relation(fields: [workSessionId], references: [id], onDelete: Cascade)
+  app           String
+  windowTitle   String?
+  idleDuration  Int         @default(0) // in seconds
+  activeDuration Int        @default(0) // in seconds
+  percentage    Float       @default(100.0)
+  createdAt     DateTime    @default(now())
+
+  @@map("activities")
+}
+
+model Screenshot {
+  id            String      @id @default(uuid())
+  workSessionId String
+  workSession   WorkSession @relation(fields: [workSessionId], references: [id], onDelete: Cascade)
+  storagePath   String
+  thumbnailPath String?
+  createdAt     DateTime    @default(now())
+
+  @@map("screenshots")
+}
+
+model Project {
+  id         String             @id @default(uuid())
+  name       String
+  companyId  String
+  company    Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  status     String             @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  tasks      Task[]
+  members    ProjectMember[]
+  milestones ProjectMilestone[]
+
+  @@map("projects")
+}
+
+model Task {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  projectId   String
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employeeId  String?
+  employee    Employee?     @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  priority    String        @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status      String        @default("TODO") // TODO, IN_PROGRESS, REVIEW, DONE
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  comments    TaskComment[]
+  timeLogs    TaskTimeLog[]
+
+  @@map("tasks")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  companyId  String?
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  userId     String?
+  action     String   // e.g. "LOGIN", "EMPLOYEE_CREATE"
+  ipAddress  String?
+  userAgent  String?
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model CompanySettings {
+  id                 String   @id @default(uuid())
+  companyId          String   @unique
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  workingHoursPerDay Int      @default(8)
+  screenshotInterval Int      @default(60) // seconds
+  idleThreshold      Int      @default(300) // seconds (5 min)
+  timezone           String   @default("UTC")
+  shiftStart         String   @default("09:00")
+  shiftEnd           String   @default("18:00")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("company_settings")
+}
+
+model Shift {
+  id        String   @id @default(uuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name      String // e.g. "Morning", "Night"
+  startTime String // e.g. "09:00"
+  endTime   String // e.g. "18:00"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("shifts")
+}
+
+model LeaveType {
+  id          String         @id @default(uuid())
+  name        String // "Annual", "Sick", "Casual", "WFH"
+  companyId   String
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  allowedDays Int            @default(15)
+  isPaid      Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  requests    LeaveRequest[]
+  balances    LeaveBalance[]
+
+  @@unique([name, companyId])
+  @@map("leave_types")
+}
+
+model LeaveRequest {
+  id          String    @id @default(uuid())
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveTypeId String
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  status      String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy  String?
+  reviewNote  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("leave_requests")
+}
+
+model LeaveBalance {
+  id          String    @id @default(uuid())
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveTypeId String
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+  year        Int
+  used        Float     @default(0)
+  total       Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("leave_balances")
+}
+
+model Holiday {
+  id        String   @id @default(uuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name      String
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  @@map("holidays")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, ALERT, TASK, LEAVE
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  authorId  String
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+model TaskComment {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  @@map("task_comments")
+}
+
+model TaskTimeLog {
+  id         String   @id @default(uuid())
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  minutes    Int
+  note       String?
+  loggedAt   DateTime @default(now())
+
+  @@map("task_time_logs")
+}
+
+model ProjectMember {
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  role       String   @default("MEMBER") // LEAD, MEMBER
+  joinedAt   DateTime @default(now())
+
+  @@id([projectId, employeeId])
+  @@map("project_members")
+}
+
+model ProjectMilestone {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  dueDate     DateTime
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("project_milestones")
+}
+
+model Invoice {
+  id        String    @id @default(uuid())
+  companyId String
+  company   Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  amount    Decimal   @db.Decimal(10, 2)
+  currency  String    @default("USD")
+  status    String    @default("PENDING") // PENDING, PAID, OVERDUE
+  dueDate   DateTime
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("invoices")
+}
+
+model FeatureFlag {
+  id        String   @id @default(uuid())
+  key       String   @unique // e.g. "screenshots", "leave_management"
+  label     String
+  isGlobal  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("feature_flags")
+}
+
+model Payslip {
+  id           String   @id @default(uuid())
+  employeeId   String
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  month        String   // e.g. "July 2026"
+  baseSalary   Float
+  allowance    Float    @default(0)
+  deductions   Float    @default(0)
+  netPay       Float
+  status       String   @default("PAID") // PAID, PENDING
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("payslips")
+}
