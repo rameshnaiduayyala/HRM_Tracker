@@ -138,7 +138,7 @@ export default function WorkspacesTab({
         const ws = row.original;
         const { totalEmployees } = getWorkspaceStats(ws);
         return (
-          <span className="text-sm font-semibold text-gray-300">
+          <span className="text-sm font-semibold text-[var(--text-primary)]">
             {totalEmployees} {totalEmployees === 1 ? 'Employee' : 'Employees'}
           </span>
         );
@@ -229,11 +229,11 @@ export default function WorkspacesTab({
   return (
     <div className="space-y-6">
       {/* Workspaces List Card */}
-      <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-2xl space-y-6">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-2xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold">Registered Workspace Companies</h2>
-            <p className="text-xs text-gray-500 mt-1">Audit, activate, or deactivate client tenant profiles globally.</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">Audit, activate, or deactivate client tenant profiles globally.</p>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold px-2 py-1 bg-gray-800 rounded-md">{workspaces.length} total</span>
@@ -260,7 +260,7 @@ export default function WorkspacesTab({
         title={editingWorkspace ? 'Edit Workspace Profile' : 'Workspace Onboarding'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Workspace Setup</h4>
+          <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Workspace Setup</h4>
           
           <Input
             label="Company Workspace Name"
@@ -279,7 +279,7 @@ export default function WorkspacesTab({
             onChange={(e) => setNewSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
           />
 
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider pt-2 mb-2">Primary Company Admin</h4>
+          <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider pt-2 mb-2">Primary Company Admin</h4>
 
           <div className="grid grid-cols-2 gap-2">
             <Input
@@ -329,7 +329,7 @@ export default function WorkspacesTab({
             ))}
           </Select>
 
-          <div className="flex gap-2 pt-4 border-t border-gray-800/80">
+          <div className="flex gap-2 pt-4 border-t border-[var(--border-base)]/80">
             <Button
               type="submit"
               loading={loading}
@@ -366,47 +366,47 @@ export default function WorkspacesTab({
               <div 
                 ref={printRef}
                 id="print-section" 
-                className="space-y-6 p-4 rounded-xl border border-gray-800 bg-gray-900/50 print:bg-white print:text-black print:border-none"
+                className="space-y-6 p-4 rounded-xl border border-[var(--border-base)] bg-[var(--bg-card-alt)] print:bg-white print:text-black print:border-none"
               >
                 {/* Print Header */}
                 <div className="hidden print:block border-b pb-4 mb-4 border-gray-200">
                   <h1 className="text-2xl font-bold">TASKTRACKY ENTERPRISE TENANT REPORT</h1>
-                  <p className="text-xs text-gray-500">Generated on {new Date().toLocaleDateString()}</p>
+                  <p className="text-xs text-[var(--text-muted)]">Generated on {new Date().toLocaleDateString()}</p>
                 </div>
 
                 {/* Company Title */}
                 <div>
                   <h3 className="text-xl font-bold text-white print:text-black">{viewingDetailsWorkspace.name}</h3>
-                  <p className="text-xs text-gray-500 font-mono mt-1">Tenant ID: {viewingDetailsWorkspace.id}</p>
-                  <p className="text-xs text-gray-500 font-mono">Subdomain: {viewingDetailsWorkspace.subdomain}.tasktracky.com</p>
+                  <p className="text-xs text-[var(--text-muted)] font-mono mt-1">Tenant ID: {viewingDetailsWorkspace.id}</p>
+                  <p className="text-xs text-[var(--text-muted)] font-mono">Subdomain: {viewingDetailsWorkspace.subdomain}.tasktracky.com</p>
                 </div>
 
                 {/* Subscription Details */}
-                <div className="border-t border-gray-800 pt-4 print:border-gray-300">
+                <div className="border-t border-[var(--border-base)] pt-4 print:border-gray-300">
                   <h4 className="text-sm font-semibold text-indigo-400 print:text-indigo-600 mb-2">Active Subscription Tiers</h4>
                   {plan ? (
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-gray-400 print:text-gray-600">Plan Name:</span>
+                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Plan Name:</span>
                         <span className="font-semibold text-white print:text-black">{plan.name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400 print:text-gray-600">Price Per Seat:</span>
+                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Price Per Seat:</span>
                         <span className="font-semibold text-white print:text-black">${Number(plan.price).toFixed(2)} / month</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400 print:text-gray-600">Billing Cycle:</span>
+                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Billing Cycle:</span>
                         <span className="font-semibold text-white print:text-black">{plan.billingCycle}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400 print:text-gray-600">Maximum Capacity:</span>
+                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Maximum Capacity:</span>
                         <span className="font-semibold text-white print:text-black">{plan.employeeLimit} Seats</span>
                       </div>
                       <div className="mt-2">
-                        <span className="block text-gray-400 print:text-gray-600 mb-1">Included Features:</span>
+                        <span className="block text-[var(--text-secondary)] print:text-[var(--text-muted)] mb-1">Included Features:</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {plan.features?.map((f, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-gray-800 text-gray-300 rounded print:border print:bg-white print:text-black text-[10px]">
+                            <span key={i} className="px-2 py-0.5 bg-gray-800 text-[var(--text-primary)] rounded print:border print:bg-white print:text-black text-[10px]">
                               {f}
                             </span>
                           ))}
@@ -414,43 +414,43 @@ export default function WorkspacesTab({
                       </div>
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-500">No active subscription plan assigned.</p>
+                    <p className="text-xs text-[var(--text-muted)]">No active subscription plan assigned.</p>
                   )}
                 </div>
 
                 {/* Seat Allocations & MRR */}
-                <div className="border-t border-gray-800 pt-4 print:border-gray-300">
+                <div className="border-t border-[var(--border-base)] pt-4 print:border-gray-300">
                   <h4 className="text-sm font-semibold text-indigo-400 print:text-indigo-600 mb-2">Metrics & Revenues</h4>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-gray-400 print:text-gray-600">Active Seat Usage:</span>
+                      <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Active Seat Usage:</span>
                       <span className="font-semibold text-white print:text-black">{stats.totalEmployees} Employees</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400 print:text-gray-600">Monthly Recurring Revenue (MRR):</span>
+                      <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Monthly Recurring Revenue (MRR):</span>
                       <span className="font-semibold text-emerald-400 print:text-emerald-700 font-mono">${stats.monthlyRevenue.toFixed(2)} / mo</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Primary Administrator */}
-                <div className="border-t border-gray-800 pt-4 print:border-gray-300">
+                <div className="border-t border-[var(--border-base)] pt-4 print:border-gray-300">
                   <h4 className="text-sm font-semibold text-indigo-400 print:text-indigo-600 mb-2">Primary Company Admin</h4>
                   {viewingDetailsWorkspace.companies?.[0]?.employees?.[0]?.user ? (
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-gray-400 print:text-gray-600">Full Name:</span>
+                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Full Name:</span>
                         <span className="font-semibold text-white print:text-black">
                           {viewingDetailsWorkspace.companies[0].employees[0].user.firstName} {viewingDetailsWorkspace.companies[0].employees[0].user.lastName}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400 print:text-gray-600">Email Address:</span>
+                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Email Address:</span>
                         <span className="font-semibold text-white print:text-black">{viewingDetailsWorkspace.companies[0].employees[0].user.email}</span>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-500">No administrator details found.</p>
+                    <p className="text-xs text-[var(--text-muted)]">No administrator details found.</p>
                   )}
                 </div>
               </div>
@@ -496,3 +496,7 @@ export default function WorkspacesTab({
     </div>
   );
 }
+
+
+
+

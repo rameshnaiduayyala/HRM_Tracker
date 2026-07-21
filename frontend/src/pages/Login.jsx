@@ -79,12 +79,12 @@ export default function Login() {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md relative z-10 glass-card p-8 shadow-2xl" style={{ boxShadow: '0 32px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05)' }}>
+      <div className="w-full max-w-md relative z-10 glass-card p-8 shadow-2xl" style={{ boxShadow: '0 32px 64px rgba(0,0,0,0.10), 0 0 0 1px var(--border-subtle)' }}>
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-black tracking-tight text-white mb-2">
+          <h1 className="text-3xl font-black tracking-tight mb-2" style={{ color: 'var(--text-primary)' }}>
             Task<span style={{ background: 'linear-gradient(90deg,#818cf8,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Tracky</span>
           </h1>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Sign in to your workplace portal
           </p>
         </div>
@@ -119,9 +119,9 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-2 uppercase">Email Address</label>
+            <label className="block text-xs font-semibold mb-2 uppercase" style={{ color: 'var(--text-secondary)' }}>Email Address</label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center" style={{ color: 'var(--text-muted)' }}>
                 <Mail className="w-5 h-5" />
               </span>
               <input
@@ -130,15 +130,20 @@ export default function Login() {
                 placeholder="admin@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-[#1f2937] border border-gray-800 text-white rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                className="w-full pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                style={{
+                  background: 'var(--bg-canvas)',
+                  border: '1px solid var(--border-muted)',
+                  color: 'var(--text-primary)',
+                }}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-2 uppercase">Password</label>
+            <label className="block text-xs font-semibold mb-2 uppercase" style={{ color: 'var(--text-secondary)' }}>Password</label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center" style={{ color: 'var(--text-muted)' }}>
                 <KeyRound className="w-5 h-5" />
               </span>
               <input
@@ -147,7 +152,12 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-[#1f2937] border border-gray-800 text-white rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                className="w-full pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                style={{
+                  background: 'var(--bg-canvas)',
+                  border: '1px solid var(--border-muted)',
+                  color: 'var(--text-primary)',
+                }}
               />
             </div>
           </div>
@@ -172,43 +182,58 @@ export default function Login() {
           </div>
 
           {/* Developer Fast Login Buttons */}
-          <div className="border-t border-gray-800/85 pt-6 mt-6 space-y-3 text-left">
-            <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider text-center">
+          <div className="border-t pt-6 mt-6 space-y-3 text-left" style={{ borderColor: 'var(--border-muted)' }}>
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-center" style={{ color: 'var(--text-muted)' }}>
               Developer Fast-Login
             </span>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickLogin('superadmin@tasktracky.com', 'superadmin123')}
-                className="px-3 py-2 bg-indigo-955/40 hover:bg-indigo-900/40 border border-indigo-900/50 text-[10px] font-semibold rounded-lg text-indigo-300 transition text-center"
+                className="px-3 py-2 border text-[10px] font-semibold rounded-lg transition text-center"
+                style={{ background: 'rgba(99,102,241,0.08)', borderColor: 'rgba(99,102,241,0.22)', color: '#a5b4fc' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.15)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.08)'}
               >
                 Super Admin
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickLogin('admin@acme.com', 'admin123')}
-                className="px-3 py-2 bg-emerald-955/40 hover:bg-emerald-900/40 border border-emerald-900/50 text-[10px] font-semibold rounded-lg text-emerald-300 transition text-center"
+                className="px-3 py-2 border text-[10px] font-semibold rounded-lg transition text-center"
+                style={{ background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(16,185,129,0.15)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(16,185,129,0.08)'}
               >
                 Company Admin
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickLogin('manager@acme.com', 'manager123')}
-                className="px-3 py-2 bg-blue-955/40 hover:bg-blue-900/40 border border-blue-900/50 text-[10px] font-semibold rounded-lg text-blue-300 transition text-center"
+                className="px-3 py-2 border text-[10px] font-semibold rounded-lg transition text-center"
+                style={{ background: 'rgba(96,165,250,0.08)', borderColor: 'rgba(96,165,250,0.22)', color: '#93c5fd' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(96,165,250,0.15)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(96,165,250,0.08)'}
               >
                 Company Manager
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickLogin('hr@acme.com', 'hr123')}
-                className="px-3 py-2 bg-pink-955/40 hover:bg-pink-900/40 border border-pink-900/50 text-[10px] font-semibold rounded-lg text-pink-300 transition text-center"
+                className="px-3 py-2 border text-[10px] font-semibold rounded-lg transition text-center"
+                style={{ background: 'rgba(244,63,94,0.08)', borderColor: 'rgba(244,63,94,0.22)', color: '#fda4af' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(244,63,94,0.15)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(244,63,94,0.08)'}
               >
                 HR Specialist
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickLogin('employee@acme.com', 'employee123')}
-                className="col-span-2 px-3 py-2 bg-purple-955/40 hover:bg-purple-900/40 border border-purple-900/50 text-[10px] font-semibold rounded-lg text-purple-300 transition text-center"
+                className="col-span-2 px-3 py-2 border text-[10px] font-semibold rounded-lg transition text-center"
+                style={{ background: 'rgba(139,92,246,0.08)', borderColor: 'rgba(139,92,246,0.22)', color: '#c4b5fd' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(139,92,246,0.15)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(139,92,246,0.08)'}
               >
                 Employee (Staff Member)
               </button>
@@ -219,3 +244,7 @@ export default function Login() {
     </div>
   );
 }
+
+
+
+

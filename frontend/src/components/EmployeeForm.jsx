@@ -60,9 +60,9 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
   const filteredManagers = managersList.filter(mgr => !isEdit || mgr.id !== initialData.id);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 text-gray-300">
+    <form onSubmit={handleSubmit} className="space-y-5 text-[var(--text-primary)]">
       
-      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Company Directory Info</h4>
+      <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Company Directory Info</h4>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -73,7 +73,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
             placeholder="e.g. EMP-2030"
             value={employeeNum}
             onChange={(e) => setEmployeeNum(e.target.value)}
-            className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
           />
         </div>
 
@@ -85,7 +85,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
             placeholder="e.g. Software Engineer"
             value={designation}
             onChange={(e) => setDesignation(e.target.value)}
-            className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
           />
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
           <select
             value={managerId}
             onChange={(e) => setManagerId(e.target.value)}
-            className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
           >
             <option value="">None (Top Level)</option>
             {filteredManagers.map((mgr) => (
@@ -112,7 +112,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
           <select
             value={roleName}
             onChange={(e) => setRoleName(e.target.value)}
-            className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
           >
             <option value="EMPLOYEE">Standard Employee</option>
             <option value="MANAGER">Manager / Lead</option>
@@ -126,7 +126,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
           >
             <option value="ACTIVE">ACTIVE (On-Duty)</option>
             <option value="INACTIVE">INACTIVE (Terminated/Suspended)</option>
@@ -135,7 +135,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
         </div>
       )}
 
-      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider pt-2 mb-2">User Account Credentials</h4>
+      <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider pt-2 mb-2">User Account Credentials</h4>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -146,7 +146,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
             placeholder="John"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
           />
         </div>
         <div>
@@ -157,7 +157,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
             placeholder="Doe"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
           />
         </div>
       </div>
@@ -170,7 +170,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
           placeholder="employee@company.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+          className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
         />
       </div>
 
@@ -184,7 +184,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
           placeholder={isEdit ? '•••••••• (Leave blank to keep current)' : '•••••••• (Min 8 characters)'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+          className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
         />
       </div>
 
@@ -199,3 +199,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
     </form>
   );
 }
+
+
+
+

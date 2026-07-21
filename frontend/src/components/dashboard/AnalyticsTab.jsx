@@ -5,7 +5,7 @@ import { BarChart3, TrendingUp, Users, ShieldAlert, Award, FileText, CheckCircle
 const StatCard = ({ label, value, sub, note, icon: Icon, iconColor, accent }) => (
   <div className="stat-card card-hover p-5">
     <div className="flex items-start justify-between mb-4">
-      <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: '#374151' }}>
+      <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
         {label}
       </span>
       <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
@@ -14,22 +14,22 @@ const StatCard = ({ label, value, sub, note, icon: Icon, iconColor, accent }) =>
       </div>
     </div>
     <div className="flex items-baseline gap-2">
-      <span style={{ fontSize: '22px', fontWeight: 900, color: accent || '#f1f5f9', fontFamily: 'JetBrains Mono, monospace' }}>
+      <span style={{ fontSize: '22px', fontWeight: 900, color: accent || 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace' }}>
         {value}
       </span>
       {sub && <span style={{ fontSize: '10px', fontWeight: 700, color: iconColor }}>{sub}</span>}
     </div>
-    {note && <p style={{ marginTop: '12px', fontSize: '10px', color: '#1f2937' }}>{note}</p>}
+    {note && <p style={{ marginTop: '12px', fontSize: '10px', color: 'var(--text-muted)' }}>{note}</p>}
   </div>
 );
 
 const BarRow = ({ label, count, pct, color }) => (
   <div className="space-y-1.5">
     <div className="flex justify-between" style={{ fontSize: '11px' }}>
-      <span style={{ color: '#6b7280', fontWeight: 600 }}>{label}</span>
-      <span style={{ color: '#374151', fontFamily: 'JetBrains Mono, monospace' }}>{count} · {pct}%</span>
+      <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</span>
+      <span style={{ color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{count} · {pct}%</span>
     </div>
-    <div style={{ height: '4px', borderRadius: '99px', background: 'rgba(255,255,255,0.04)', overflow: 'hidden' }}>
+    <div style={{ height: '4px', borderRadius: '99px', background: 'var(--bg-card-alt)', overflow: 'hidden' }}>
       <div style={{
         height: '100%', width: `${pct}%`, borderRadius: '99px',
         background: color, transition: 'width 0.6s ease',
@@ -41,22 +41,22 @@ const BarRow = ({ label, count, pct, color }) => (
 
 const PanelCard = ({ title, subtitle, children }) => (
   <div style={{
-    background: 'linear-gradient(145deg,rgba(20,26,40,0.8) 0%,rgba(13,17,23,0.9) 100%)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border-base)',
     borderRadius: '16px',
     padding: '24px',
   }}>
-    <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#e2e8f0', marginBottom: subtitle ? '4px' : '20px' }}>{title}</h3>
+    <h3 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: subtitle ? '4px' : '20px' }}>{title}</h3>
     {subtitle && (
-      <p style={{ fontSize: '11px', color: '#374151', marginBottom: '20px', lineHeight: 1.5 }}>{subtitle}</p>
+      <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: 1.5 }}>{subtitle}</p>
     )}
     {children}
   </div>
 );
 
 const MiniCard = ({ label, value, color }) => (
-  <div style={{ padding: '14px', background: 'rgba(7,9,15,0.50)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px' }}>
-    <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151', display: 'block' }}>
+  <div style={{ padding: '14px', background: 'var(--bg-card-alt)', border: '1px solid var(--border-subtle)', borderRadius: '10px' }}>
+    <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block' }}>
       {label}
     </span>
     <span style={{ fontSize: '14px', fontWeight: 800, color, fontFamily: 'JetBrains Mono, monospace', display: 'block', marginTop: '4px' }}>
@@ -112,10 +112,10 @@ export default function AnalyticsTab({
 
       {/* Page header */}
       <div>
-        <h2 className="text-lg font-black tracking-tight text-white uppercase">
+        <h2 className="text-lg font-black tracking-tight uppercase" style={{ color: 'var(--text-primary)' }}>
           Enterprise Operations Analytics
         </h2>
-        <p style={{ fontSize: '11px', color: '#374151', marginTop: '4px' }}>
+        <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
           {isSuperAdmin
             ? 'Global subscription metrics, workspace distribution, and SaaS revenue performance.'
             : 'Workspace utilization, headcount audits, and project completion metrics.'}
@@ -211,7 +211,7 @@ export default function AnalyticsTab({
             <PanelCard title="Workspace Health Overview" subtitle="Staff check-ins and activity ratios compiled today.">
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <MiniCard label="Active Attendance" value="Operational"                color="#10b981" />
-                <MiniCard label="Staff On Leave"    value="0 Today"                    color="#374151" />
+                <MiniCard label="Staff On Leave"    value="0 Today"                    color="var(--text-muted)" />
                 <MiniCard label="Total Employees"   value={`${totalEmployees}`}        color="#6366f1" />
                 <MiniCard label="Completion Rate"   value={`${taskCompletionRate}%`}   color="#60a5fa" />
               </div>
@@ -222,3 +222,7 @@ export default function AnalyticsTab({
     </div>
   );
 }
+
+
+
+

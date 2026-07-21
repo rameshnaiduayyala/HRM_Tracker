@@ -97,7 +97,7 @@ export default function TeamsTab({ companyId, employees = [] }) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight">Teams</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Manage cross-functional teams within departments</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage cross-functional teams within departments</p>
         </div>
         <button
           onClick={openCreate}
@@ -110,17 +110,17 @@ export default function TeamsTab({ companyId, employees = [] }) {
       {/* Create / Edit Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#111827] border border-gray-700 rounded-2xl p-6 shadow-2xl">
+          <div className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-muted)] rounded-2xl p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-base font-bold text-white">{editing ? 'Edit Team' : 'New Team'}</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-white transition">
+              <button onClick={() => setShowForm(false)} className="text-[var(--text-secondary)] hover:text-white transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Department selector — required by backend */}
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                   Department <span className="text-red-400">*</span>
                 </label>
                 {departments.length === 0 ? (
@@ -132,7 +132,7 @@ export default function TeamsTab({ companyId, employees = [] }) {
                     required
                     value={form.departmentId}
                     onChange={e => setForm(f => ({ ...f, departmentId: e.target.value }))}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-700 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500 transition"
+                    className="w-full px-3 py-2 bg-[var(--bg-card-alt)] border border-[var(--border-muted)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500 transition"
                   >
                     <option value="">— Select Department —</option>
                     {departments.map(d => (
@@ -143,13 +143,13 @@ export default function TeamsTab({ companyId, employees = [] }) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Team Name</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">Team Name</label>
                 <input
                   required
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. Alpha Squad"
-                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500 transition"
+                  className="w-full px-3 py-2 bg-[var(--bg-card-alt)] border border-[var(--border-muted)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500 transition"
                 />
               </div>
 
@@ -157,7 +157,7 @@ export default function TeamsTab({ companyId, employees = [] }) {
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 py-2 border border-gray-700 text-gray-300 text-sm rounded-lg hover:bg-gray-800 transition"
+                  className="flex-1 py-2 border border-[var(--border-muted)] text-[var(--text-primary)] text-sm rounded-lg hover:bg-[var(--bg-elevated)] transition"
                 >
                   Cancel
                 </button>
@@ -176,11 +176,11 @@ export default function TeamsTab({ companyId, employees = [] }) {
 
       {/* Teams Grid */}
       {loading ? (
-        <div className="text-center text-gray-500 py-16">Loading teams...</div>
+        <div className="text-center text-[var(--text-muted)] py-16">Loading teams...</div>
       ) : teams.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl">
+        <div className="text-center py-16 border border-dashed border-[var(--border-base)] rounded-2xl">
           <Users className="w-10 h-10 text-gray-700 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">No teams yet. Create a department first, then add teams.</p>
+          <p className="text-[var(--text-muted)] text-sm">No teams yet. Create a department first, then add teams.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -200,13 +200,13 @@ export default function TeamsTab({ companyId, employees = [] }) {
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                     <button
                       onClick={() => openEdit(team)}
-                      className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition"
+                      className="p-1.5 rounded-lg hover:bg-white/10 text-[var(--text-secondary)] hover:text-white transition"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(team.id, team.departmentId)}
-                      className="p-1.5 rounded-lg hover:bg-red-950/60 text-gray-400 hover:text-red-400 transition"
+                      className="p-1.5 rounded-lg hover:bg-red-950/60 text-[var(--text-secondary)] hover:text-red-400 transition"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -215,12 +215,12 @@ export default function TeamsTab({ companyId, employees = [] }) {
                 <h3 className="font-bold text-white text-sm">{team.name}</h3>
                 {deptName && (
                   <div className="flex items-center gap-1 mt-1">
-                    <Building2 className="w-3 h-3 text-gray-500" />
-                    <span className="text-[11px] text-gray-500">{deptName}</span>
+                    <Building2 className="w-3 h-3 text-[var(--text-muted)]" />
+                    <span className="text-[11px] text-[var(--text-muted)]">{deptName}</span>
                   </div>
                 )}
                 <div className="mt-4 pt-4 border-t border-white/5">
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-[var(--text-secondary)]">
                     {memberCount} member{memberCount !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -232,3 +232,7 @@ export default function TeamsTab({ companyId, employees = [] }) {
     </div>
   );
 }
+
+
+
+

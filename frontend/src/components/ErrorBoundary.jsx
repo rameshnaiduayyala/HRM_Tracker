@@ -24,8 +24,8 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#0b0f19] text-gray-100 flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-[#111827] border border-gray-800 rounded-2xl p-8 shadow-2xl text-center space-y-6">
+        <div className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-8 shadow-2xl text-center space-y-6">
             
             {/* Warning Icon */}
             <div className="mx-auto w-16 h-16 rounded-2xl bg-red-950/40 border border-red-800 flex items-center justify-center text-red-500 shadow-lg shadow-red-500/5">
@@ -35,18 +35,18 @@ export default class ErrorBoundary extends Component {
             {/* Error Message Header */}
             <div className="space-y-2">
               <h2 className="text-xl font-bold text-white">Something went wrong</h2>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--text-secondary)]">
                 A system exception occurred while rendering this workspace interface.
               </p>
             </div>
 
             {/* Collapsible details wrapper */}
             {this.state.error && (
-              <div className="text-left bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-x-auto max-h-40">
+              <div className="text-left bg-[var(--bg-card-alt)] border border-[var(--border-base)] rounded-xl p-4 overflow-x-auto max-h-40">
                 <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider block mb-1">
                   Exception Stack
                 </span>
-                <code className="text-xs font-mono text-gray-300 block leading-relaxed break-words">
+                <code className="text-xs font-mono text-[var(--text-primary)] block leading-relaxed break-words">
                   {this.state.error.toString()}
                 </code>
               </div>
@@ -76,3 +76,7 @@ export default class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+
+
+

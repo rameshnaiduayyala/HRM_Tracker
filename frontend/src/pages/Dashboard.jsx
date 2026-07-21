@@ -349,40 +349,45 @@ export default function Dashboard() {
   const hasNoSubscription = !isSuperAdmin && companies.length > 0 && !activeSubscription;
 
   return (
-    <div className="min-h-screen text-gray-100 flex flex-col" style={{ background: 'var(--bg-canvas)', fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-canvas)', fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif', color: 'var(--text-primary)' }}>
       <Header />
 
       {/* Subscription Activation Wall */}
       {hasNoSubscription ? (
-        <div className="flex-1 flex items-center justify-center p-8 bg-[#0b0f19] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/20 via-[#0b0f19] to-[#050811]">
+        <div className="flex-1 flex items-center justify-center p-8" style={{ background: 'var(--bg-canvas)' }}>
           <div className="w-full max-w-4xl space-y-8 text-center">
             {user?.role === 'ADMIN' ? (
               <>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black text-white tracking-tight">Activate Your Company Workspace</h2>
-                  <p className="text-sm text-gray-400 max-w-lg mx-auto">
+                  <h2 className="text-2xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>Activate Your Company Workspace</h2>
+                  <p className="text-sm max-w-lg mx-auto" style={{ color: 'var(--text-secondary)' }}>
                     Your workspace registration has been approved! Select a subscription billing plan below to initialize and activate your platform workspace.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
                   {plans.map((p) => (
-                    <div key={p.id} className="bg-[#111827] border border-gray-800 hover:border-indigo-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl">
+                    <div key={p.id} className="border rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl"
+                      style={{ background: 'var(--bg-card)', borderColor: 'var(--border-muted)' }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.40)'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-muted)'}
+                    >
                       <div>
-                        <span className="text-[10px] bg-indigo-950 text-indigo-400 border border-indigo-800/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                        <span className="text-[10px] border px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                          style={{ background: 'rgba(99,102,241,0.10)', color: '#6366f1', borderColor: 'rgba(99,102,241,0.20)' }}>
                           {p.billingCycle}
                         </span>
-                        <h4 className="text-base font-extrabold text-white mt-3 uppercase tracking-wide">{p.name}</h4>
+                        <h4 className="text-base font-extrabold mt-3 uppercase tracking-wide" style={{ color: 'var(--text-primary)' }}>{p.name}</h4>
                         <div className="mt-4 flex items-baseline justify-center gap-1">
-                          <span className="text-3xl font-black text-white">${Number(p.price)}</span>
-                          <span className="text-xs text-gray-500">/ month</span>
+                          <span className="text-3xl font-black" style={{ color: 'var(--text-primary)' }}>${Number(p.price)}</span>
+                          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>/ month</span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-2">Up to {p.employeeLimit} employees allowed</p>
+                        <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>Up to {p.employeeLimit} employees allowed</p>
                         
-                        <ul className="mt-6 space-y-2.5 text-left text-xs text-gray-400 border-t border-gray-800 pt-6">
+                        <ul className="mt-6 space-y-2.5 text-left text-xs border-t pt-6" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
                           {(p.features || []).map((feat, i) => (
                             <li key={i} className="flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
                               {feat}
                             </li>
                           ))}
@@ -399,24 +404,28 @@ export default function Dashboard() {
                     </div>
                   ))}
                   {plans.length === 0 && (
-                    <div className="col-span-full py-8 text-center text-xs text-gray-500 italic">
+                    <div className="col-span-full py-8 text-center text-xs italic" style={{ color: 'var(--text-muted)' }}>
                       No subscription plans configured. Please contact support.
                     </div>
                   )}
                 </div>
               </>
             ) : (
-              <div className="max-w-md mx-auto bg-[#111827] border border-gray-800 rounded-2xl p-8 shadow-xl space-y-4">
-                <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mx-auto">
+              <div className="max-w-md mx-auto border rounded-2xl p-8 shadow-xl space-y-4"
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-muted)' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto" style={{ background: 'rgba(245,158,11,0.10)', color: '#f59e0b' }}>
                   <AlertCircle className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wider">Workspace Awaiting Activation</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">
+                <h3 className="text-base font-bold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>Workspace Awaiting Activation</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   Your workspace has been approved by the platform admin, but requires billing plan selection. Please contact your company administrator ({companies[0]?.name || 'Admin'}) to select a subscription plan and activate the portal.
                 </p>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 border border-gray-800 hover:border-gray-700 text-xs font-semibold text-gray-400 hover:text-white rounded-lg transition"
+                  className="px-4 py-2 border text-xs font-semibold rounded-lg transition"
+                  style={{ borderColor: 'var(--border-muted)', color: 'var(--text-secondary)' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-base)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-muted)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                 >
                   Log Out
                 </button>
@@ -438,7 +447,8 @@ export default function Dashboard() {
         {/* Dynamic Tab Panel Content */}
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto" style={{ background: 'var(--bg-canvas)' }}>
           {error && (
-            <div className="mb-6 p-4 bg-red-950/40 border border-red-800 text-red-400 rounded-xl text-sm flex justify-between">
+            <div className="mb-6 p-4 border rounded-xl text-sm flex justify-between"
+              style={{ background: 'rgba(244,63,94,0.06)', borderColor: 'rgba(244,63,94,0.20)', color: '#fda4af' }}>
               <span>{error}</span>
               <button onClick={() => setError(null)} className="text-xs underline">Dismiss</button>
             </div>
@@ -573,3 +583,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+
+

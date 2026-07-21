@@ -110,7 +110,7 @@ export default function HRPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-gray-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] flex flex-col font-sans">
       <Header />
 
       <div className="flex-1 flex flex-col md:flex-row">
@@ -130,18 +130,18 @@ export default function HRPortal() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-black text-white tracking-tight uppercase">HRM Command Center</h2>
-                <p className="text-xs text-gray-400 mt-1">Enterprise Human Resource Metrics and Monitoring Console</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Enterprise Human Resource Metrics and Monitoring Console</p>
               </div>
 
               {/* KPI metrics row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div className="bg-[#111827]/40 border border-gray-800/80 rounded-2xl p-5 flex items-center justify-between shadow-xl">
+                <div className="bg-[var(--bg-card)]/40 border border-[var(--border-base)]/80 rounded-2xl p-5 flex items-center justify-between shadow-xl">
                   <div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Staff Headcount</span>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">Staff Headcount</span>
                     <span className="text-2xl font-black text-white mt-1 block">
-                      {employees.length} / <span className="text-gray-600 text-base">{activePlan?.employeeLimit || 5}</span>
+                      {employees.length} / <span className="text-[var(--text-muted)] text-base">{activePlan?.employeeLimit || 5}</span>
                     </span>
-                    <span className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
+                    <span className="text-[9px] text-[var(--text-secondary)] mt-1 flex items-center gap-1">
                       <TrendingUp className="w-3 h-3 text-emerald-400" /> Subscription Limit Seats
                     </span>
                   </div>
@@ -150,11 +150,11 @@ export default function HRPortal() {
                   </div>
                 </div>
 
-                <div className="bg-[#111827]/40 border border-gray-800/80 rounded-2xl p-5 flex items-center justify-between shadow-xl">
+                <div className="bg-[var(--bg-card)]/40 border border-[var(--border-base)]/80 rounded-2xl p-5 flex items-center justify-between shadow-xl">
                   <div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Pending Leaves</span>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">Pending Leaves</span>
                     <span className="text-2xl font-black text-amber-400 mt-1 block">{leavesCount} Request{leavesCount === 1 ? '' : 's'}</span>
-                    <span className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
+                    <span className="text-[9px] text-[var(--text-secondary)] mt-1 flex items-center gap-1">
                       Awaiting review status
                     </span>
                   </div>
@@ -163,11 +163,11 @@ export default function HRPortal() {
                   </div>
                 </div>
 
-                <div className="bg-[#111827]/40 border border-gray-800/80 rounded-2xl p-5 flex items-center justify-between shadow-xl">
+                <div className="bg-[var(--bg-card)]/40 border border-[var(--border-base)]/80 rounded-2xl p-5 flex items-center justify-between shadow-xl">
                   <div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Payroll Receipts</span>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">Payroll Receipts</span>
                     <span className="text-2xl font-black text-purple-400 mt-1 block">{payslipsCount} Payslip{payslipsCount === 1 ? '' : 's'}</span>
-                    <span className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
+                    <span className="text-[9px] text-[var(--text-secondary)] mt-1 flex items-center gap-1">
                       Generated payments this month
                     </span>
                   </div>
@@ -176,11 +176,11 @@ export default function HRPortal() {
                   </div>
                 </div>
 
-                <div className="bg-[#111827]/40 border border-gray-800/80 rounded-2xl p-5 flex items-center justify-between shadow-xl">
+                <div className="bg-[var(--bg-card)]/40 border border-[var(--border-base)]/80 rounded-2xl p-5 flex items-center justify-between shadow-xl">
                   <div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Active Shift Sessions</span>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">Active Shift Sessions</span>
                     <span className="text-2xl font-black text-emerald-400 mt-1 block">Active</span>
-                    <span className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
+                    <span className="text-[9px] text-[var(--text-secondary)] mt-1 flex items-center gap-1">
                       Employees clocked in today
                     </span>
                   </div>
@@ -205,9 +205,9 @@ export default function HRPortal() {
 
               {/* Quick statistics checklist */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-                <div className="bg-[#111827]/40 border border-gray-800/80 rounded-2xl p-6 shadow-xl">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Workspace Details</h3>
-                  <div className="space-y-3.5 text-xs text-gray-400">
+                <div className="bg-[var(--bg-card)]/40 border border-[var(--border-base)]/80 rounded-2xl p-6 shadow-xl">
+                  <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-4">Workspace Details</h3>
+                  <div className="space-y-3.5 text-xs text-[var(--text-secondary)]">
                     <div className="flex justify-between">
                       <span>Active Plan</span>
                       <strong className="text-white uppercase tracking-wider">{activePlan?.name || 'Basic Plan'}</strong>
@@ -216,19 +216,19 @@ export default function HRPortal() {
                       <span>Monthly Workspace Price</span>
                       <strong className="text-indigo-400 font-mono">${activePlan?.price || 10} / month</strong>
                     </div>
-                    <div className="flex justify-between border-t border-gray-800 pt-3">
+                    <div className="flex justify-between border-t border-[var(--border-base)] pt-3">
                       <span>Configured Features</span>
-                      <span className="text-right text-[10px] font-medium text-gray-400">
+                      <span className="text-right text-[10px] font-medium text-[var(--text-secondary)]">
                         {(activePlan?.features || ['Leaves Tracker', 'Timesheets', 'Taskboards']).join(', ')}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-[#111827]/40 border border-gray-800/80 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                <div className="bg-[var(--bg-card)]/40 border border-[var(--border-base)]/80 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
                   <div>
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Platform Activity Audit</h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">
+                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Platform Activity Audit</h3>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                       Track and analyze all employee attendance check-ins, leaves, and salary transactions directly from your HR control panel.
                     </p>
                   </div>
@@ -295,3 +295,7 @@ export default function HRPortal() {
     </div>
   );
 }
+
+
+
+

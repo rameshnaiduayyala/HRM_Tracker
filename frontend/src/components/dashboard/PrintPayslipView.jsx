@@ -48,12 +48,12 @@ export default function PrintPayslipView({ payslip, onBack }) {
   const netPayInWords = numberToWords(netPay);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto font-sans text-gray-200">
+    <div className="space-y-6 max-w-4xl mx-auto font-sans text-[var(--text-primary)]">
       {/* Top action controls bar */}
-      <div className="flex items-center justify-between border-b border-gray-800 pb-5 no-print">
+      <div className="flex items-center justify-between border-b border-[var(--border-base)] pb-5 no-print">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white uppercase tracking-wider transition"
+          className="flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)] hover:text-white uppercase tracking-wider transition"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Payroll
         </button>
@@ -84,7 +84,7 @@ export default function PrintPayslipView({ payslip, onBack }) {
               <Building2 className="w-6 h-6 text-indigo-600 shrink-0" />
               {companyName}
             </h1>
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Corporate Headquarters & Workspaces</p>
+            <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest mt-1">Corporate Headquarters & Workspaces</p>
           </div>
           <div className="text-right">
             <h3 className="text-base font-black text-gray-900 uppercase tracking-wide">Salary Statement</h3>
@@ -97,33 +97,33 @@ export default function PrintPayslipView({ payslip, onBack }) {
         {/* Employee Profile Metadata Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs bg-gray-50 p-6 rounded-2xl border border-gray-200 print:bg-white print:border print:p-4">
           <div className="space-y-2 border-r border-gray-200 pr-6 print:pr-2">
-            <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+            <h4 className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-indigo-500" /> Personnel Information
             </h4>
             <div className="grid grid-cols-2 gap-y-1.5 pt-1">
-              <span className="text-gray-500">Employee Name:</span>
+              <span className="text-[var(--text-muted)]">Employee Name:</span>
               <strong className="text-gray-900">{employeeName}</strong>
-              <span className="text-gray-500">Employee ID:</span>
+              <span className="text-[var(--text-muted)]">Employee ID:</span>
               <strong className="text-gray-900">{emp?.employeeNum}</strong>
-              <span className="text-gray-500">Designation:</span>
+              <span className="text-[var(--text-muted)]">Designation:</span>
               <strong className="text-gray-900">{emp?.designation || 'Staff'}</strong>
-              <span className="text-gray-500">Department:</span>
+              <span className="text-[var(--text-muted)]">Department:</span>
               <strong className="text-gray-900">{emp?.department?.name || 'General Operations'}</strong>
             </div>
           </div>
 
           <div className="space-y-2 pl-2">
-            <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+            <h4 className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
               <Landmark className="w-3.5 h-3.5 text-indigo-500" /> Disbursal Accounts & Work
             </h4>
             <div className="grid grid-cols-2 gap-y-1.5 pt-1">
-              <span className="text-gray-500">Bank Name:</span>
+              <span className="text-[var(--text-muted)]">Bank Name:</span>
               <strong className="text-gray-900">Chase National Bank</strong>
-              <span className="text-gray-500">Account Number:</span>
+              <span className="text-[var(--text-muted)]">Account Number:</span>
               <strong className="text-gray-900">•••• •••• 9840</strong>
-              <span className="text-gray-500">Total Working Days:</span>
+              <span className="text-[var(--text-muted)]">Total Working Days:</span>
               <strong className="text-gray-900">26 Days</strong>
-              <span className="text-gray-500">Present Days:</span>
+              <span className="text-[var(--text-muted)]">Present Days:</span>
               <strong className="text-gray-900">25 Days</strong>
             </div>
           </div>
@@ -138,15 +138,15 @@ export default function PrintPayslipView({ payslip, onBack }) {
             </div>
             <div className="p-5 space-y-2.5 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-500">Basic Salary</span>
+                <span className="text-[var(--text-muted)]">Basic Salary</span>
                 <span className="font-mono text-gray-900">${basic.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">House Rent Allowance (HRA)</span>
+                <span className="text-[var(--text-muted)]">House Rent Allowance (HRA)</span>
                 <span className="font-mono text-gray-900">${hra.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Special Allowances</span>
+                <span className="text-[var(--text-muted)]">Special Allowances</span>
                 <span className="font-mono text-gray-900">${splAllowance.toLocaleString()}</span>
               </div>
             </div>
@@ -163,19 +163,19 @@ export default function PrintPayslipView({ payslip, onBack }) {
             </div>
             <div className="p-5 space-y-2.5 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-500">Provident Fund (PF)</span>
+                <span className="text-[var(--text-muted)]">Provident Fund (PF)</span>
                 <span className="font-mono text-gray-900">${pf.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Professional Tax (PT)</span>
+                <span className="text-[var(--text-muted)]">Professional Tax (PT)</span>
                 <span className="font-mono text-gray-900">${profTax.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Medical Insurance Contribution</span>
+                <span className="text-[var(--text-muted)]">Medical Insurance Contribution</span>
                 <span className="font-mono text-gray-900">${healthInsurance.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Tax Deducted at Source (TDS)</span>
+                <span className="text-[var(--text-muted)]">Tax Deducted at Source (TDS)</span>
                 <span className="font-mono text-gray-900">${incomeTax.toLocaleString()}</span>
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function PrintPayslipView({ payslip, onBack }) {
         <div className="border-2 border-indigo-600 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-indigo-50/20 print:bg-white print:border-2">
           <div className="text-center sm:text-left">
             <span className="text-[9px] font-black text-indigo-600 uppercase tracking-wider block">Net Take-Home Salary</span>
-            <span className="text-xs text-gray-500 italic mt-1 block capitalize">{netPayInWords}</span>
+            <span className="text-xs text-[var(--text-muted)] italic mt-1 block capitalize">{netPayInWords}</span>
           </div>
           <div className="text-center sm:text-right shrink-0">
             <span className="text-3xl font-black text-indigo-700 font-mono">${netPay.toLocaleString()}</span>
@@ -200,17 +200,17 @@ export default function PrintPayslipView({ payslip, onBack }) {
         {/* Signatures Section */}
         <div className="grid grid-cols-2 gap-8 pt-12 text-xs">
           <div className="text-center border-t border-gray-300 pt-3">
-            <span className="text-gray-500 block">Employee Signature</span>
-            <span className="text-[10px] text-gray-400 block mt-1">Date: ____/____/________</span>
+            <span className="text-[var(--text-muted)] block">Employee Signature</span>
+            <span className="text-[10px] text-[var(--text-secondary)] block mt-1">Date: ____/____/________</span>
           </div>
           <div className="text-center border-t border-gray-300 pt-3">
             <strong className="text-gray-900 block font-semibold">Authorized HR Director</strong>
-            <span className="text-gray-500 block">For {companyName}</span>
+            <span className="text-[var(--text-muted)] block">For {companyName}</span>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center text-[9px] text-gray-400 border-t border-gray-200 pt-6">
+        <div className="text-center text-[9px] text-[var(--text-secondary)] border-t border-gray-200 pt-6">
           This salary document is system generated and signed electronically. Retain for tax reporting purposes.
         </div>
 
@@ -218,3 +218,7 @@ export default function PrintPayslipView({ payslip, onBack }) {
     </div>
   );
 }
+
+
+
+

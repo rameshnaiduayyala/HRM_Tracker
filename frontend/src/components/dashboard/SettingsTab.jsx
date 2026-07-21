@@ -57,53 +57,53 @@ export default function SettingsTab({ companyId }) {
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-white tracking-tight">Company Configuration & Policies</h2>
-        <p className="text-xs text-gray-500 mt-0.5">Configure tracking preferences, working hours, and security rules for your workspace</p>
+        <p className="text-xs text-[var(--text-muted)] mt-0.5">Configure tracking preferences, working hours, and security rules for your workspace</p>
       </div>
 
       {loading ? (
-        <div className="py-12 text-center text-xs text-gray-500">Loading settings...</div>
+        <div className="py-12 text-center text-xs text-[var(--text-muted)]">Loading settings...</div>
       ) : (
         <form onSubmit={handleSave} className="space-y-6">
           {/* Section 1: Work Schedule */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg space-y-4">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-4 h-4 text-indigo-400" />
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">Standard Working Hours</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase">Shift Start Time</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase">Shift Start Time</label>
                 <input
                   type="time"
                   value={settings.workHoursStart}
                   onChange={(e) => setSettings({ ...settings, workHoursStart: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 text-white text-sm rounded-lg"
+                  className="w-full px-3 py-2 bg-[var(--bg-card-alt)] border border-[var(--border-muted)] text-white text-sm rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase">Shift End Time</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase">Shift End Time</label>
                 <input
                   type="time"
                   value={settings.workHoursEnd}
                   onChange={(e) => setSettings({ ...settings, workHoursEnd: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 text-white text-sm rounded-lg"
+                  className="w-full px-3 py-2 bg-[var(--bg-card-alt)] border border-[var(--border-muted)] text-white text-sm rounded-lg"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 2: Desktop Tracking Settings */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg space-y-4">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <Camera className="w-4 h-4 text-purple-400" />
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">Tracking Agent Configuration</h3>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase">Screenshot Frequency (Minutes)</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase">Screenshot Frequency (Minutes)</label>
               <select
                 value={settings.screenshotIntervalMinutes}
                 onChange={(e) => setSettings({ ...settings, screenshotIntervalMinutes: Number(e.target.value) })}
-                className="w-full md:w-1/2 px-3 py-2 bg-gray-900 border border-gray-700 text-white text-sm rounded-lg"
+                className="w-full md:w-1/2 px-3 py-2 bg-[var(--bg-card-alt)] border border-[var(--border-muted)] text-white text-sm rounded-lg"
               >
                 <option value={5}>Every 5 Minutes</option>
                 <option value={10}>Every 10 Minutes</option>
@@ -114,35 +114,35 @@ export default function SettingsTab({ companyId }) {
           </div>
 
           {/* Section 3: Time Logging Policies */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg space-y-4">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <Shield className="w-4 h-4 text-emerald-400" />
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">Policy & Approvals</h3>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gray-900/60 rounded-xl border border-gray-800">
+              <div className="flex items-center justify-between p-3 bg-[var(--bg-card-alt)] rounded-xl border border-[var(--border-base)]">
                 <div>
                   <h4 className="text-xs font-bold text-white">Allow Manual Time Entries</h4>
-                  <p className="text-[11px] text-gray-500">Permit staff to manually log off-screen work hours.</p>
+                  <p className="text-[11px] text-[var(--text-muted)]">Permit staff to manually log off-screen work hours.</p>
                 </div>
                 <input
                   type="checkbox"
                   checked={settings.allowManualTime}
                   onChange={(e) => setSettings({ ...settings, allowManualTime: e.target.checked })}
-                  className="rounded border-gray-700 text-indigo-600 bg-gray-900 w-4 h-4"
+                  className="rounded border-[var(--border-muted)] text-indigo-600 bg-[var(--bg-card-alt)] w-4 h-4"
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-900/60 rounded-xl border border-gray-800">
+              <div className="flex items-center justify-between p-3 bg-[var(--bg-card-alt)] rounded-xl border border-[var(--border-base)]">
                 <div>
                   <h4 className="text-xs font-bold text-white">Require Overtime Approval</h4>
-                  <p className="text-[11px] text-gray-500">Require manager review for work beyond standard shift hours.</p>
+                  <p className="text-[11px] text-[var(--text-muted)]">Require manager review for work beyond standard shift hours.</p>
                 </div>
                 <input
                   type="checkbox"
                   checked={settings.requireApprovalForOvertime}
                   onChange={(e) => setSettings({ ...settings, requireApprovalForOvertime: e.target.checked })}
-                  className="rounded border-gray-700 text-indigo-600 bg-gray-900 w-4 h-4"
+                  className="rounded border-[var(--border-muted)] text-indigo-600 bg-[var(--bg-card-alt)] w-4 h-4"
                 />
               </div>
             </div>
@@ -160,3 +160,7 @@ export default function SettingsTab({ companyId }) {
     </div>
   );
 }
+
+
+
+

@@ -14,15 +14,15 @@ export default function Table({ data = [], columns = [], emptyMessage = 'No reco
 
   return (
     <div className="w-full overflow-hidden" style={{
-      border: '1px solid rgba(255,255,255,0.06)',
+      border: '1px solid var(--border-subtle)',
       borderRadius: '14px',
-      background: 'linear-gradient(180deg, rgba(20,26,40,0.8) 0%, rgba(13,17,23,0.9) 100%)',
+      background: 'var(--bg-card)',
     }}>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             {table.getHeaderGroups().map(hg => (
-              <tr key={hg.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(7,9,15,0.50)' }}>
+              <tr key={hg.id} style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-card-alt)' }}>
                 {hg.headers.map(header => (
                   <th
                     key={header.id}
@@ -32,7 +32,7 @@ export default function Table({ data = [], columns = [], emptyMessage = 'No reco
                       fontWeight: 700,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      color: '#374151',
+                      color: 'var(--text-muted)',
                       whiteSpace: 'nowrap',
                     }}
                   >
@@ -49,7 +49,7 @@ export default function Table({ data = [], columns = [], emptyMessage = 'No reco
                 <td
                   colSpan={columns.length}
                   className="px-4 py-14 text-center"
-                  style={{ fontSize: '12px', color: '#374151', fontStyle: 'italic' }}
+                  style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}
                 >
                   {emptyMessage}
                 </td>
@@ -69,7 +69,7 @@ export default function Table({ data = [], columns = [], emptyMessage = 'No reco
                     <td
                       key={cell.id}
                       className="px-4 py-3.5"
-                      style={{ fontSize: '12px', color: '#9ca3af', verticalAlign: 'middle' }}
+                      style={{ fontSize: '12px', color: 'var(--text-muted)', verticalAlign: 'middle' }}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
@@ -83,3 +83,7 @@ export default function Table({ data = [], columns = [], emptyMessage = 'No reco
     </div>
   );
 }
+
+
+
+

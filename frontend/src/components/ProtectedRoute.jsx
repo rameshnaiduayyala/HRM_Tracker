@@ -52,3 +52,7 @@ export default function ProtectedRoute({
   // Authorized - Render child component tree
   return children;
 }
+
+
+
+

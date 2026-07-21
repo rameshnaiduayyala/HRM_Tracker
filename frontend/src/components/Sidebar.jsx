@@ -6,9 +6,9 @@ const NavItem = ({ icon: Icon, label, active, onClick, iconColor }) => (
   <button
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[12px] font-medium transition-all duration-150 nav-item ${active ? 'nav-item-active' : ''}`}
-    style={{ color: active ? '#a5b4fc' : '#6b7280' }}
+    style={{ color: active ? '#a5b4fc' : 'var(--text-secondary)' }}
   >
-    <Icon className="w-4 h-4 shrink-0" style={{ color: active ? '#818cf8' : iconColor || '#4b5568' }} />
+    <Icon className="w-4 h-4 shrink-0" style={{ color: active ? '#818cf8' : iconColor || 'var(--text-muted)' }} />
     <span className="flex-1 text-left">{label}</span>
     {active && <ChevronRight className="w-3 h-3 shrink-0 opacity-60" />}
   </button>
@@ -16,7 +16,7 @@ const NavItem = ({ icon: Icon, label, active, onClick, iconColor }) => (
 
 const NavSection = ({ label, children }) => (
   <div className="space-y-0.5">
-    <span className="block text-[9px] font-bold uppercase tracking-widest px-3 mb-1.5" style={{ color: '#374151' }}>
+    <span className="block text-[9px] font-bold uppercase tracking-widest px-3 mb-1.5" style={{ color: 'var(--text-muted)' }}>
       {label}
     </span>
     {children}
@@ -40,8 +40,8 @@ export default function Sidebar({
     <aside
       className="w-full md:w-60 flex-shrink-0 flex flex-col gap-5 p-4 overflow-y-auto"
       style={{
-        borderRight: '1px solid rgba(255,255,255,0.05)',
-        background: 'linear-gradient(180deg, rgba(13,17,23,0.85) 0%, rgba(7,9,15,0.90) 100%)',
+        borderRight: '1px solid var(--border-subtle)',
+        background: 'var(--bg-surface)',
         backdropFilter: 'blur(12px)',
         minHeight: '100%',
       }}
@@ -49,11 +49,11 @@ export default function Sidebar({
       {/* Active Workspace selector */}
       {isCompanyAdmin && (
         <div className="space-y-2">
-          <label className="block text-[9px] font-bold uppercase tracking-widest px-1" style={{ color: '#374151' }}>
+          <label className="block text-[9px] font-bold uppercase tracking-widest px-1" style={{ color: 'var(--text-muted)' }}>
             Active Workspace
           </label>
           {companies.length === 0 ? (
-            <div className="text-[11px] italic px-3 py-2 rounded-xl" style={{ color: '#374151', background: 'rgba(255,255,255,0.02)' }}>
+            <div className="text-[11px] italic px-3 py-2 rounded-xl" style={{ color: 'var(--text-muted)', background: 'var(--bg-card-alt)' }}>
               No workspace assigned
             </div>
           ) : (
@@ -148,8 +148,12 @@ export default function Sidebar({
 
       {/* Bottom version tag */}
       <div className="px-3 pb-1">
-        <span className="block text-[9px] font-mono" style={{ color: '#1f2937' }}>TaskTracky v2.0 · Enterprise</span>
+        <span className="block text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>TaskTracky v2.0 · Enterprise</span>
       </div>
     </aside>
   );
 }
+
+
+
+

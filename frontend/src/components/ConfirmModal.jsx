@@ -34,7 +34,7 @@ export default function ConfirmModal({
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm text-gray-300 leading-relaxed">{message}</p>
+            <p className="text-sm text-[var(--text-primary)] leading-relaxed">{message}</p>
           </div>
         </div>
 
@@ -63,3 +63,7 @@ export default function ConfirmModal({
     </Modal>
   );
 }
+
+
+
+

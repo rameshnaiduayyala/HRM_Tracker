@@ -64,7 +64,7 @@ export default function EmployeesTab({ employees = [], onSubmitEmployee, onReset
             </div>
             <div>
               <span className="block text-[13px] font-semibold text-white">{emp.user.firstName} {emp.user.lastName}</span>
-              <span className="block text-[10px] font-mono" style={{ color: '#374151' }}>{emp.employeeNum}</span>
+              <span className="block text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>{emp.employeeNum}</span>
             </div>
           </div>
         );
@@ -73,7 +73,7 @@ export default function EmployeesTab({ employees = [], onSubmitEmployee, onReset
     {
       accessorKey: 'user.email',
       header: 'Email',
-      cell: (info) => <span className="text-gray-400">{info.getValue()}</span>,
+      cell: (info) => <span className="text-[var(--text-secondary)]">{info.getValue()}</span>,
     },
     {
       accessorKey: 'designation',
@@ -101,7 +101,7 @@ export default function EmployeesTab({ employees = [], onSubmitEmployee, onReset
         return emp.manager ? (
           <span>{emp.manager.user.firstName} {emp.manager.user.lastName}</span>
         ) : (
-          <span className="text-gray-600 italic">None</span>
+          <span className="text-[var(--text-muted)] italic">None</span>
         );
       },
     },
@@ -142,7 +142,7 @@ export default function EmployeesTab({ employees = [], onSubmitEmployee, onReset
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-black tracking-tight text-white uppercase">Staff Directory</h2>
-          <p style={{ fontSize: '11px', color: '#374151', marginTop: '4px' }}>Manage employee profiles, reporting lines, and system credentials.</p>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>Manage employee profiles, reporting lines, and system credentials.</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <span className="badge badge-indigo">{employees.length} hired</span>
@@ -173,3 +173,7 @@ export default function EmployeesTab({ employees = [], onSubmitEmployee, onReset
     </div>
   );
 }
+
+
+
+

@@ -17,9 +17,9 @@ export default function App() {
         position="top-right"
         toastOptions={{
           style: {
-            background: '#111827',
-            color: '#f9fafb',
-            border: '1px solid #1f2937',
+            background: 'var(--bg-elevated)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-base)',
           },
         }}
       />
@@ -61,3 +61,7 @@ export default function App() {
     </>
   );
 }
+
+
+
+

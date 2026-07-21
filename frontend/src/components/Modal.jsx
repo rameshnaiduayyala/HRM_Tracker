@@ -33,12 +33,12 @@ export default function Modal({ isOpen, onClose, title, size = 'lg', children })
     >
       <div
         style={{
-          background: 'linear-gradient(160deg, #141a28 0%, #0d1117 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-base)',
           borderRadius: '18px',
-          boxShadow: '0 32px 64px rgba(0,0,0,0.60), 0 0 0 1px rgba(255,255,255,0.04)',
+          boxShadow: '0 32px 64px rgba(0,0,0,0.15), 0 0 0 1px var(--border-subtle)',
           overflow: 'hidden',
-          color: '#e2e8f0',
+          color: 'var(--text-primary)',
         }}
       >
         {/* Ambient top line */}
@@ -54,16 +54,16 @@ export default function Modal({ isOpen, onClose, title, size = 'lg', children })
         {(title || onClose) && (
           <div
             className="flex items-center justify-between px-6 py-4"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ borderBottom: '1px solid var(--border-subtle)' }}
           >
             {title && (
-              <h3 className="text-[14px] font-bold tracking-tight text-white">{title}</h3>
+              <h3 className="text-[14px] font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>{title}</h3>
             )}
             <button
               onClick={onClose}
-              className="ml-auto p-1.5 rounded-lg transition-colors text-gray-500 hover:text-white"
-              style={{ background: 'transparent' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
+              className="ml-auto p-1.5 rounded-lg transition-colors"
+              style={{ background: 'transparent', color: 'var(--text-muted)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-card-alt)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               <X className="w-4 h-4" />
@@ -79,3 +79,7 @@ export default function Modal({ isOpen, onClose, title, size = 'lg', children })
     </ReactModal>
   );
 }
+
+
+
+

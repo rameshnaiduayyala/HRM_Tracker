@@ -22,9 +22,9 @@ export default function Drawer({ isOpen, onClose, title, children }) {
       <div
         className="relative w-full max-w-lg h-full flex flex-col z-10 animate-slide-in"
         style={{
-          background: 'linear-gradient(180deg, #141a28 0%, #0d1117 100%)',
-          borderLeft: '1px solid rgba(255,255,255,0.07)',
-          boxShadow: '-24px 0 64px rgba(0,0,0,0.55)',
+          background: 'var(--bg-card)',
+          borderLeft: '1px solid var(--border-muted)',
+          boxShadow: '-24px 0 64px rgba(0,0,0,0.15)',
         }}
       >
         {/* Ambient left edge line */}
@@ -37,16 +37,17 @@ export default function Drawer({ isOpen, onClose, title, children }) {
         {/* Header */}
         <div
           className="flex items-center justify-between px-6 py-4 shrink-0"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ borderBottom: '1px solid var(--border-subtle)' }}
         >
           <div>
-            <h3 className="text-[14px] font-bold text-white tracking-tight">{title}</h3>
+            <h3 className="text-[14px] font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>{title}</h3>
             <div style={{ height: '1px', background: 'linear-gradient(90deg, rgba(99,102,241,0.5), transparent)', marginTop: '6px', width: '60px' }} />
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg transition-colors text-gray-500 hover:text-white"
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
+            className="p-1.5 rounded-lg transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-card-alt)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             <X className="w-4 h-4" />
@@ -61,3 +62,7 @@ export default function Drawer({ isOpen, onClose, title, children }) {
     </div>
   );
 }
+
+
+
+

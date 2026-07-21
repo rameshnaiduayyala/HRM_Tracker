@@ -84,12 +84,12 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
     {
       accessorKey: 'billingCycle',
       header: 'Billing Cycle',
-      cell: (info) => <span className="text-gray-400 text-xs font-semibold">{info.getValue()}</span>,
+      cell: (info) => <span className="text-[var(--text-secondary)] text-xs font-semibold">{info.getValue()}</span>,
     },
     {
       accessorKey: 'employeeLimit',
       header: 'Max Seat Limit',
-      cell: (info) => <span className="text-gray-300 font-semibold">{info.getValue()} users</span>,
+      cell: (info) => <span className="text-[var(--text-primary)] font-semibold">{info.getValue()} users</span>,
     },
     {
       accessorKey: 'features',
@@ -99,7 +99,7 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
         return (
           <div className="flex flex-wrap gap-1 max-w-xs">
             {feats.map((f, idx) => (
-              <span key={idx} className="text-[10px] bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded">
+              <span key={idx} className="text-[10px] bg-gray-800 text-[var(--text-secondary)] px-1.5 py-0.5 rounded">
                 {f}
               </span>
             ))}
@@ -147,11 +147,11 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
   return (
     <div className="space-y-6">
       {/* Left Panel: Plans Table */}
-      <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-2xl space-y-6">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-2xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold">Monetization Plans</h2>
-            <p className="text-xs text-gray-500 mt-1">Configure pricing tiers, active features, and seat capacities for tenants.</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">Configure pricing tiers, active features, and seat capacities for tenants.</p>
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -216,16 +216,16 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
           />
 
           <div className="space-y-1">
-            <label className="block text-xs font-semibold text-gray-400">Included Features (comma separated)</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)]">Included Features (comma separated)</label>
             <textarea
               placeholder="Screenshots, Work Logs, Attendance Tracking"
               value={featuresRaw}
               onChange={(e) => setFeaturesRaw(e.target.value)}
-              className="w-full h-20 px-3 py-2 bg-[#1f2937] border border-gray-800 text-white text-xs rounded-xl focus:outline-none focus:border-indigo-500 transition resize-none"
+              className="w-full h-20 px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-xs rounded-xl focus:outline-none focus:border-indigo-500 transition resize-none"
             />
           </div>
 
-          <div className="flex gap-2 pt-4 border-t border-gray-800/80">
+          <div className="flex gap-2 pt-4 border-t border-[var(--border-base)]/80">
             <Button
               type="submit"
               loading={loading}
@@ -257,50 +257,50 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
             <div 
               ref={printRef}
               id="print-section" 
-              className="space-y-6 p-4 rounded-xl border border-gray-800 bg-gray-900/50 print:bg-white print:text-black print:border-none"
+              className="space-y-6 p-4 rounded-xl border border-[var(--border-base)] bg-[var(--bg-card-alt)] print:bg-white print:text-black print:border-none"
             >
               {/* Print Header */}
               <div className="hidden print:block border-b pb-4 mb-4 border-gray-200">
                 <h1 className="text-2xl font-bold">TASKTRACKY SUBSCRIPTION PLAN CONFIGURATION</h1>
-                <p className="text-xs text-gray-500">Generated on {new Date().toLocaleDateString()}</p>
+                <p className="text-xs text-[var(--text-muted)]">Generated on {new Date().toLocaleDateString()}</p>
               </div>
 
               {/* Plan Title */}
               <div>
                 <h3 className="text-xl font-bold text-white print:text-black">{viewingDetailsPlan.name} Tier</h3>
-                <p className="text-xs text-gray-500 font-mono mt-1">Plan ID: {viewingDetailsPlan.id}</p>
+                <p className="text-xs text-[var(--text-muted)] font-mono mt-1">Plan ID: {viewingDetailsPlan.id}</p>
               </div>
 
               {/* Financial Metrics */}
-              <div className="border-t border-gray-800 pt-4 print:border-gray-300">
+              <div className="border-t border-[var(--border-base)] pt-4 print:border-gray-300">
                 <h4 className="text-sm font-semibold text-indigo-400 print:text-indigo-600 mb-2">Plan Pricing & Cycles</h4>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-gray-400 print:text-gray-600">Price Rate (Seat / Month):</span>
+                    <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Price Rate (Seat / Month):</span>
                     <span className="font-semibold text-white print:text-black">${Number(viewingDetailsPlan.price).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400 print:text-gray-600">Billing Cycle:</span>
+                    <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Billing Cycle:</span>
                     <span className="font-semibold text-white print:text-black">{viewingDetailsPlan.billingCycle}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400 print:text-gray-600">Employee Seat Limit:</span>
+                    <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Employee Seat Limit:</span>
                     <span className="font-semibold text-white print:text-black">{viewingDetailsPlan.employeeLimit} Seats</span>
                   </div>
                 </div>
               </div>
 
               {/* Included functional list */}
-              <div className="border-t border-gray-800 pt-4 print:border-gray-300">
+              <div className="border-t border-[var(--border-base)] pt-4 print:border-gray-300">
                 <h4 className="text-sm font-semibold text-indigo-400 print:text-indigo-600 mb-2">Capabilities & Features</h4>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {viewingDetailsPlan.features?.map((f, i) => (
-                    <span key={i} className="px-2.5 py-1 bg-gray-800 text-gray-300 rounded-md print:border print:bg-white print:text-black text-xs font-semibold">
+                    <span key={i} className="px-2.5 py-1 bg-gray-800 text-[var(--text-primary)] rounded-md print:border print:bg-white print:text-black text-xs font-semibold">
                       {f}
                     </span>
                   ))}
                   {(!viewingDetailsPlan.features || viewingDetailsPlan.features.length === 0) && (
-                    <span className="text-xs text-gray-500">No custom features listed in this plan tier.</span>
+                    <span className="text-xs text-[var(--text-muted)]">No custom features listed in this plan tier.</span>
                   )}
                 </div>
               </div>
@@ -342,3 +342,7 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
     </div>
   );
 }
+
+
+
+

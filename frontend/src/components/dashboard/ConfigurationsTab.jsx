@@ -15,9 +15,9 @@ export default function ConfigurationsTab({ onCreateCompany, loading }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Create Company Form */}
-      <div className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg">
         <h3 className="text-lg font-bold text-white mb-4">Create New Company Division</h3>
-        <p className="text-sm text-gray-400 mb-6">Introduce an independent business office or subsidiary unit under your tenant account.</p>
+        <p className="text-sm text-[var(--text-secondary)] mb-6">Introduce an independent business office or subsidiary unit under your tenant account.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Division Name"
@@ -38,3 +38,7 @@ export default function ConfigurationsTab({ onCreateCompany, loading }) {
     </div>
   );
 }
+
+
+
+

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { LogOut, User, Bell, ChevronDown, Shield, Zap } from 'lucide-react';
+import { LogOut, User, Bell, ChevronDown, Shield, Zap, Sun, Moon } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useThemeStore } from '../store/useThemeStore';
 import { useNavigate } from 'react-router-dom';
 
 const ROLE_CONFIG = {
@@ -14,6 +15,8 @@ const ROLE_CONFIG = {
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
+  const theme = useThemeStore((s) => s.theme);
+  const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const navigate = useNavigate();
 
   const role   = user?.role || 'EMPLOYEE';
@@ -25,10 +28,10 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full flex items-center justify-between px-5 py-3"
       style={{
-        background: 'rgba(7,9,15,0.80)',
+        background: 'var(--bg-surface)',
         backdropFilter: 'blur(16px) saturate(180%)',
         WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid var(--border-subtle)',
       }}
     >
       {/* ── Brand ── */}
@@ -40,13 +43,13 @@ export default function Header() {
           >
             <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
           </div>
-          <h1 className="text-[15px] font-black tracking-tight text-white">
+          <h1 className="text-[15px] font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
             Task<span style={{ background: 'linear-gradient(90deg,#818cf8,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Tracky</span>
           </h1>
         </div>
 
         {/* Divider + role badge */}
-        <span className="w-px h-4 hidden sm:block" style={{ background: 'rgba(255,255,255,0.08)' }} />
+        <span className="w-px h-4 hidden sm:block" style={{ background: 'var(--border-muted)' }} />
         <span className={`badge ${cfg.color} hidden sm:inline-flex`}>
           <Shield className="w-2.5 h-2.5" />
           {cfg.label}
@@ -57,21 +60,31 @@ export default function Header() {
       <div className="flex items-center gap-2">
 
         {/* Notification bell */}
-        <button className="relative p-2 rounded-xl text-gray-400 hover:text-white transition-colors"
-          style={{ background: 'rgba(255,255,255,0.04)' }}
+        <button className="relative p-2 rounded-xl transition-colors"
+          style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}
         >
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-400 pulse-glow" />
         </button>
 
-        <span className="w-px h-5 hidden sm:block" style={{ background: 'rgba(255,255,255,0.07)' }} />
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-xl transition-colors"
+          style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}
+          data-tooltip={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+
+        <span className="w-px h-5 hidden sm:block" style={{ background: 'var(--border-muted)' }} />
 
         {/* Profile dropdown */}
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl transition-all"
-            style={{ background: dropdownOpen ? 'rgba(99,102,241,0.10)' : 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+            style={{ background: dropdownOpen ? 'rgba(99,102,241,0.10)' : 'var(--bg-card)', border: '1px solid var(--border-muted)' }}
           >
             {/* Avatar */}
             <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-black tracking-wide shadow-lg"
@@ -80,26 +93,26 @@ export default function Header() {
               {initials}
             </div>
             <div className="hidden sm:block text-left leading-none">
-              <span className="block text-[12px] font-semibold text-white">{user?.firstName} {user?.lastName}</span>
+              <span className="block text-[12px] font-semibold" style={{ color: 'var(--text-primary)' }}>{user?.firstName} {user?.lastName}</span>
               <span className="block text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>{user?.email}</span>
             </div>
-            <ChevronDown className={`w-3 h-3 text-gray-500 ml-1 hidden sm:block transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} style={{ color: 'var(--text-muted)' }} />
           </button>
 
           {dropdownOpen && (
             <>
               <div onClick={() => setDropdownOpen(false)} className="fixed inset-0 z-10" />
               <div className="absolute right-0 mt-2 w-56 z-20 animate-fade-up"
-                style={{ background: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', boxShadow: '0 24px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)' }}
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-muted)', borderRadius: '14px', boxShadow: '0 24px 48px rgba(0,0,0,0.15), 0 0 0 1px var(--border-subtle)' }}
               >
                 {/* User info header */}
-                <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[11px] font-black"
                       style={{ background: 'linear-gradient(135deg,#4f46e5,#818cf8)' }}
                     >{initials}</div>
                     <div>
-                      <span className="block text-[12px] font-bold text-white">{user?.firstName} {user?.lastName}</span>
+                      <span className="block text-[12px] font-bold" style={{ color: 'var(--text-primary)' }}>{user?.firstName} {user?.lastName}</span>
                       <span className={`badge ${cfg.color} mt-0.5`}><span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />{cfg.label}</span>
                     </div>
                   </div>
@@ -111,7 +124,7 @@ export default function Header() {
                     onClick={() => setDropdownOpen(false)}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium transition-colors"
                     style={{ color: 'var(--text-secondary)' }}
-                    onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.05)'}
+                    onMouseEnter={e => e.currentTarget.style.background='var(--bg-card-alt)'}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}
                   >
                     <User className="w-3.5 h-3.5" /> My Profile
@@ -133,3 +146,7 @@ export default function Header() {
     </header>
   );
 }
+
+
+
+

@@ -17,14 +17,14 @@ const VARIANTS = {
   secondary: {
     base: 'font-medium',
     style: {
-      background: 'rgba(255,255,255,0.04)',
-      border: '1px solid rgba(255,255,255,0.09)',
-      color: '#8b95a9',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border-muted)',
+      color: 'var(--text-secondary)',
     },
     hoverStyle: {
-      background: 'rgba(255,255,255,0.08)',
-      color: '#e2e8f0',
-      borderColor: 'rgba(255,255,255,0.14)',
+      background: 'var(--bg-card-alt)',
+      color: 'var(--text-primary)',
+      borderColor: 'var(--border-base)',
     },
   },
   danger: {
@@ -32,7 +32,7 @@ const VARIANTS = {
     style: {
       background: 'rgba(244,63,94,0.08)',
       border: '1px solid rgba(244,63,94,0.22)',
-      color: '#fda4af',
+      color: '#f43f5e',
     },
     hoverStyle: {
       background: 'rgba(244,63,94,0.15)',
@@ -44,11 +44,11 @@ const VARIANTS = {
     style: {
       background: 'transparent',
       border: '1px solid transparent',
-      color: '#6b7280',
+      color: 'var(--text-muted)',
     },
     hoverStyle: {
-      background: 'rgba(255,255,255,0.05)',
-      color: '#e2e8f0',
+      background: 'var(--bg-card-alt)',
+      color: 'var(--text-primary)',
     },
   },
 };
@@ -102,3 +102,7 @@ export default function Button({
     </button>
   );
 }
+
+
+
+

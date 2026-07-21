@@ -67,7 +67,7 @@ export default function EmployeePortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] flex flex-col font-sans">
+    <div className="min-h-screen bg-[var(--bg-canvas)] flex flex-col font-sans">
       <Header />
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar configured with Employee Portal active tab state */}
@@ -83,22 +83,22 @@ export default function EmployeePortal() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-white tracking-tight">Shift Attendance</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Log your daily working hours and clock session status</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Log your daily working hours and clock session status</p>
               </div>
 
-              <div className="max-w-md bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg space-y-6">
-                <div className="flex items-center gap-3 pb-3 border-b border-gray-800">
+              <div className="max-w-md bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-6">
+                <div className="flex items-center gap-3 pb-3 border-b border-[var(--border-base)]">
                   <div className="w-10 h-10 rounded-xl bg-indigo-600/10 flex items-center justify-center text-indigo-400">
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-white">Daily Shift Controller</h3>
-                    <p className="text-xs text-gray-400">Shift status updates dynamically in real-time</p>
+                    <p className="text-xs text-[var(--text-secondary)]">Shift status updates dynamically in real-time</p>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-gray-800/80">
-                  <span className="text-xs text-gray-300">Working State</span>
+                <div className="flex justify-between items-center bg-[var(--bg-card-alt)] p-4 rounded-xl border border-[var(--border-base)]/80">
+                  <span className="text-xs text-[var(--text-primary)]">Working State</span>
                   <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${clockedIn ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/30' : 'bg-red-950 text-red-400 border border-red-800/30'}`}>
                     {clockedIn ? 'Clocked In' : 'Clocked Out'}
                   </span>
@@ -154,3 +154,7 @@ export default function EmployeePortal() {
     </div>
   );
 }
+
+
+
+
