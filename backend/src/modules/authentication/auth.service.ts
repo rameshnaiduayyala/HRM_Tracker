@@ -169,6 +169,72 @@ export class AuthService {
     };
   }
 
+  async loginLegacy(
+    data: { email: string; passwordHash: string; deviceFingerprint?: string }
+  ) {
+    const user = await prisma.user.findFirst({
+      where: { email: data.email },
+      include: {
+        role: true,
+        tenant: true,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedError('Invalid credentials');
+    }
+
+    if (user.tenant && user.tenant.status !== 'ACTIVE') {
+      if (user.tenant.status === 'PENDING') {
+        throw new UnauthorizedError('Your workspace registration is currently pending super admin approval. Please try again later.');
+      }
+      throw new UnauthorizedError('Your company workspace has been deactivated. Please contact support.');
+    }
+
+    const isValid = await bcrypt.compare(data.passwordHash, user.passwordHash);
+    if (!isValid) {
+      throw new UnauthorizedError('Invalid credentials');
+    }
+
+    const legacyExpiry = process.env.JWT_LEGACY_EXPIRES_IN || '365d';
+
+    const accessToken = jwt.sign(
+      { userId: user.id, tenantId: user.tenantId, role: user.role?.name, legacy: true },
+      JWT_SECRET,
+      { expiresIn: legacyExpiry as any }
+    );
+
+    const refreshToken = jwt.sign(
+      { userId: user.id, tenantId: user.tenantId, legacy: true },
+      JWT_REFRESH_SECRET,
+      { expiresIn: legacyExpiry as any }
+    );
+
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+    await prisma.session.create({
+      data: {
+        userId: user.id,
+        token: refreshToken,
+        deviceFingerprint: data.deviceFingerprint || null,
+        expiresAt,
+      },
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role?.name,
+      },
+    };
+  }
+
   async refresh(refreshToken: string) {
     try {
       jwt.verify(refreshToken, JWT_REFRESH_SECRET);

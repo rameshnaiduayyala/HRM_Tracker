@@ -16,6 +16,12 @@ const loginSchema = z.object({
   deviceFingerprint: z.string().optional(),
 });
 
+const legacyLoginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+  deviceFingerprint: z.string().optional(),
+});
+
 const refreshSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 });
@@ -75,6 +81,28 @@ export class AuthController {
       }
 
       const result = await authService.refresh(parsed.data.refreshToken);
+
+      return res.status(200).json({
+        status: 'success',
+        data: result,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async legacyLogin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = legacyLoginSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return next(new ValidationError(parsed.error.format()));
+      }
+
+      const result = await authService.loginLegacy({
+        email: parsed.data.email,
+        passwordHash: parsed.data.password,
+        deviceFingerprint: parsed.data.deviceFingerprint,
+      });
 
       return res.status(200).json({
         status: 'success',

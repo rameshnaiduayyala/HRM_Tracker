@@ -18,17 +18,21 @@ import announcementsRoutes from '../modules/announcements/announcements.routes';
 import settingsRoutes from '../modules/settings/settings.routes';
 import reportsRoutes from '../modules/reports/reports.routes';
 
+import { authenticate } from '../modules/authentication/auth.middleware';
+
 const router = Router();
 
 router.use('/tenants', tenantsRoutes);
 router.use('/auth', authRoutes);
 router.use('/companies', companiesRoutes);
 router.use('/employees', employeesRoutes);
-router.use('/attendance', attendanceRoutes);
-router.use('/work-sessions', workSessionsRoutes);
+
+router.use('/attendance', authenticate, attendanceRoutes);
+router.use('/work-sessions', authenticate, workSessionsRoutes);
+router.use('/devices', authenticate, devicesRoutes);
+
 router.use('/tasks', tasksRoutes);
 router.use('/plans', plansRoutes);
-router.use('/devices', devicesRoutes);
 
 // Register New Modules
 router.use('/departments', departmentsRoutes);
