@@ -368,6 +368,41 @@ async function main() {
     console.log('Associated HR Employee record seeded');
   }
 
+  // Seed Additional Staff Employees
+  const extraStaff = [
+    { email: 'emily.designer@acme.com', firstName: 'Emily', lastName: 'Designer', designation: 'UI/UX Lead Designer', num: 'EMP-00005' },
+    { email: 'david.qa@acme.com', firstName: 'David', lastName: 'Quality', designation: 'Senior QA Engineer', num: 'EMP-00006' },
+    { email: 'jessica.pm@acme.com', firstName: 'Jessica', lastName: 'Product', designation: 'Product Manager', num: 'EMP-00007' },
+    { email: 'michael.dev@acme.com', firstName: 'Michael', lastName: 'Backend', designation: 'Fullstack Engineer', num: 'EMP-00008' }
+  ];
+
+  for (const staff of extraStaff) {
+    let u = await prisma.user.findUnique({ where: { email: staff.email } });
+    if (!u && employeeRole) {
+      const passwordHash = await bcrypt.hash('employee123', 10);
+      u = await prisma.user.create({
+        data: {
+          email: staff.email,
+          passwordHash,
+          firstName: staff.firstName,
+          lastName: staff.lastName,
+          tenantId: tenant.id,
+          roleId: employeeRole.id,
+        },
+      });
+      await prisma.employee.create({
+        data: {
+          employeeNum: staff.num,
+          userId: u.id,
+          companyId: company.id,
+          status: 'ACTIVE',
+          designation: staff.designation,
+        },
+      });
+      console.log(`Seeded staff employee: ${staff.firstName} ${staff.lastName}`);
+    }
+  }
+
   // Seed default CompanySettings
   const existingSettings = await prisma.companySettings.findUnique({
     where: { companyId: company.id },

@@ -147,10 +147,13 @@ namespace Agent.Background
 
                 // 6. Periodic screenshot capture
                 _screenshotTicks += 10;
-                if (_screenshotTicks >= (_configSync.CurrentConfig?.ScreenshotIntervalSeconds ?? 60))
+                int interval = _configSync.CurrentConfig?.ScreenshotIntervalSeconds ?? 60;
+                bool isEnabled = _configSync.CurrentConfig?.ScreenshotEnabled ?? true;
+
+                if (_screenshotTicks >= interval)
                 {
                     _screenshotTicks = 0;
-                    if (_configSync.CurrentConfig?.ScreenshotEnabled == true)
+                    if (isEnabled)
                     {
                         string? base64 = _screenCaptureService.CapturePrimaryScreenBase64();
                         if (!string.IsNullOrEmpty(base64))

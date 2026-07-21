@@ -35,19 +35,19 @@
 
 /* ─── Dark Theme ──────────────────────────────────────────────────────── */
 [data-theme="dark"] {
-  --bg-canvas:    #07090f;
-  --bg-surface:   #0d1117;
-  --bg-card:      #111827;
-  --bg-card-alt:  #141a28;
-  --bg-elevated:  #1a2235;
+  --bg-canvas:    #090d16;
+  --bg-surface:   #111827;
+  --bg-card:      #161f32;
+  --bg-card-alt:  #1e293b;
+  --bg-elevated:  #243147;
 
-  --border-subtle: rgba(255,255,255,0.05);
-  --border-muted:  rgba(255,255,255,0.08);
-  --border-base:   rgba(255,255,255,0.10);
+  --border-subtle: rgba(255,255,255,0.08);
+  --border-muted:  rgba(255,255,255,0.12);
+  --border-base:   rgba(255,255,255,0.16);
 
-  --text-primary:  #f1f5f9;
-  --text-secondary:#8b95a9;
-  --text-muted:    #4b5568;
+  --text-primary:  #ffffff;
+  --text-secondary:#e2e8f0;
+  --text-muted:    #94a3b8;
 }
 
 /* ─── Base Reset ──────────────────────────────────────────────────────── */

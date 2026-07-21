@@ -113,17 +113,18 @@ export class WorkSessionsService {
     }
 
     const buffer = Buffer.from(imageBase64, 'base64');
-    const filename = `screenshots/${active.id}/${Date.now()}.png`;
+    const relativeFilePath = `screenshots/${active.id}/${Date.now()}.png`;
 
-    let storagePath = filename;
+    let storagePath = `/uploads/${relativeFilePath}`;
     try {
-      await storageService.uploadFile(filename, buffer, 'image/png');
+      await storageService.uploadFile(relativeFilePath, buffer, 'image/png');
+      storagePath = relativeFilePath;
     } catch (err: any) {
-      // Fallback to local file storage if S3/MinIO is offline
-      const localPath = path.join(__dirname, '../../../../uploads', filename);
+      // Save locally inside backend/uploads/screenshots/ directory
+      const localPath = path.join(__dirname, '../../../../uploads', relativeFilePath);
       fs.mkdirSync(path.dirname(localPath), { recursive: true });
       fs.writeFileSync(localPath, buffer);
-      storagePath = `/uploads/${filename}`;
+      storagePath = `/uploads/${relativeFilePath}`;
     }
 
     return prisma.screenshot.create({

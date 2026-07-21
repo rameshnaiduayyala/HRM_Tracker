@@ -77,6 +77,14 @@ backend/prisma/migrations/*.sql
 # Redis
 dump.rdb
 
+# Uploads & Media
+uploads/
+*/uploads/
+backend/uploads/
+*.png
+*.jpg
+*.jpeg
+
 # Misc
 *.local
 *.tsbuildinfo

@@ -39,6 +39,10 @@ export class EmployeesService {
               orderBy: { createdAt: 'desc' },
               take: 20,
             },
+            screenshots: {
+              orderBy: { createdAt: 'desc' },
+              take: 20,
+            },
           },
         },
       },

@@ -146,8 +146,8 @@ export default function Dashboard() {
     }
   };
 
-  const fetchCompanyData = async (companyId) => {
-    setLoading(true);
+  const fetchCompanyData = async (companyId, silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const [empRes, projRes] = await Promise.all([
@@ -157,11 +157,20 @@ export default function Dashboard() {
       setEmployees(empRes.data.employees);
       setProjects(projRes.data.projects);
     } catch (err) {
-      setError('Failed to load company details.');
+      if (!silent) setError('Failed to load company details.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
+
+  // Auto-refresh live telemetry & attendance every 5 seconds
+  useEffect(() => {
+    if (!selectedCompanyId || isSuperAdmin) return;
+    const interval = setInterval(() => {
+      fetchCompanyData(selectedCompanyId, true);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [selectedCompanyId, isSuperAdmin]);
 
   const handleToggleStatus = async (id, currentStatus) => {
     const nextStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
@@ -575,6 +584,7 @@ export default function Dashboard() {
           {!isSuperAdmin && activeTab === 'reports' && (
             <ReportsTab
               employees={employees}
+              onRefresh={() => fetchCompanyData(selectedCompanyId, true)}
             />
           )}
         </main>
