@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tenantApi, planApi } from '../services/api';
-import { UserPlus, ArrowLeft, CheckCircle, ShieldCheck } from 'lucide-react';
+import { UserPlus, ArrowLeft, CheckCircle, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function Register() {
@@ -16,8 +16,10 @@ export default function Register() {
   const [newTenantName, setNewTenantName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+
   const [adminFirstName, setAdminFirstName] = useState('');
   const [adminLastName, setAdminLastName] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   useEffect(() => {
     fetchPlans();
@@ -57,7 +59,7 @@ export default function Register() {
 
       toast.success(`Workspace registered! Awaiting super admin approval.`);
       setSuccess("Your company workspace has been successfully registered with your chosen billing subscription plan. Once the super administrator approves, your workspace will be fully active and ready to log in.");
-      
+
       setNewTenantName('');
       setAdminEmail('');
       setAdminPassword('');
@@ -77,7 +79,7 @@ export default function Register() {
 
       <div className="w-full max-w-6xl border rounded-3xl relative z-10 shadow-2xl overflow-hidden flex flex-col md:flex-row"
         style={{ background: 'var(--bg-card)', borderColor: 'var(--border-muted)' }}>
-        
+
         <div className="w-full md:w-5/12 p-8 border-b md:border-b-0 md:border-r flex flex-col justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
           <div>
             <div className="flex items-center gap-2 mb-6">
@@ -198,20 +200,41 @@ export default function Register() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1 uppercase" style={{ color: 'var(--text-secondary)' }}>Admin Password</label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
-                    style={{
-                      background: 'var(--bg-canvas)',
-                      border: '1px solid var(--border-muted)',
-                      color: 'var(--text-primary)',
-                    }}
-                  />
+                  <label
+                    className="block text-xs font-semibold mb-1 uppercase"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Admin Password
+                  </label>
+
+                  <div className="relative">
+                    <input
+                      type={showAdminPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      className="w-full px-3 pr-11 py-2.5 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                      style={{
+                        background: "var(--bg-canvas)",
+                        border: "1px solid var(--border-muted)",
+                        color: "var(--text-primary)",
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowAdminPassword(!showAdminPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {showAdminPassword ? (
+                        <EyeOff className="w-5 h-5 hover:text-indigo-500 transition-colors" />
+                      ) : (
+                        <Eye className="w-5 h-5 hover:text-indigo-500 transition-colors" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </form>
             )}

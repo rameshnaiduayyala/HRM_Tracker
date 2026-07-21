@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
-import { KeyRound, Mail, LogIn, AlertTriangle } from 'lucide-react';
+import { KeyRound, Mail, LogIn, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import FocusTrackLogo from "../assets/focustrack-logo.png"
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
   const [workspaceDeactivated, setWorkspaceDeactivated] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
 
   // Login Form State
   const [email, setEmail] = useState('');
@@ -37,7 +39,7 @@ export default function Login() {
     try {
       const response = await authApi.login(email, password);
       setAuth(response.data.accessToken, response.data.user);
-      
+
       const isHR = response.data.user.role === 'HR';
       const isManagement = ['ADMIN', 'SUPER_ADMIN', 'MANAGER'].includes(response.data.user.role);
       if (isHR) {
@@ -58,7 +60,7 @@ export default function Login() {
     try {
       const response = await authApi.login(targetEmail, targetPassword);
       setAuth(response.data.accessToken, response.data.user);
-      
+
       const isHR = response.data.user.role === 'HR';
       const isManagement = ['ADMIN', 'SUPER_ADMIN', 'MANAGER'].includes(response.data.user.role);
       if (isHR) {
@@ -81,11 +83,20 @@ export default function Login() {
 
       <div className="w-full max-w-md relative z-10 glass-card p-8 shadow-2xl" style={{ boxShadow: '0 32px 64px rgba(0,0,0,0.10), 0 0 0 1px var(--border-subtle)' }}>
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-black tracking-tight mb-2" style={{ color: 'var(--text-primary)' }}>
-            Task<span style={{ background: 'linear-gradient(90deg,#818cf8,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Tracky</span>
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Sign in to your workplace portal
+          <div className="flex justify-center mb-4">
+            <img
+              src={FocusTrackLogo}
+              alt="FocusTrack"
+              className="h-12 w-auto object-contain mx-auto"
+              draggable={false}
+            />
+          </div>
+
+          <p
+            className="text-sm"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Smart Employee Monitoring & Workforce Analytics
           </p>
         </div>
 
@@ -141,24 +152,47 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold mb-2 uppercase" style={{ color: 'var(--text-secondary)' }}>Password</label>
+            <label
+              className="block text-xs font-semibold mb-2 uppercase"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Password
+            </label>
+
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center" style={{ color: 'var(--text-muted)' }}>
+              <span
+                className="absolute inset-y-0 left-0 pl-3 flex items-center"
+                style={{ color: "var(--text-muted)" }}
+              >
                 <KeyRound className="w-5 h-5" />
               </span>
+
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
+                className="w-full pl-10 pr-12 py-3 rounded-xl focus:outline-none focus:border-indigo-500 transition text-sm"
                 style={{
-                  background: 'var(--bg-canvas)',
-                  border: '1px solid var(--border-muted)',
-                  color: 'var(--text-primary)',
+                  background: "var(--bg-canvas)",
+                  border: "1px solid var(--border-muted)",
+                  color: "var(--text-primary)",
                 }}
               />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5 hover:text-indigo-500 transition-colors" />
+                ) : (
+                  <Eye className="w-5 h-5 hover:text-indigo-500 transition-colors" />
+                )}
+              </button>
             </div>
           </div>
 

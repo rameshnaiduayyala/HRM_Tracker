@@ -3,13 +3,14 @@ import { LogOut, User, Bell, ChevronDown, Shield, Zap, Sun, Moon } from 'lucide-
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { useNavigate } from 'react-router-dom';
+import FocusTrackLogo from "../assets/focustrack-logo.png";
 
 const ROLE_CONFIG = {
-  SUPER_ADMIN: { label: 'Platform Admin',   color: 'badge-indigo',  dot: 'bg-indigo-400' },
-  ADMIN:       { label: 'Company Admin',     color: 'badge-emerald', dot: 'bg-emerald-400' },
-  MANAGER:     { label: 'Manager',           color: 'badge-amber',   dot: 'bg-amber-400'  },
-  HR:          { label: 'HR Specialist',     color: 'badge-violet',  dot: 'bg-violet-400' },
-  EMPLOYEE:    { label: 'Staff Member',      color: 'badge-rose',    dot: 'bg-rose-400'   },
+  SUPER_ADMIN: { label: 'Platform Admin', color: 'badge-indigo', dot: 'bg-indigo-400' },
+  ADMIN: { label: 'Company Admin', color: 'badge-emerald', dot: 'bg-emerald-400' },
+  MANAGER: { label: 'Manager', color: 'badge-amber', dot: 'bg-amber-400' },
+  HR: { label: 'HR Specialist', color: 'badge-violet', dot: 'bg-violet-400' },
+  EMPLOYEE: { label: 'Staff Member', color: 'badge-rose', dot: 'bg-rose-400' },
 };
 
 export default function Header() {
@@ -19,8 +20,8 @@ export default function Header() {
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const navigate = useNavigate();
 
-  const role   = user?.role || 'EMPLOYEE';
-  const cfg    = ROLE_CONFIG[role] || ROLE_CONFIG.EMPLOYEE;
+  const role = user?.role || 'EMPLOYEE';
+  const cfg = ROLE_CONFIG[role] || ROLE_CONFIG.EMPLOYEE;
   const initials = `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || 'U'}`.toUpperCase();
 
   const handleLogout = () => { logout(); navigate('/login'); };
@@ -36,20 +37,18 @@ export default function Header() {
     >
       {/* ── Brand ── */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          {/* Animated icon mark */}
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#4f46e5,#818cf8)', boxShadow: '0 0 14px rgba(99,102,241,0.45)' }}
-          >
-            <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-          </div>
-          <h1 className="text-[15px] font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            Task<span style={{ background: 'linear-gradient(90deg,#818cf8,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Tracky</span>
-          </h1>
-        </div>
+        <img
+          src={FocusTrackLogo}
+          alt="FocusTrack"
+          className="h-10 w-auto object-contain"
+          draggable={false}
+        />
 
-        {/* Divider + role badge */}
-        <span className="w-px h-4 hidden sm:block" style={{ background: 'var(--border-muted)' }} />
+        <span
+          className="w-px h-4 hidden sm:block"
+          style={{ background: "var(--border-muted)" }}
+        />
+
         <span className={`badge ${cfg.color} hidden sm:inline-flex`}>
           <Shield className="w-2.5 h-2.5" />
           {cfg.label}
@@ -124,16 +123,16 @@ export default function Header() {
                     onClick={() => setDropdownOpen(false)}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium transition-colors"
                     style={{ color: 'var(--text-secondary)' }}
-                    onMouseEnter={e => e.currentTarget.style.background='var(--bg-card-alt)'}
-                    onMouseLeave={e => e.currentTarget.style.background='transparent'}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-card-alt)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <User className="w-3.5 h-3.5" /> My Profile
                   </button>
                   <button
                     onClick={() => { setDropdownOpen(false); handleLogout(); }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium transition-colors text-rose-400"
-                    onMouseEnter={e => e.currentTarget.style.background='rgba(244,63,94,0.08)'}
-                    onMouseLeave={e => e.currentTarget.style.background='transparent'}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(244,63,94,0.08)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <LogOut className="w-3.5 h-3.5" /> Sign Out
                   </button>
