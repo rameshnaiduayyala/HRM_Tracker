@@ -135,6 +135,21 @@ export class WorkSessionsService {
       },
     });
   }
+
+  async updateLastSessionReason(userId: string, stopReason: string) {
+    const employee = await this.getEmployeeProfile(userId);
+    const lastSession = await prisma.workSession.findFirst({
+      where: { employeeId: employee.id },
+      orderBy: { createdAt: 'desc' }
+    });
+    if (!lastSession) {
+      throw new BadRequestError('No work session found');
+    }
+    return prisma.workSession.update({
+      where: { id: lastSession.id },
+      data: { stopReason }
+    });
+  }
 }
 
 export const workSessionsService = new WorkSessionsService();

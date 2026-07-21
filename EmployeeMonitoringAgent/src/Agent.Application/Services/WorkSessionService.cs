@@ -68,6 +68,20 @@ namespace Agent.Application.Services
             }
         }
 
+        public async Task<bool> UpdateLastSessionReasonAsync(string reason)
+        {
+            try
+            {
+                _logger.Log($"Updating last completed work session reason to: {reason}...");
+                return await _apiClient.UpdateLastSessionReasonAsync(reason);
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Failed to update last session reason: {ex.Message}");
+                return false;
+            }
+        }
+
         public async Task<bool> SendHeartbeatAsync(string activeApp, string windowTitle, double activeDuration, double idleDuration)
         {
             var hbPayload = new

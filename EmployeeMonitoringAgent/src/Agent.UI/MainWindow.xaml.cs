@@ -149,9 +149,21 @@ namespace Agent.UI
                 TxtWindowTitle.Text = title;
             });
 
-            _telemetryWorker.OnInactivityDetected += () => Dispatcher.Invoke(() =>
+            _telemetryWorker.OnInactivityDetected += () => Dispatcher.Invoke(async () =>
             {
                 ShowWindow();
+                
+                // Reset dashboard telemetry display fields
+                TxtActiveApp.Text = "-";
+                TxtWindowTitle.Text = "-";
+                TxtIdleTime.Text = "0s";
+                
+                // Prompt user for their inactivity reason and update it on backend
+                string? reason = PromptForStopReason();
+                if (!string.IsNullOrEmpty(reason))
+                {
+                    await _workSessionService.UpdateLastSessionReasonAsync(reason);
+                }
             });
 
             _breakManagement.OnBreakStarted += (b) => Dispatcher.Invoke(() =>

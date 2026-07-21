@@ -195,6 +195,21 @@ namespace Agent.Network.Http
             }
         }
 
+        public async Task<bool> UpdateLastSessionReasonAsync(string reason)
+        {
+            try
+            {
+                string json = JsonSerializer.Serialize(new { reason });
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                HttpResponseMessage res = await _httpClient.PostAsync($"{BaseAddress}/api/legacy/work-sessions/update-reason", content);
+                return res.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> SendHeartbeatAsync(object payload)
         {
             try

@@ -15,6 +15,7 @@ namespace Agent.Core.Interfaces
         Task<bool> ClockOutAsync();
         Task<bool> StartWorkSessionAsync();
         Task<bool> StopWorkSessionAsync(string? reason = null);
+        Task<bool> UpdateLastSessionReasonAsync(string reason);
         Task<bool> SendHeartbeatAsync(object payload);
         Task<bool> UploadScreenshotAsync(object payload);
     }

@@ -36,6 +36,19 @@ export class WorkSessionsController {
     }
   }
 
+  async updateStopReason(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { reason, stopReason } = req.body;
+      const session = await workSessionsService.updateLastSessionReason(req.userId!, reason || stopReason);
+      return res.status(200).json({
+        status: 'success',
+        data: { session },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async heartbeat(req: Request, res: Response, next: NextFunction) {
     try {
       const parsed = heartbeatSchema.safeParse(req.body);

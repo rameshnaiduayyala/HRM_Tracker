@@ -12,6 +12,7 @@ namespace Agent.Core.Interfaces
         event Action? OnSessionStatusChanged;
         Task<bool> StartSessionAsync();
         Task<bool> StopSessionAsync(string? reason = null);
+        Task<bool> UpdateLastSessionReasonAsync(string reason);
         Task<bool> SendHeartbeatAsync(string activeApp, string windowTitle, double activeDuration, double idleDuration);
         Task<bool> UploadScreenshotAsync(string base64Image);
     }
