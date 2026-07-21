@@ -39,5 +39,14 @@ namespace Agent.Application.Services
                 _logger.LogError($"Failed to record activity: {ex.Message}", ex);
             }
         }
+
+        public void Reset()
+        {
+            TotalActiveSeconds = 0;
+            TotalIdleSeconds = 0;
+            KeyboardActivityLevel = 0;
+            MouseActivityLevel = 0;
+            _logger.LogInfo("Activity tracking counters reset.");
+        }
     }
 }

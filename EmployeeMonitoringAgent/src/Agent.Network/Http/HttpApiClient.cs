@@ -176,11 +176,17 @@ namespace Agent.Network.Http
             }
         }
 
-        public async Task<bool> StopWorkSessionAsync()
+        public async Task<bool> StopWorkSessionAsync(string? reason = null)
         {
             try
             {
-                HttpResponseMessage res = await _httpClient.PostAsync($"{BaseAddress}/api/legacy/work-sessions/stop", null);
+                HttpContent? content = null;
+                if (!string.IsNullOrEmpty(reason))
+                {
+                    string json = JsonSerializer.Serialize(new { reason });
+                    content = new StringContent(json, Encoding.UTF8, "application/json");
+                }
+                HttpResponseMessage res = await _httpClient.PostAsync($"{BaseAddress}/api/legacy/work-sessions/stop", content);
                 return res.IsSuccessStatusCode;
             }
             catch

@@ -31,6 +31,7 @@ namespace Agent.UI
         private readonly IWebsiteMonitoringService _websiteMonitoring;
         private readonly ISecurityService _securityService;
         private readonly IUpdateService _updateService;
+        private readonly IActivityMonitoringService _activityMonitoring;
 
         private System.Windows.Forms.NotifyIcon? _notifyIcon;
 
@@ -51,7 +52,8 @@ namespace Agent.UI
             IApplicationMonitoringService appMonitoring,
             IWebsiteMonitoringService websiteMonitoring,
             ISecurityService securityService,
-            IUpdateService updateService)
+            IUpdateService updateService,
+            IActivityMonitoringService activityMonitoring)
         {
             InitializeComponent();
             _apiClient = apiClient;
@@ -71,6 +73,7 @@ namespace Agent.UI
             _websiteMonitoring = websiteMonitoring;
             _securityService = securityService;
             _updateService = updateService;
+            _activityMonitoring = activityMonitoring;
 
             InitializeTrayIcon();
             InitializeSettings();
@@ -347,16 +350,38 @@ namespace Agent.UI
             });
         }
 
+        private string? PromptForStopReason()
+        {
+            double activeSeconds = _activityMonitoring.TotalActiveSeconds;
+            double idleSeconds = _activityMonitoring.TotalIdleSeconds;
+
+            var dialog = new ReasonDialog(activeSeconds, idleSeconds);
+            dialog.Owner = this;
+            bool? result = dialog.ShowDialog();
+            if (result == true)
+            {
+                return dialog.Reason;
+            }
+            return null; // Return null if user cancels
+        }
+
         private async void ClockToggle_Click(object sender, RoutedEventArgs e)
         {
             if (_attendanceService.IsClockedIn)
             {
+                string? reason = null;
+                if (_workSessionService.IsSessionActive)
+                {
+                    reason = PromptForStopReason();
+                    if (reason == null) return; // User cancelled
+                }
+
                 bool ok = await _attendanceService.ClockOutAsync();
                 if (ok)
                 {
                     if (_workSessionService.IsSessionActive)
                     {
-                        await StopWorkSessionAsync();
+                        await StopWorkSessionAsync(reason);
                     }
                 }
             }
@@ -374,7 +399,9 @@ namespace Agent.UI
         {
             if (_workSessionService.IsSessionActive)
             {
-                await StopWorkSessionAsync();
+                string? reason = PromptForStopReason();
+                if (reason == null) return; // User cancelled
+                await StopWorkSessionAsync(reason);
             }
             else
             {
@@ -384,6 +411,7 @@ namespace Agent.UI
 
         private async Task StartWorkSessionAsync()
         {
+            _activityMonitoring.Reset();
             bool ok = await _workSessionService.StartSessionAsync();
             if (ok)
             {
@@ -391,9 +419,9 @@ namespace Agent.UI
             }
         }
 
-        private async Task StopWorkSessionAsync()
+        private async Task StopWorkSessionAsync(string? reason = null)
         {
-            await _workSessionService.StopSessionAsync();
+            await _workSessionService.StopSessionAsync(reason);
             _telemetryWorker.Stop();
             TxtActiveApp.Text = "-";
             TxtWindowTitle.Text = "-";
@@ -454,7 +482,7 @@ namespace Agent.UI
             {
                 _logger.Log($"Transitioned to break: {reason.ToUpper()}. Pausing tracking sessions.");
                 TxtBreakStatus.Text = $"{reason}...";
-                if (_workSessionService.IsSessionActive) await StopWorkSessionAsync();
+                if (_workSessionService.IsSessionActive) await StopWorkSessionAsync($"Break: {reason}");
                 await _breakManagement.StartBreakAsync(reason);
             }
         }
@@ -507,6 +535,12 @@ namespace Agent.UI
             _syncWorker.Stop();
             _configSyncWorker.Stop();
             _updateWorker.Stop();
+
+            if (_workSessionService.IsSessionActive)
+            {
+                await _workSessionService.StopSessionAsync("Agent App Shutdown");
+            }
+
             await _watchdogWorker.StopAsync();
 
             if (_attendanceService.IsClockedIn)

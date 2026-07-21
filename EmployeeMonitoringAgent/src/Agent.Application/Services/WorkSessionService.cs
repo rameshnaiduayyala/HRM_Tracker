@@ -48,12 +48,12 @@ namespace Agent.Application.Services
             }
         }
 
-        public async Task<bool> StopSessionAsync()
+        public async Task<bool> StopSessionAsync(string? reason = null)
         {
             try
             {
-                _logger.Log("Stopping work session tracker...");
-                bool success = await _apiClient.StopWorkSessionAsync();
+                _logger.Log($"Stopping work session tracker with reason: {reason ?? "none"}...");
+                bool success = await _apiClient.StopWorkSessionAsync(reason);
                 IsSessionActive = false;
                 _logger.Log("Work session tracker paused.");
                 OnSessionStatusChanged?.Invoke();

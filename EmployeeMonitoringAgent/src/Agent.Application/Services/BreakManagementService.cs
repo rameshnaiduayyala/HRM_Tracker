@@ -45,7 +45,7 @@ namespace Agent.Application.Services
 
                 if (_workSessionService.IsSessionActive)
                 {
-                    await _workSessionService.StopSessionAsync();
+                    await _workSessionService.StopSessionAsync($"Break: {breakType}");
                 }
 
                 await Task.CompletedTask;

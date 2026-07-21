@@ -15,9 +15,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Agent.Core\Agent.Core.csproj" />
-    <ProjectReference Include="..\Agent.Background\Agent.Background.csproj" />
-    <ProjectReference Include="..\Agent.Infrastructure\Agent.Infrastructure.csproj" />
+    <Compile Include="..\Agent.Domain\**\*.cs" Exclude="..\Agent.Domain\obj\**;..\Agent.Domain\bin\**" Link="Domain\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\Agent.Core\**\*.cs" Exclude="..\Agent.Core\obj\**;..\Agent.Core\bin\**" Link="Core\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\Agent.Application\**\*.cs" Exclude="..\Agent.Application\obj\**;..\Agent.Application\bin\**" Link="Application\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\Agent.Background\**\*.cs" Exclude="..\Agent.Background\obj\**;..\Agent.Background\bin\**" Link="Background\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\Agent.LocalStorage\**\*.cs" Exclude="..\Agent.LocalStorage\obj\**;..\Agent.LocalStorage\bin\**" Link="LocalStorage\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\Agent.Network\**\*.cs" Exclude="..\Agent.Network\obj\**;..\Agent.Network\bin\**" Link="Network\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\Agent.Infrastructure\**\*.cs" Exclude="..\Agent.Infrastructure\obj\**;..\Agent.Infrastructure\bin\**" Link="Infrastructure\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\Agent.Windows\**\*.cs" Exclude="..\Agent.Windows\obj\**;..\Agent.Windows\bin\**" Link="Windows\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
-
 </Project>

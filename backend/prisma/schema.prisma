@@ -241,6 +241,7 @@ model WorkSession {
   start      DateTime    @default(now())
   end        DateTime?
   status     String      @default("RUNNING") // RUNNING, PAUSED, COMPLETED
+  stopReason String?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   activities Activity[]

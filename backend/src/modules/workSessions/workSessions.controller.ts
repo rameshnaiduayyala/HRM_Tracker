@@ -25,7 +25,8 @@ export class WorkSessionsController {
 
   async stop(req: Request, res: Response, next: NextFunction) {
     try {
-      const session = await workSessionsService.stopSession(req.userId!);
+      const { reason, stopReason } = req.body;
+      const session = await workSessionsService.stopSession(req.userId!, reason || stopReason);
       return res.status(200).json({
         status: 'success',
         data: { session },

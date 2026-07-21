@@ -14,7 +14,9 @@ import path from 'path';
 const app = express();
 
 // Secure app by setting various HTTP headers
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 
 // Enable CORS
 app.use(cors());

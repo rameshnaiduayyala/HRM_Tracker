@@ -38,7 +38,7 @@ export class WorkSessionsService {
     });
   }
 
-  async stopSession(userId: string) {
+  async stopSession(userId: string, stopReason?: string) {
     const employee = await this.getEmployeeProfile(userId);
 
     const active = await prisma.workSession.findFirst({
@@ -57,6 +57,7 @@ export class WorkSessionsService {
       data: {
         status: 'COMPLETED',
         end: new Date(),
+        stopReason,
       },
     });
   }
@@ -121,7 +122,7 @@ export class WorkSessionsService {
       storagePath = relativeFilePath;
     } catch (err: any) {
       // Save locally inside backend/uploads/screenshots/ directory
-      const localPath = path.join(__dirname, '../../../../uploads', relativeFilePath);
+      const localPath = path.join(__dirname, '../../../uploads', relativeFilePath);
       fs.mkdirSync(path.dirname(localPath), { recursive: true });
       fs.writeFileSync(localPath, buffer);
       storagePath = `/uploads/${relativeFilePath}`;

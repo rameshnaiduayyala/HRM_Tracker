@@ -12,5 +12,6 @@ namespace Agent.Core.Interfaces
         event Action<double, double>? OnActivityUpdated;
         event Action<int, int>? OnInputActivityUpdated;
         Task RecordActivityAsync(double activeSeconds, double idleSeconds, int keyboardLevel, int mouseLevel);
+        void Reset();
     }
 }

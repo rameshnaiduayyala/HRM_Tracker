@@ -105,7 +105,7 @@ namespace Agent.Background
                         _workSessionService.IsTemporarilyIdle = true;
                         _logger.Log($"Inactivity detected ({idleSeconds}s idle). Suspending session...");
                         OnInactivityDetected?.Invoke();
-                        await _workSessionService.StopSessionAsync();
+                        await _workSessionService.StopSessionAsync("Inactivity Detected");
                     }
                     return;
                 }

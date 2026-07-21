@@ -82,6 +82,7 @@ export default function ReportsTab({ employees = [], onRefresh }) {
   const formatMs = (ms) => (ms / (1000 * 60 * 60)).toFixed(2) + ' hrs';
 
   const [isResetting, setIsResetting] = useState(false);
+  const [activeLightboxImg, setActiveLightboxImg] = useState(null);
 
   const handleResetData = async () => {
     if (!selectedEmployeeId) return;
@@ -390,6 +391,7 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                     <tr className="border-b border-[var(--border-base)] print:border-gray-300 text-[var(--text-secondary)] print:text-[var(--text-muted)] font-semibold">
                       <th className="py-3">Session Start</th>
                       <th className="py-3">Session End</th>
+                      <th className="py-3">Stop Reason</th>
                       <th className="py-3 text-right">Status</th>
                     </tr>
                   </thead>
@@ -404,6 +406,9 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                           <td className="py-3 text-[var(--text-primary)]">
                             {endDate ? endDate.toLocaleString() : '-'}
                           </td>
+                          <td className="py-3 text-[var(--text-secondary)] italic">
+                            {session.stopReason || '-'}
+                          </td>
                           <td className="py-3 text-right">
                             <span className={`text-[10px] px-2 py-0.5 rounded font-semibold ${
                               session.status === 'RUNNING' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/60' : 'bg-gray-800 text-[var(--text-secondary)]'
@@ -416,7 +421,7 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                     })}
                     {filteredSessions.length === 0 && (
                       <tr>
-                        <td colSpan="3" className="py-4 text-center text-[var(--text-muted)] italic">
+                        <td colSpan="4" className="py-4 text-center text-[var(--text-muted)] italic">
                           No session activities logged.
                         </td>
                       </tr>
@@ -494,7 +499,10 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                             <span className="font-bold text-[var(--text-primary)] truncate">Screenshot #{idx + 1}</span>
                             <span className="text-[var(--text-muted)] font-mono">{new Date(sc.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
-                          <div className="w-full h-32 bg-black/40 rounded border border-[var(--border-base)] overflow-hidden flex items-center justify-center relative">
+                          <div 
+                            onClick={() => setActiveLightboxImg(imgUrl)}
+                            className="w-full h-32 bg-black/40 rounded border border-[var(--border-base)] overflow-hidden flex items-center justify-center relative cursor-zoom-in group/img"
+                          >
                             <img
                               src={imgUrl}
                               alt={`Screenshot ${idx + 1}`}
@@ -505,6 +513,10 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                                 e.target.parentElement.innerHTML = '<div class="text-[9px] text-[var(--text-muted)] p-2 text-center flex flex-col items-center justify-center h-full"><span>🖼️ Image File Syncing</span><span class="text-[8px] text-[var(--text-secondary)] mt-1">Saved on Agent Local Storage</span></div>';
                               }}
                             />
+                            {/* Hover Zoom Overlay */}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-xs text-white font-medium select-none">
+                              <span>🔍</span> Click to Expand
+                            </div>
                           </div>
                           <div className="mt-2 flex items-center justify-between text-[9px] font-mono">
                             <span className="text-emerald-400 font-semibold">Captured Screen</span>
@@ -613,6 +625,36 @@ export default function ReportsTab({ employees = [], onRefresh }) {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Fullscreen Modal */}
+      {activeLightboxImg && (
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setActiveLightboxImg(null)}
+        >
+          {/* Close button */}
+          <button 
+            onClick={() => setActiveLightboxImg(null)}
+            className="absolute top-4 right-4 bg-gray-900/80 border border-gray-800 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg hover:bg-gray-850 hover:text-red-400 transition"
+          >
+            ✕
+          </button>
+          
+          {/* Enlarged Image Container */}
+          <div className="relative max-w-5xl max-h-[85vh] flex items-center justify-center bg-black/50 p-2 rounded-xl border border-gray-850 shadow-2xl">
+            <img 
+              src={activeLightboxImg} 
+              alt="Fullscreen Screen Capture" 
+              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()} // Prevent modal closure when clicking image
+            />
+          </div>
+          
+          <div className="mt-4 text-xs text-gray-400 font-mono select-none">
+            Click anywhere to close full screen
           </div>
         </div>
       )}

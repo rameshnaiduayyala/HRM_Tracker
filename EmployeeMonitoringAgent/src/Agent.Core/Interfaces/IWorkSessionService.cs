@@ -11,7 +11,7 @@ namespace Agent.Core.Interfaces
         string BreakReason { get; set; }
         event Action? OnSessionStatusChanged;
         Task<bool> StartSessionAsync();
-        Task<bool> StopSessionAsync();
+        Task<bool> StopSessionAsync(string? reason = null);
         Task<bool> SendHeartbeatAsync(string activeApp, string windowTitle, double activeDuration, double idleDuration);
         Task<bool> UploadScreenshotAsync(string base64Image);
     }
