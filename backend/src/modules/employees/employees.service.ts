@@ -1,4 +1,6 @@
 import bcrypt from 'bcrypt';
+import fs from 'fs';
+import path from 'path';
 import { prisma } from '../../shared/database';
 
 export class EmployeesService {
@@ -231,22 +233,47 @@ export class EmployeesService {
   }
 
   async resetEmployeeData(employeeId: string) {
-    return prisma.$transaction(async (tx) => {
-      // 1. Delete task time logs
+    // 1. Fetch screenshot paths before database deletion
+    const screenshots = await prisma.screenshot.findMany({
+      where: {
+        workSession: {
+          employeeId: employeeId,
+        },
+      },
+    });
+
+    // 2. Perform DB deletion in transaction
+    await prisma.$transaction(async (tx) => {
+      // Delete task time logs
       await tx.taskTimeLog.deleteMany({
         where: { employeeId },
       });
 
-      // 2. Delete work sessions (cascades activities and screenshots)
+      // Delete work sessions (cascades activities and screenshots)
       await tx.workSession.deleteMany({
         where: { employeeId },
       });
 
-      // 3. Delete attendances (cascades breaks)
+      // Delete attendances (cascades breaks)
       await tx.attendance.deleteMany({
         where: { employeeId },
       });
     });
+
+    // 3. Delete files from disk
+    for (const sc of screenshots) {
+      if (sc.storagePath && sc.storagePath.startsWith('/uploads/')) {
+        const relativeFilePath = sc.storagePath.replace(/^\/uploads\//, '');
+        const absolutePath = path.join(__dirname, '../../../uploads', relativeFilePath);
+        try {
+          if (fs.existsSync(absolutePath)) {
+            fs.unlinkSync(absolutePath);
+          }
+        } catch (err) {
+          console.error(`Failed to delete physical screenshot file ${absolutePath}:`, err);
+        }
+      }
+    }
   }
 
   async deleteEmployee(id: string, companyId: string) {

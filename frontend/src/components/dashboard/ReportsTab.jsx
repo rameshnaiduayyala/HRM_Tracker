@@ -5,6 +5,21 @@ import { Calendar, Clock, Activity, Printer, FileText, Coffee, Monitor, Users, E
 import Button from '../Button';
 import Select from '../Select';
 import { employeeApi } from '../../services/employee.service';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-gray-900 border border-gray-800 p-2.5 rounded-lg shadow-xl text-[11px] font-mono">
+        <p className="font-bold text-white mb-1">{data.name}</p>
+        <p className="text-emerald-400">⏱️ Active: {data.value}m</p>
+        <p className="text-indigo-400">📊 Share: {data.percentage}%</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function ReportsTab({ employees = [], onRefresh }) {
   const location = useLocation();
@@ -78,11 +93,62 @@ export default function ReportsTab({ employees = [], onRefresh }) {
     totalWorkMs += (end - start);
   });
 
+  // Aggregate application usage statistics
+  const appStats = {};
+  let totalSessionActiveTime = 0;
+  
+  filteredSessions.forEach(session => {
+    (session.activities || []).forEach(act => {
+      const appName = act.app || 'Unknown';
+      if (!appStats[appName]) {
+        appStats[appName] = {
+          app: appName,
+          activeDuration: 0,
+          idleDuration: 0,
+          totalDuration: 0,
+          windows: new Set()
+        };
+      }
+      appStats[appName].activeDuration += act.activeDuration;
+      appStats[appName].idleDuration += act.idleDuration;
+      appStats[appName].totalDuration += (act.activeDuration + act.idleDuration);
+      if (act.windowTitle) {
+        appStats[appName].windows.add(act.windowTitle);
+      }
+      totalSessionActiveTime += act.activeDuration;
+    });
+  });
+
+  const sortedAppStats = Object.values(appStats)
+    .sort((a, b) => b.activeDuration - a.activeDuration)
+    .map(stat => {
+      const pct = totalSessionActiveTime > 0 
+        ? ((stat.activeDuration / totalSessionActiveTime) * 100) 
+        : 0;
+      return {
+        ...stat,
+        percentage: Math.round(pct),
+        uniqueWindows: stat.windows.size
+      };
+    });
+
+  const appColors = [
+    '#6366F1', // Indigo (VS Code / Editors)
+    '#10B981', // Emerald (Browsers)
+    '#F59E0B', // Amber (Slack / Chat)
+    '#EC4899', // Pink
+    '#8B5CF6', // Purple
+    '#3B82F6', // Blue
+    '#14B8A6', // Teal
+  ];
+  const getAppColor = (idx) => appColors[idx % appColors.length];
+
   const totalBreakMs = Math.max(0, totalLoggedMs - totalWorkMs);
   const formatMs = (ms) => (ms / (1000 * 60 * 60)).toFixed(2) + ' hrs';
 
   const [isResetting, setIsResetting] = useState(false);
   const [activeLightboxImg, setActiveLightboxImg] = useState(null);
+  const [showRawLogs, setShowRawLogs] = useState(false);
 
   const handleResetData = async () => {
     if (!selectedEmployeeId) return;
@@ -433,44 +499,169 @@ export default function ReportsTab({ employees = [], onRefresh }) {
 
             {/* Monitored Background Heartbeats */}
             <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl print:bg-white print:border-gray-200">
-              <h4 className="text-sm font-semibold text-[var(--text-primary)] print:text-black mb-4 uppercase tracking-wider flex items-center gap-2">
-                <Monitor className="w-4 h-4 text-amber-400" /> Monitored Application Logs
-              </h4>
-              <div className="overflow-x-auto max-h-64 overflow-y-auto border border-[var(--border-base)] rounded-xl">
-                <table className="w-full text-xs text-left">
-                  <thead className="sticky top-0 bg-[var(--bg-card-alt)] text-[var(--text-secondary)] border-b border-[var(--border-base)] font-semibold">
-                    <tr>
-                      <th className="py-2.5 px-3">Timestamp</th>
-                      <th className="py-2.5 px-3">Application</th>
-                      <th className="py-2.5 px-3">Window Title</th>
-                      <th className="py-2.5 px-3 text-right">Active / Idle Ratio</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border-base)]/40 font-mono text-[11px]">
-                    {filteredSessions.flatMap(s => s.activities || []).map((act, idx) => (
-                      <tr key={act.id || idx} className="hover:bg-[var(--bg-card-alt)]/60 text-[var(--text-primary)] transition">
-                        <td className="py-2 px-3 text-[var(--text-secondary)] shrink-0 whitespace-nowrap">
-                          {new Date(act.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                        </td>
-                        <td className="py-2 px-3 text-indigo-400 font-bold whitespace-nowrap">{act.app}</td>
-                        <td className="py-2 px-3 text-[var(--text-primary)] truncate max-w-xs">{act.windowTitle || 'N/A'}</td>
-                        <td className="py-2 px-3 text-right font-semibold whitespace-nowrap">
-                          <span className="text-emerald-400">{act.activeDuration}s active</span>
-                          <span className="text-[var(--text-muted)] mx-1">/</span>
-                          <span className="text-amber-400">{act.idleDuration}s idle</span>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredSessions.flatMap(s => s.activities || []).length === 0 && (
-                      <tr>
-                        <td colSpan="4" className="py-6 text-center text-[var(--text-muted)] italic">
-                          No active desktop application heartbeats recorded.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)] print:text-black uppercase tracking-wider flex items-center gap-2">
+                    <Monitor className="w-4 h-4 text-amber-400" /> Monitored Application Usage Graph
+                  </h4>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Smart visual breakdown of time spent across workstation software application sessions.</p>
+                </div>
+                
+                <button
+                  onClick={() => setShowRawLogs(!showRawLogs)}
+                  className="px-3 py-1.5 text-[10px] font-semibold font-mono border border-[var(--border-base)] rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-indigo-500/50 hover:bg-[var(--bg-card-alt)] transition self-start md:self-auto"
+                >
+                  {showRawLogs ? '📊 Show Smart Graph' : '📋 View Raw Telemetry Logs'}
+                </button>
               </div>
+
+              {!showRawLogs ? (
+                <div>
+                  <div className="flex flex-col lg:flex-row items-center gap-6 mb-6">
+                    {/* Donut Chart Visualizer */}
+                    <div className="w-full lg:w-1/2 h-64 flex items-center justify-center bg-gray-950/20 border border-[var(--border-base)]/50 rounded-2xl p-4">
+                      {sortedAppStats.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={sortedAppStats.map((stat, idx) => ({
+                                name: stat.app,
+                                value: Math.round(stat.activeDuration / 60),
+                                percentage: stat.percentage,
+                                color: getAppColor(idx)
+                              }))}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={85}
+                              paddingAngle={4}
+                              dataKey="value"
+                            >
+                              {sortedAppStats.map((stat, idx) => (
+                                <Cell key={`cell-${idx}`} fill={getAppColor(idx)} />
+                              ))}
+                            </Pie>
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend 
+                              verticalAlign="bottom" 
+                              height={36} 
+                              iconType="circle"
+                              iconSize={8}
+                              formatter={(value) => <span className="text-[10px] text-[var(--text-secondary)] font-mono">{value}</span>}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="text-xs text-[var(--text-muted)] font-mono italic">
+                          No active application log telemetry found to plot
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Quick Stats Summary List */}
+                    <div className="w-full lg:w-1/2 flex flex-col gap-3">
+                      <div className="bg-[var(--bg-card-alt)]/25 border border-[var(--border-base)]/40 p-4 rounded-xl">
+                        <span className="text-[10px] text-[var(--text-muted)] font-mono block">TOP ACTIVE APPLICATION</span>
+                        <span className="text-sm font-bold text-[var(--text-primary)] mt-1 block">
+                          {sortedAppStats[0]?.app || 'None'}
+                        </span>
+                        {sortedAppStats[0] && (
+                          <span className="text-[10px] text-emerald-400 font-mono mt-0.5 block">
+                            Active for {(sortedAppStats[0].activeDuration / 60).toFixed(1)} mins today ({sortedAppStats[0].percentage}%)
+                          </span>
+                        )}
+                      </div>
+                      <div className="bg-[var(--bg-card-alt)]/25 border border-[var(--border-base)]/40 p-4 rounded-xl">
+                        <span className="text-[10px] text-[var(--text-muted)] font-mono block">MONITORED PROCESSES</span>
+                        <span className="text-sm font-bold text-[var(--text-primary)] mt-1 block">
+                          {sortedAppStats.length} Unique App{sortedAppStats.length !== 1 ? 's' : ''}
+                        </span>
+                        <span className="text-[10px] text-indigo-400 font-mono mt-0.5 block">
+                          Actively gathering workstation processes telemetry.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* App Breakdown Details Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {sortedAppStats.map((stat, idx) => {
+                      const color = getAppColor(idx);
+                      const activeMins = (stat.activeDuration / 60).toFixed(1);
+                      const idleMins = (stat.idleDuration / 60).toFixed(1);
+                      return (
+                        <div 
+                          key={stat.app} 
+                          className="p-4 bg-[var(--bg-card-alt)]/40 border border-[var(--border-base)] rounded-xl flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 group"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2 truncate">
+                                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                                <span className="font-bold text-[var(--text-primary)] text-xs truncate">{stat.app}</span>
+                              </div>
+                              <span className="font-mono text-xs font-bold shrink-0" style={{ color: color }}>{stat.percentage}%</span>
+                            </div>
+                            
+                            <div className="w-full bg-gray-950 h-1.5 rounded-full overflow-hidden mb-3">
+                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${stat.percentage}%`, backgroundColor: color }} />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] mt-1 border-t border-[var(--border-base)]/20 pt-2">
+                            <span>💻 Active: <strong className="text-emerald-400">{activeMins}m</strong></span>
+                            <span>☕ Idle: <strong className="text-amber-400">{idleMins}m</strong></span>
+                            <span>📂 Window Logs: <strong className="text-purple-400">{stat.uniqueWindows}</strong></span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {sortedAppStats.length === 0 && (
+                    <div className="text-center py-8 text-[var(--text-muted)] italic text-xs">
+                      No application usage recorded. Start the desktop client to sync telemetry.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Raw Telemetry Logs Table */
+                <div className="overflow-x-auto max-h-80 overflow-y-auto border border-[var(--border-base)] rounded-xl">
+                  <table className="w-full text-xs text-left">
+                    <thead className="sticky top-0 bg-[var(--bg-card-alt)] text-[var(--text-secondary)] border-b border-[var(--border-base)] font-semibold">
+                      <tr>
+                        <th className="py-2.5 px-3">Timestamp</th>
+                        <th className="py-2.5 px-3">Application</th>
+                        <th className="py-2.5 px-3">Window Title</th>
+                        <th className="py-2.5 px-3 text-right">Active / Idle Ratio</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--border-base)]/40 font-mono text-[11px]">
+                      {filteredSessions.flatMap(s => s.activities || []).map((act, idx) => (
+                        <tr key={act.id || idx} className="hover:bg-[var(--bg-card-alt)]/60 text-[var(--text-primary)] transition">
+                          <td className="py-2 px-3 text-[var(--text-secondary)] shrink-0 whitespace-nowrap">
+                            {new Date(act.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </td>
+                          <td className="py-2 px-3 text-indigo-400 font-bold whitespace-nowrap">{act.app}</td>
+                          <td className="py-2 px-3 text-[var(--text-primary)] truncate max-w-xs">{act.windowTitle || 'N/A'}</td>
+                          <td className="py-2 px-3 text-right font-semibold whitespace-nowrap">
+                            <span className="text-emerald-400">{act.activeDuration}s active</span>
+                            <span className="text-[var(--text-muted)] mx-1">/</span>
+                            <span className="text-amber-400">{act.idleDuration}s idle</span>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredSessions.flatMap(s => s.activities || []).length === 0 && (
+                        <tr>
+                          <td colSpan="4" className="py-6 text-center text-[var(--text-muted)] italic">
+                            No active desktop application heartbeats recorded.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             {/* Captured Laptop Screenshots Timeline */}
