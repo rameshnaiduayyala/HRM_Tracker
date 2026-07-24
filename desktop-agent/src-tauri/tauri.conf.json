@@ -22,7 +22,7 @@
         "height": 768,
         "resizable": true,
         "fullscreen": false,
-        "visible": false
+        "visible": true
       }
     ],
     "security": {

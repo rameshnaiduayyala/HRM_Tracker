@@ -1,4 +1,4 @@
-export const API_URL = 'http://localhost:5000/api/v1';
+export const API_URL = 'http://localhost:5000/api/legacy';
 export const HEARTBEAT_INTERVAL = 30000; // 30 seconds
 export const ACTIVITY_INTERVAL = 10000; // 10 seconds
 export const SCREENSHOT_INTERVAL = 60000; // 60 seconds (or pulled from CompanySettings)

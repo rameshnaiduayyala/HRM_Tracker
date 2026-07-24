@@ -82,6 +82,18 @@ export class WorkSessionsController {
       return next(error);
     }
   }
+
+  async profile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const employee = await workSessionsService.getEmployeeProfile(req.userId!);
+      return res.status(200).json({
+        status: 'success',
+        data: employee,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export const workSessionsController = new WorkSessionsController();

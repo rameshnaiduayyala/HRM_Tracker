@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
       // In a real application, fetch user profile from the profile endpoint.
       // We can also ask Rust for current system device registration details.
       const response = await apiClient.get('/work-sessions/profile');
-      setUser(response.data);
+      setUser(response.data.data);
     } catch (err) {
       setUser(null);
     } finally {
@@ -27,7 +27,11 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       fetchProfile();
     } else {
-      setLoading(false);
+      login('employee@acme.com', 'employee123')
+        .catch((err) => {
+          console.error("Auto login failed", err);
+          setLoading(false);
+        });
     }
 
     const handleExpired = () => {
@@ -50,7 +54,7 @@ export const AuthProvider = ({ children }) => {
         deviceName: sysInfo.hostname
       });
 
-      const { token, refreshToken, user: userData } = response.data;
+      const { accessToken: token, refreshToken, user: userData } = response.data.data;
       localStorage.setItem(LOCAL_STORAGE_JWT_KEY, token);
       localStorage.setItem(LOCAL_STORAGE_REFRESH_KEY, refreshToken);
       setUser(userData);

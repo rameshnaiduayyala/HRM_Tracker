@@ -15,28 +15,28 @@ pub fn get_tracking_stats() -> TrackingStats {
 }
 
 #[tauri::command]
-pub fn start_tracking_command() -> Result<(), String> {
+pub async fn start_tracking_command() -> Result<(), String> {
     TrackingService::start();
     BackgroundScheduler::start();
     Ok(())
 }
 
 #[tauri::command]
-pub fn pause_tracking_command() -> Result<(), String> {
+pub async fn pause_tracking_command() -> Result<(), String> {
     TrackingService::pause();
     BackgroundScheduler::stop();
     Ok(())
 }
 
 #[tauri::command]
-pub fn resume_tracking_command() -> Result<(), String> {
+pub async fn resume_tracking_command() -> Result<(), String> {
     TrackingService::resume();
     BackgroundScheduler::start();
     Ok(())
 }
 
 #[tauri::command]
-pub fn stop_tracking_command(_reason: String) -> Result<(), String> {
+pub async fn stop_tracking_command(_reason: String) -> Result<(), String> {
     TrackingService::stop();
     BackgroundScheduler::stop();
     Ok(())

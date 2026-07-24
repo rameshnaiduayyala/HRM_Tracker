@@ -8,5 +8,6 @@ router.post('/stop', workSessionsController.stop);
 router.post('/update-reason', workSessionsController.updateStopReason);
 router.post('/heartbeat', workSessionsController.heartbeat);
 router.post('/screenshot', workSessionsController.screenshot);
+router.get('/profile', workSessionsController.profile);
 
 export default router;

@@ -78,6 +78,12 @@ namespace Agent.UI
             InitializeTrayIcon();
             InitializeSettings();
             RegisterEvents();
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Login_Click(this, new RoutedEventArgs());
         }
 
         private void InitializeSettings()
