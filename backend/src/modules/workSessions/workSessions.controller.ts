@@ -94,6 +94,17 @@ export class WorkSessionsController {
       return next(error);
     }
   }
+  async config(req: Request, res: Response, next: NextFunction) {
+    try {
+      const config = await workSessionsService.getAgentConfig(req.userId!);
+      return res.status(200).json({
+        status: 'success',
+        data: config,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export const workSessionsController = new WorkSessionsController();

@@ -9,5 +9,6 @@ router.post('/update-reason', workSessionsController.updateStopReason);
 router.post('/heartbeat', workSessionsController.heartbeat);
 router.post('/screenshot', workSessionsController.screenshot);
 router.get('/profile', workSessionsController.profile);
+router.get('/config', workSessionsController.config);
 
 export default router;

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import apiClient from '../api/apiClient';
 import { LOCAL_STORAGE_JWT_KEY } from '../constants/appConstants';
 
@@ -13,6 +14,7 @@ export const TrackingProvider = ({ children }) => {
   const [showReasonModal, setShowReasonModal] = useState(false);
   const [clockedIn, setClockedIn] = useState(false);
   const [logs, setLogs] = useState([]);
+  const [agentConfig, setAgentConfig] = useState({ screenshotInterval: 60, idleThreshold: 300 });
   const statsIntervalRef = useRef(null);
 
   const addLog = (msg) => {
@@ -20,12 +22,31 @@ export const TrackingProvider = ({ children }) => {
     setLogs((prev) => [`[${timeStr}] ${msg}`, ...prev].slice(0, 100));
   };
 
-  // Fetch attendance status on startup — delayed 1.2s to allow auth token to be set
+  // Fetch company config (screenshot interval + idle threshold)
+  const fetchAgentConfig = async () => {
+    try {
+      const res = await apiClient.get('/work-sessions/config');
+      if (res.data?.data) {
+        const cfg = res.data.data;
+        setAgentConfig({
+          screenshotInterval: cfg.screenshotInterval || 60,
+          idleThreshold: cfg.idleThreshold || 300,
+        });
+        addLog(`✔ Company config loaded — screenshot every ${cfg.screenshotInterval}s, idle threshold ${cfg.idleThreshold}s`);
+        return cfg;
+      }
+    } catch (e) {
+      addLog('⚠ Could not fetch company config. Using defaults (60s / 300s).');
+    }
+    return { screenshotInterval: 60, idleThreshold: 300 };
+  };
+
+  // Fetch attendance status on startup
   useEffect(() => {
     const fetchStatus = async () => {
       try {
         const response = await apiClient.get('/attendance/status');
-        if (response.data && response.data.data) {
+        if (response.data?.data) {
           const status = response.data.data.clockedIn;
           setClockedIn(status);
           addLog(status
@@ -58,19 +79,19 @@ export const TrackingProvider = ({ children }) => {
     return () => clearInterval(statsIntervalRef.current);
   }, [shiftActive, isPaused]);
 
-  // Listen for Rust inactivity detection event
+  // Listen for Rust inactivity detection — force window visible + show unclosable modal
   useEffect(() => {
     let unlisten;
     const setupListener = async () => {
-      unlisten = await listen('inactivity-detected', () => {
+      unlisten = await listen('inactivity-detected', async () => {
         setIsPaused(true);
         setShowReasonModal(true);
-        addLog('⚠ Inactivity detected (5 min). Session auto-suspended. Please provide a reason.');
+        addLog(`⚠ Inactivity detected (${agentConfig.idleThreshold}s). Window forced open — submit a reason to continue.`);
       });
     };
     setupListener();
     return () => { if (unlisten) unlisten(); };
-  }, []);
+  }, [agentConfig.idleThreshold]);
 
   const clockIn = async () => {
     try {
@@ -99,12 +120,19 @@ export const TrackingProvider = ({ children }) => {
 
   const startShift = async () => {
     try {
+      // Fetch latest company config before starting
+      const cfg = await fetchAgentConfig();
       const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY) || '';
+
       await apiClient.post('/work-sessions/start');
-      await invoke('start_tracking_command', { token });
+      await invoke('start_tracking_command', {
+        token,
+        screenshotInterval: cfg.screenshotInterval,
+        idleThreshold: cfg.idleThreshold,
+      });
       setShiftActive(true);
       setIsPaused(false);
-      addLog('✔ Work session started. Background KB/Mouse/Screenshot tracker active.');
+      addLog('✔ Work session started. Background tracker active.');
     } catch (e) {
       const msg = e.response?.data?.message || e.message;
       addLog('✖ Start tracker failed: ' + msg);
@@ -126,7 +154,11 @@ export const TrackingProvider = ({ children }) => {
   const resumeShift = async () => {
     try {
       const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY) || '';
-      await invoke('resume_tracking_command', { token });
+      await invoke('resume_tracking_command', {
+        token,
+        screenshotInterval: agentConfig.screenshotInterval,
+        idleThreshold: agentConfig.idleThreshold,
+      });
       setIsPaused(false);
       addLog('▶ Tracker resumed.');
     } catch (e) {
@@ -153,8 +185,16 @@ export const TrackingProvider = ({ children }) => {
     try {
       await apiClient.post('/work-sessions/update-reason', { stopReason: reason });
       setShowReasonModal(false);
-      setIsPaused(false);
       addLog(`✔ Inactivity reason logged: ${reason}. Resuming session...`);
+
+      // Remove always-on-top after reason submitted
+      try {
+        const win = getCurrentWindow();
+        await win.setAlwaysOnTop(false);
+      } catch (_) { /* non-critical */ }
+
+      // Auto-resume the session
+      setIsPaused(false);
       await resumeShift();
     } catch (e) {
       addLog('✖ Reason submit failed: ' + e.message);
@@ -177,6 +217,7 @@ export const TrackingProvider = ({ children }) => {
       clockedIn,
       clockIn,
       clockOut,
+      agentConfig,
       logs,
       addLog
     }}>

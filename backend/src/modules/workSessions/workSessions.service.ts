@@ -4,6 +4,10 @@ import { storageService } from '../../infrastructure/s3';
 import fs from 'fs';
 import path from 'path';
 
+// Default config values (used when CompanySettings row doesn't exist yet)
+const DEFAULT_SCREENSHOT_INTERVAL = 60;  // seconds
+const DEFAULT_IDLE_THRESHOLD       = 300; // seconds (5 minutes)
+
 export class WorkSessionsService {
   async getEmployeeProfile(userId: string) {
     const employee = await prisma.employee.findFirst({
@@ -13,6 +17,34 @@ export class WorkSessionsService {
       throw new NotFoundError('Employee profile not found for this user');
     }
     return employee;
+  }
+
+  /**
+   * Returns the company-level agent configuration for the authenticated employee.
+   * The desktop agent fetches this on every session start so intervals are always
+   * up-to-date without requiring a re-login.
+   */
+  async getAgentConfig(userId: string): Promise<{
+    screenshotInterval: number;
+    idleThreshold: number;
+    workingHoursPerDay: number;
+  }> {
+    const employee = await this.getEmployeeProfile(userId);
+
+    const settings = await prisma.companySettings.findUnique({
+      where: { companyId: employee.companyId },
+      select: {
+        screenshotInterval: true,
+        idleThreshold: true,
+        workingHoursPerDay: true,
+      },
+    });
+
+    return {
+      screenshotInterval: settings?.screenshotInterval ?? DEFAULT_SCREENSHOT_INTERVAL,
+      idleThreshold:      settings?.idleThreshold      ?? DEFAULT_IDLE_THRESHOLD,
+      workingHoursPerDay: settings?.workingHoursPerDay ?? 8,
+    };
   }
 
   async startSession(userId: string) {

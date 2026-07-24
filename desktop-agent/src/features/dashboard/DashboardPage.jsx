@@ -15,6 +15,7 @@ export const DashboardPage = () => {
     startShift, endShift,
     showReasonModal, submitStopReason,
     clockedIn, clockIn, clockOut,
+    agentConfig,
     logs
   } = useTracking();
 
@@ -138,7 +139,7 @@ export const DashboardPage = () => {
       {showReasonModal && (
         <ReasonModal
           title="Inactivity Detected"
-          subtitle="5 minutes of no activity. Select a reason:"
+          subtitle={`${agentConfig.idleThreshold}s of no keyboard/mouse activity detected. You must select a reason to continue:`}
           options={['Meeting', 'Break', 'Task Sync', 'Other']}
           selectedOption={selectedReason}
           onSelectOption={setSelectedReason}
