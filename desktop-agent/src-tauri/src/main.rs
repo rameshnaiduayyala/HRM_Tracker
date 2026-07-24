@@ -7,7 +7,7 @@ use employee_tracker_agent_lib::commands::*;
 use tauri::{
     menu::{MenuBuilder, MenuItem},
     tray::TrayIconBuilder,
-    Manager,
+    Emitter, Manager,
 };
 
 fn main() {
@@ -74,7 +74,7 @@ fn main() {
         .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
-                window.hide().unwrap();
+                let _ = window.emit("window-close-requested", ());
             }
             _ => {}
         })

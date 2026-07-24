@@ -20,13 +20,15 @@ export const ReasonModal = ({
           </button>
         ))}
       </div>
-      <input
-        type="text"
-        className="modal-input"
-        placeholder="Additional details (optional)..."
-        value={customReason}
-        onChange={(e) => onChangeCustomReason(e.target.value)}
-      />
+      {selectedOption === 'Other' && (
+        <input
+          type="text"
+          className="modal-input"
+          placeholder="Type your custom reason..."
+          value={customReason}
+          onChange={(e) => onChangeCustomReason(e.target.value)}
+        />
+      )}
       <div className="modal-actions">
         {showCancel && (
           <button type="button" className="btn-modal-cancel" onClick={onCancel}>

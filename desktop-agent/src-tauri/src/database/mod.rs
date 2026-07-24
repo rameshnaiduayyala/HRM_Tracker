@@ -19,7 +19,8 @@ impl SqliteService {
             return Ok(());
         }
 
-        let connection = sqlite::open("agent_offline.db").map_err(|e| e.to_string())?;
+        let db_path = std::env::temp_dir().join("employee_tracker_agent_offline.db");
+        let connection = sqlite::open(db_path.to_str().unwrap_or("agent_offline.db")).map_err(|e| e.to_string())?;
 
         connection.execute("PRAGMA journal_mode=WAL;").ok();
         connection.execute("PRAGMA synchronous=NORMAL;").ok();

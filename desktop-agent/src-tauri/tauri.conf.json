@@ -33,11 +33,7 @@
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist",
-    "withGlobalTauri": false
-  },
-  "devWatcher": {
-    "ignore": ["**/agent_offline.db*", "**/*.db", "**/*.db-shm", "**/*.db-wal", "**/target/**"]
+    "frontendDist": "../dist"
   },
   "plugins": {
     "updater": {

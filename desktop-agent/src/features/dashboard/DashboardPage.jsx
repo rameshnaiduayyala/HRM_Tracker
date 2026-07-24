@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTracking } from '../../contexts/TrackingContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import StatusHeader from '../../components/StatusHeader';
 import TelemetryCard from '../../components/TelemetryCard';
 import ReasonModal from '../../components/ReasonModal';
@@ -26,6 +28,7 @@ export const DashboardPage = () => {
   const [customReason, setCustomReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showStopModal, setShowStopModal] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [stopActionType, setStopActionType] = useState('tracker');
 
   useEffect(() => {
@@ -33,6 +36,33 @@ export const DashboardPage = () => {
       .then((info) => setSysInfo(info))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    let unlisten;
+    const setupCloseListener = async () => {
+      unlisten = await listen('window-close-requested', async () => {
+        if (shiftActive) {
+          if (showReasonModal) {
+            await endShift('Inactivity / Idle Close');
+            const win = getCurrentWindow();
+            await win.hide();
+          } else {
+            setStopActionType('tracker');
+            setShowStopModal(true);
+            const win = getCurrentWindow();
+            await win.show();
+            await win.unminimize();
+            await win.setFocus();
+          }
+        } else {
+          const win = getCurrentWindow();
+          await win.hide();
+        }
+      });
+    };
+    setupCloseListener();
+    return () => { if (unlisten) unlisten(); };
+  }, [shiftActive, showReasonModal, endShift]);
 
   useEffect(() => {
     let timer;
@@ -71,7 +101,13 @@ export const DashboardPage = () => {
         statusText={statusText}
         statusClass={statusClass}
         workstation={sysInfo?.hostname || '—'}
-        onLogout={logout}
+        onLogout={() => {
+          if (clockedIn || shiftActive) {
+            setShowSignOutModal(true);
+          } else {
+            logout();
+          }
+        }}
       />
 
       {/* Controls */}
@@ -175,11 +211,46 @@ export const DashboardPage = () => {
             setCustomReason('');
             if (stopActionType === 'tracker') {
               await endShift(reason || 'Manual Stop');
+              if (clockedIn) {
+                await clockOut();
+              }
             } else {
               await clockOut();
             }
           }}
           onCancel={() => setShowStopModal(false)}
+          showCancel={true}
+        />
+      )}
+
+      {/* Sign Out Confirmation Modal */}
+      {showSignOutModal && (
+        <ReasonModal
+          title="Sign Out Confirmation"
+          subtitle="Warning: Signing out will automatically stop the tracker and clock you out. Please select a reason for stopping:"
+          options={['End of Day', 'Lunch Break', 'Meeting', 'Personal Break', 'Other']}
+          selectedOption={selectedReason}
+          onSelectOption={setSelectedReason}
+          customReason={customReason}
+          onChangeCustomReason={setCustomReason}
+          isSubmitting={false}
+          onSubmit={async () => {
+            const reason = selectedReason === 'Other' ? customReason : selectedReason;
+            setShowSignOutModal(false);
+            setCustomReason('');
+            try {
+              if (shiftActive) {
+                await endShift(reason || 'Sign Out stop');
+              }
+              if (clockedIn) {
+                await clockOut();
+              }
+            } catch (e) {
+              console.error(e);
+            }
+            logout();
+          }}
+          onCancel={() => setShowSignOutModal(false)}
           showCancel={true}
         />
       )}
