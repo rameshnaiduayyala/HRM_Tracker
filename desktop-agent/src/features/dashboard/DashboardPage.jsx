@@ -11,122 +11,134 @@ import TrackingControls from '../../components/TrackingControls';
 
 export const DashboardPage = () => {
   const {
-    shiftActive,
-    isPaused,
-    stats,
-    startShift,
-    pauseShift,
-    resumeShift,
-    endShift,
-    showReasonModal,
-    submitStopReason,
-    clockedIn,
-    clockIn,
-    clockOut,
-    breakReason,
-    changeBreakReason,
+    shiftActive, isPaused, stats,
+    startShift, endShift,
+    showReasonModal, submitStopReason,
+    clockedIn, clockIn, clockOut,
     logs
   } = useTracking();
 
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [sysInfo, setSysInfo] = useState(null);
   const [sessionTime, setSessionTime] = useState(0);
-  const [selectedReason, setSelectedReason] = useState('Meeting');
+  const [selectedReason, setSelectedReason] = useState('End of Day');
   const [customReason, setCustomReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopActionType, setStopActionType] = useState('tracker');
 
-  // Fetch system details
   useEffect(() => {
     invoke('get_system_info')
       .then((info) => setSysInfo(info))
-      .catch((e) => console.error("System info error", e));
+      .catch(() => {});
   }, []);
 
-  // Session timer increment (matches shift log time)
   useEffect(() => {
     let timer;
-    if (shiftActive && !isPaused && breakReason === 'Working') {
-      timer = setInterval(() => {
-        setSessionTime((prev) => prev + 1);
-      }, 1000);
+    if (shiftActive && !isPaused) {
+      timer = setInterval(() => setSessionTime((p) => p + 1), 1000);
     }
     return () => clearInterval(timer);
-  }, [shiftActive, isPaused, breakReason]);
+  }, [shiftActive, isPaused]);
 
-  const formatTime = (totalSeconds) => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+  const formatTime = (s) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   };
 
+  const remaining = Math.max(0, 28800 - sessionTime);
+  const pctDone = Math.min(100, (sessionTime / 28800) * 100);
+
+  const statusClass = clockedIn ? (shiftActive ? 'working' : 'paused') : 'offline';
+  const statusText = clockedIn ? (shiftActive ? (isPaused ? 'Paused' : 'Working') : 'On Break') : 'Offline';
+
   return (
-    <div className="container-fluid py-2">
-      {/* 1. Warning Banners */}
+    <>
+      {/* Alert Banners */}
       {!clockedIn && (
-        <AlertBanner type="danger" message="⚠️ Please Clock In to start tracking your mandatory 8-hour shift." />
+        <AlertBanner type="danger" message="⚠  Please Clock In to start your mandatory 8-hour shift." />
       )}
-
       {clockedIn && !shiftActive && (
-        <AlertBanner type="primary" message="ℹ️ Clocked In. Click Start Tracker to begin recording work hours." />
+        <AlertBanner type="info" message="ℹ  Clocked in. Start the tracker to begin recording your session." />
       )}
 
-      {/* 2. Sleek Swiss Status Header Bar Component */}
+      {/* Status Bar */}
       <StatusHeader
         shiftTimeText={formatTime(sessionTime)}
-        statusText={clockedIn ? (shiftActive ? 'WORKING' : 'ON BREAK') : 'OFFLINE'}
-        statusBadgeClass={clockedIn ? (shiftActive ? 'bg-danger text-white' : 'bg-warning text-dark') : 'bg-secondary text-white'}
-        workstation={sysInfo?.hostname || 'UNKNOWN'}
+        statusText={statusText}
+        statusClass={statusClass}
+        workstation={sysInfo?.hostname || '—'}
         onLogout={logout}
       />
 
-      {/* 3. Operations Controls Component */}
+      {/* Controls */}
       <TrackingControls
         clockedIn={clockedIn}
-        onClockToggle={clockedIn ? () => { setStopActionType('clockout'); setShowStopModal(true); } : clockIn}
+        onClockToggle={clockedIn
+          ? () => { setStopActionType('clockout'); setShowStopModal(true); }
+          : clockIn}
         shiftActive={shiftActive}
-        onSessionToggle={shiftActive ? () => { setStopActionType('tracker'); setShowStopModal(true); } : startShift}
+        onSessionToggle={shiftActive
+          ? () => { setStopActionType('tracker'); setShowStopModal(true); }
+          : startShift}
       />
 
-      {/* 4. Real-Time Metrics Grid Component */}
-      <div className="row g-3 mb-3">
-        <div className="col-lg-3 col-sm-6">
-          <TelemetryCard
-            label="ACTIVE WINDOW"
-            title={stats.activeWindow || '-'}
-            subtitle={`Process: ${sysInfo?.hostname ? 'Active' : 'Idle'}`}
-          />
+      {/* 8h Progress Bar */}
+      <div className="ent-card" style={{ padding: '14px 18px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <span className="card-label">8-Hour Shift Progress</span>
+          <span className="card-label" style={{ color: 'var(--text-secondary)' }}>
+            {formatTime(remaining)} remaining
+          </span>
         </div>
-        <div className="col-lg-3 col-sm-6">
-          <TelemetryCard
-            label="IDLE TIME"
-            value="0s"
-          />
-        </div>
-        <div className="col-lg-3 col-sm-6">
-          <TelemetryCard
-            label="SHIFT LOGGED"
-            value={formatTime(sessionTime)}
-          />
-        </div>
-        <div className="col-lg-3 col-sm-6">
-          <TelemetryCard
-            label="REMAINING TIME"
-            value={formatTime(Math.max(0, 28800 - sessionTime))}
-          />
+        <div style={{ background: 'var(--card-border)', borderRadius: '4px', height: '5px', overflow: 'hidden' }}>
+          <div style={{
+            width: `${pctDone}%`,
+            height: '100%',
+            background: pctDone >= 100
+              ? 'var(--status-working)'
+              : 'linear-gradient(90deg, #e53935, #ff6b35)',
+            borderRadius: '4px',
+            transition: 'width 1s linear'
+          }} />
         </div>
       </div>
 
-      {/* 5. Telemetry Log Console Component */}
+      {/* Metric Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+        <TelemetryCard
+          label="Active Window"
+          title={stats.activeWindow || 'Idle'}
+          subtitle={`Host: ${sysInfo?.hostname || '—'}`}
+          colorClass="blue"
+        />
+        <TelemetryCard
+          label="Idle Time"
+          value={isPaused ? formatTime(sessionTime) : '0:00'}
+          colorClass="amber"
+        />
+        <TelemetryCard
+          label="Shift Logged"
+          value={formatTime(sessionTime)}
+          colorClass="emerald"
+        />
+        <TelemetryCard
+          label="Remaining"
+          value={formatTime(remaining)}
+          colorClass="purple"
+        />
+      </div>
+
+      {/* Log Console */}
       <LogConsole logs={logs} />
 
-      {/* Swiss Inactivity Reason Modal Dialog */}
+      {/* Inactivity Modal */}
       {showReasonModal && (
         <ReasonModal
           title="Inactivity Detected"
-          subtitle="Please specify a reason for inactivity:"
+          subtitle="5 minutes of no activity. Select a reason:"
           options={['Meeting', 'Break', 'Task Sync', 'Other']}
           selectedOption={selectedReason}
           onSelectOption={setSelectedReason}
@@ -136,23 +148,20 @@ export const DashboardPage = () => {
           onSubmit={async () => {
             setIsSubmitting(true);
             try {
-              const finalReason = selectedReason === 'Other' ? customReason : selectedReason;
-              await submitStopReason(finalReason || 'Idle');
-            } catch (e) {
-              console.error(e);
-            } finally {
-              setIsSubmitting(false);
-            }
+              const reason = selectedReason === 'Other' ? customReason : selectedReason;
+              await submitStopReason(reason || 'Idle');
+            } catch (e) { console.error(e); }
+            finally { setIsSubmitting(false); }
           }}
           showCancel={false}
         />
       )}
 
-      {/* Swiss Manual Stop Reason Modal Dialog */}
+      {/* Manual Stop Modal */}
       {showStopModal && (
         <ReasonModal
-          title="Specify Stop Reason"
-          subtitle="Please specify a reason for stopping:"
+          title={stopActionType === 'clockout' ? 'Clock Out Confirmation' : 'Stop Tracker'}
+          subtitle="Select a reason for stopping:"
           options={['End of Day', 'Lunch Break', 'Meeting', 'Personal Break', 'Other']}
           selectedOption={selectedReason}
           onSelectOption={setSelectedReason}
@@ -160,11 +169,11 @@ export const DashboardPage = () => {
           onChangeCustomReason={setCustomReason}
           isSubmitting={false}
           onSubmit={async () => {
-            const finalReason = selectedReason === 'Other' ? customReason : selectedReason;
-            const reasonText = finalReason || 'Manual Stop';
+            const reason = selectedReason === 'Other' ? customReason : selectedReason;
             setShowStopModal(false);
+            setCustomReason('');
             if (stopActionType === 'tracker') {
-              await endShift(reasonText);
+              await endShift(reason || 'Manual Stop');
             } else {
               await clockOut();
             }
@@ -173,7 +182,7 @@ export const DashboardPage = () => {
           showCancel={true}
         />
       )}
-    </div>
+    </>
   );
 };
 

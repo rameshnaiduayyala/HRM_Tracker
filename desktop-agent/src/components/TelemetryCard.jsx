@@ -1,23 +1,16 @@
 import React from 'react';
 
-export const TelemetryCard = ({ label, title, subtitle, value, valueClass }) => (
-  <div className="card custom-card p-3 bg-white h-100">
-    <span className="text-uppercase font-monospace text-muted" style={{ fontSize: '9px', fontWeight: 'bold' }}>{label}</span>
-    {title && (
-      <h6 className="fw-black text-uppercase text-truncate mt-2 mb-1 font-monospace" style={{ fontSize: '12px' }}>
-        {title}
-      </h6>
+export const TelemetryCard = ({ label, title, subtitle, value, colorClass }) => (
+  <div className={`metric-card ${colorClass || 'blue'}`}>
+    <div className="metric-label">{label}</div>
+    {value !== undefined ? (
+      <div className="metric-value">{value}</div>
+    ) : (
+      <div className="metric-value" style={{ fontSize: '14px', letterSpacing: '-0.2px' }}>
+        {title || '—'}
+      </div>
     )}
-    {subtitle && (
-      <span className="text-muted font-monospace text-truncate d-block" style={{ fontSize: '9px' }}>
-        {subtitle}
-      </span>
-    )}
-    {value && (
-      <h3 className={`fw-black font-monospace mt-2 mb-0 ${valueClass || 'text-dark'}`} style={{ fontSize: '20px' }}>
-        {value}
-      </h3>
-    )}
+    {subtitle && <div className="metric-sub">{subtitle}</div>}
   </div>
 );
 
