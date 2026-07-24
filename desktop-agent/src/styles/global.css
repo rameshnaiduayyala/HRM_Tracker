@@ -1,51 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 :root {
-  --primary-color: #2b579a;
-  --bg-dark: #121212;
-  --bg-card-dark: #1e1e1e;
-  --text-light: #f8f9fa;
-  --accent-blue: #0078d4;
-  --accent-success: #107c41;
+  --primary-color: #ff3b30; /* Swiss Red */
+  --bg-light: #f5f5f7;
+  --bg-card: #ffffff;
+  --text-dark: #111111;
+  --text-muted: #555555;
+  --border-color: #000000;
+  --accent-success: #00802b;
 }
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f6f9;
-  color: #333333;
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
   overflow-x: hidden;
   user-select: none;
+  font-size: 14px;
+  letter-spacing: -0.01em;
 }
 
-body.dark-theme {
-  background-color: var(--bg-dark);
-  color: var(--text-light);
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-light);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
 }
 
 .custom-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border: none;
-  background: white;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.body.dark-theme .custom-card {
-  background: var(--bg-card-dark);
-  color: var(--text-light);
+  border-radius: 0px; /* Minimalist flat corners */
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  box-shadow: 6px 6px 0px 0px var(--border-color); /* Retro flat shadows */
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  color: var(--text-dark);
 }
 
 .custom-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px 0px var(--border-color);
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism panel override for Swiss layout */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 12px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 0px;
+  box-shadow: 4px 4px 0px 0px var(--border-color);
 }
-.body.dark-theme .glass-panel {
-  background: rgba(30, 30, 30, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+
+/* Glowing animations -> Swiss Red Pulse */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(255, 59, 48, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 59, 48, 0);
+  }
+}
+
+.glow-active {
+  animation: pulse-glow 1.5s infinite;
+}
+
+.glow-paused {
+  border: 2px dashed var(--border-color);
 }

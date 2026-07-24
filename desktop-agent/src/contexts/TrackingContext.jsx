@@ -27,8 +27,9 @@ export const TrackingProvider = ({ children }) => {
 
   const startShift = async () => {
     try {
+      const token = localStorage.getItem('agent_auth_token') || '';
       await apiClient.post('/work-sessions/start');
-      await invoke('start_tracking_command');
+      await invoke('start_tracking_command', { token });
       setShiftActive(true);
       setIsPaused(false);
     } catch (e) {
@@ -49,7 +50,8 @@ export const TrackingProvider = ({ children }) => {
 
   const resumeShift = async () => {
     try {
-      await invoke('resume_tracking_command');
+      const token = localStorage.getItem('agent_auth_token') || '';
+      await invoke('resume_tracking_command', { token });
       setIsPaused(false);
     } catch (e) {
       console.error(e);

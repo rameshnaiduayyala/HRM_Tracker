@@ -3,6 +3,12 @@ use crate::services::system_service::SystemService;
 use crate::tracking::TrackingService;
 use crate::database::SqliteService;
 use crate::scheduler::BackgroundScheduler;
+use std::sync::{Arc, Mutex};
+use lazy_static::lazy_static;
+
+lazy_static! {
+    pub static ref AUTH_TOKEN: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
+}
 
 #[tauri::command]
 pub fn get_system_info() -> SystemInfo {
@@ -15,7 +21,10 @@ pub fn get_tracking_stats() -> TrackingStats {
 }
 
 #[tauri::command]
-pub async fn start_tracking_command() -> Result<(), String> {
+pub async fn start_tracking_command(token: String) -> Result<(), String> {
+    if let Ok(mut lock) = AUTH_TOKEN.lock() {
+        *lock = Some(token);
+    }
     TrackingService::start();
     BackgroundScheduler::start();
     Ok(())
@@ -29,7 +38,10 @@ pub async fn pause_tracking_command() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn resume_tracking_command() -> Result<(), String> {
+pub async fn resume_tracking_command(token: String) -> Result<(), String> {
+    if let Ok(mut lock) = AUTH_TOKEN.lock() {
+        *lock = Some(token);
+    }
     TrackingService::resume();
     BackgroundScheduler::start();
     Ok(())
