@@ -38,12 +38,11 @@ export default function Sidebar({
 
   return (
     <aside
-      className="w-full md:w-60 flex-shrink-0 flex flex-col gap-5 p-4 overflow-y-auto"
+      className="w-full md:w-60 flex-shrink-0 flex flex-col gap-5 p-4 h-auto md:h-screen md:sticky md:top-0"
       style={{
         borderRight: '1px solid var(--border-subtle)',
         background: 'var(--bg-surface)',
         backdropFilter: 'blur(12px)',
-        minHeight: '100%',
       }}
     >
       {/* Active Workspace selector */}
@@ -72,7 +71,7 @@ export default function Sidebar({
       )}
 
       {/* ── Navigation ── */}
-      <nav className="space-y-5 flex-1">
+      <nav className="space-y-5 flex-1 overflow-y-auto pr-1">
 
         {/* Admin overview */}
         {!isStaff && (

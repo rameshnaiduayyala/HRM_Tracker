@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, Activity, Printer, FileText, Coffee, Monitor, Users, Eye, ArrowLeft, RefreshCw, RotateCcw } from 'lucide-react';
+import { Calendar, Clock, Activity, Printer, FileText, Coffee, Monitor, Users, Eye, ArrowLeft, RefreshCw, RotateCcw, ChevronDown } from 'lucide-react';
 import Button from '../Button';
 import Select from '../Select';
 import { employeeApi } from '../../services/employee.service';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+
+import Accordion from '../Accordion';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -169,11 +171,11 @@ export default function ReportsTab({ employees = [], onRefresh }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
 
 
       {!selectedEmployeeId || !currentEmployee ? (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
               <Users className="w-4 h-4 text-indigo-400" /> Employees & Today's Attendance Summary
@@ -181,19 +183,19 @@ export default function ReportsTab({ employees = [], onRefresh }) {
             <span className="badge badge-indigo">{employees.length} Employees</span>
           </div>
 
-          <div className="p-6 bg-[var(--bg-card)]/40 border border-[var(--border-base)] rounded-2xl overflow-x-auto">
+          <div className="overflow-x-auto border border-[var(--border-base)] rounded-xl bg-[var(--bg-card-alt)]/10 shadow-lg">
             <table className="w-full text-xs text-left">
               <thead>
-                <tr className="border-b border-[var(--border-base)] text-[var(--text-secondary)]">
-                  <th className="py-3 px-2">Employee</th>
-                  <th className="py-3 px-2">Designation</th>
-                  <th className="py-3 px-2">Today's Attendance</th>
-                  <th className="py-3 px-2">Clock In Time</th>
-                  <th className="py-3 px-2">Clock Out Time</th>
-                  <th className="py-3 px-2 text-right">Action</th>
+                <tr className="bg-[var(--bg-card-alt)] text-[var(--text-secondary)] border-b border-[var(--border-base)] font-bold uppercase tracking-wider text-[10px]">
+                  <th className="py-3 px-4">Employee</th>
+                  <th className="py-3 px-4">Designation</th>
+                  <th className="py-3 px-4">Today's Attendance</th>
+                  <th className="py-3 px-4">Clock In Time</th>
+                  <th className="py-3 px-4">Clock Out Time</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[var(--border-base)]/30">
                 {employees.map((emp) => {
                   const todayStr = new Date().toDateString();
                   const todayAtt = (emp.attendances || []).find(
@@ -203,8 +205,8 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                   const isClockedIn = todayAtt && !todayAtt.clockOut;
 
                   return (
-                    <tr key={emp.id} className="border-b border-[var(--border-base)]/50 hover:bg-[var(--bg-card-alt)]">
-                      <td className="py-3 px-2">
+                    <tr key={emp.id} className="border-b border-[var(--border-base)]/30 hover:bg-[var(--bg-card-alt)]/40 transition duration-200">
+                      <td className="py-3 px-4">
                         <div className="flex items-center gap-2.5">
                           <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-black shrink-0"
                             style={{ background: 'linear-gradient(135deg,#4f46e5,#818cf8)' }}>
@@ -216,8 +218,8 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-2 text-[var(--text-secondary)]">{emp.designation || 'Staff Member'}</td>
-                      <td className="py-3 px-2">
+                      <td className="py-3 px-4 text-[var(--text-secondary)]">{emp.designation || 'Staff Member'}</td>
+                      <td className="py-3 px-4">
                         {isClockedIn ? (
                           <span className="badge badge-emerald">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -235,13 +237,13 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-2 font-mono text-[var(--text-secondary)]">
+                      <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
                         {todayAtt ? new Date(todayAtt.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </td>
-                      <td className="py-3 px-2 font-mono text-[var(--text-secondary)]">
+                      <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
                         {todayAtt?.clockOut ? new Date(todayAtt.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : todayAtt ? <span className="text-emerald-400 font-semibold">Active Now</span> : '-'}
                       </td>
-                      <td className="py-3 px-2 text-right">
+                      <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button
                             size="sm"
@@ -287,9 +289,7 @@ export default function ReportsTab({ employees = [], onRefresh }) {
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* Printable Report Wrapper */}
-          <div ref={printRef} id="print-section" className="space-y-6 bg-[var(--bg-card-alt)]/10 p-1 print:bg-white print:text-black">
+        <div ref={printRef} id="print-section" className="flex flex-col gap-4 print:bg-white print:text-black">
             
             {/* Print Header */}
             <div className="hidden print:block border-b pb-4 mb-4 border-gray-200">
@@ -297,111 +297,129 @@ export default function ReportsTab({ employees = [], onRefresh }) {
               <p className="text-xs text-[var(--text-muted)]">Report Compiled On {new Date().toLocaleDateString()}</p>
             </div>
 
-            {/* Employee Information Card */}
-            <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl print:bg-white print:border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleSelectEmployee('')}
-                  className="print:hidden text-xs flex items-center gap-1.5 px-3 py-1.5"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" /> Back to List
-                </Button>
-                <div>
-                  <h3 className="text-lg font-bold text-[var(--text-primary)] print:text-black flex items-center gap-2">
-                    {currentEmployee?.user?.firstName} {currentEmployee?.user?.lastName}
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-950/60 border border-indigo-800/50 text-indigo-400 font-semibold print:hidden">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> Live Sync (5s)
+            {/* Unified Dashboard Header Card */}
+            <div className="p-4 px-5 bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-card-alt)]/30 border border-[var(--border-base)] rounded-2xl print:bg-white print:border-gray-200 space-y-4 shadow-xl">
+              
+              {/* Row 1: Employee Details & Toolbar */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--border-base)]/40">
+                <div className="flex items-center gap-3.5">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleSelectEmployee('')}
+                    className="print:hidden text-[10px] font-bold flex items-center gap-1 px-2.5 py-1.5 border-[var(--border-base)] hover:border-indigo-500/30 shrink-0 uppercase tracking-wider"
+                  >
+                    <ArrowLeft className="w-3 h-3" /> Back
+                  </Button>
+                  
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-black shrink-0 shadow-lg border border-indigo-500/20"
+                    style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}>
+                    {currentEmployee?.user?.firstName?.[0] || '?'}{currentEmployee?.user?.lastName?.[0] || '?'}
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-white print:text-black flex items-center gap-2">
+                      {currentEmployee?.user?.firstName} {currentEmployee?.user?.lastName}
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-mono bg-emerald-950/60 border border-emerald-800/40 text-emerald-400 font-semibold print:hidden">
+                        <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" /> Live
+                      </span>
+                    </h3>
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">
+                      <span className="text-indigo-400 font-semibold">{currentEmployee?.designation || 'Staff Member'}</span>
+                      <span className="text-[var(--text-muted)] mx-1 font-normal">|</span>
+                      <span className="font-mono text-[var(--text-muted)]">{currentEmployee?.employeeNum}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Toolbar */}
+                <div className="flex flex-wrap items-center gap-2.5 print:hidden">
+                  <div className="flex gap-0.5 bg-[var(--bg-card)] p-0.5 rounded-lg border border-[var(--border-base)]">
+                    {['day', 'week', 'month', 'year'].map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setTimeframe(t)}
+                        className={`px-2.5 py-1 text-[9px] font-extrabold rounded-md uppercase tracking-wider transition duration-150 ${
+                          timeframe === t
+                            ? 'bg-indigo-600 text-white shadow'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        {t === 'day' ? '24h' : t === 'week' ? '7d' : t === 'month' ? '30d' : '365d'}
+                      </button>
+                    ))}
+                  </div>
+
+                  <Button onClick={handlePrint} variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] border-[var(--border-base)] hover:border-indigo-500/25">
+                    <Printer className="w-3 h-3 text-indigo-400" /> Print
+                  </Button>
+
+                  <Button 
+                    onClick={handleResetData} 
+                    disabled={isResetting}
+                    variant="secondary" 
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-800/30"
+                  >
+                    <RotateCcw className={`w-3 h-3 ${isResetting ? 'animate-spin' : ''}`} /> Reset
+                  </Button>
+                </div>
+              </div>
+
+              {/* Row 2: KPI Stats Block */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="p-3 bg-[var(--bg-card-alt)]/25 border border-[var(--border-base)]/40 rounded-xl flex items-center gap-4 transition duration-300 hover:border-indigo-500/20">
+                  <div className="w-9 h-9 flex items-center justify-center bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-lg shrink-0">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="block text-[9px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Total Hours</span>
+                    <span className="text-base font-bold text-white print:text-black font-mono tracking-tight">{formatMs(totalLoggedMs)}</span>
+                    <span className="text-[8px] text-[var(--text-muted)] font-mono block mt-0.5 leading-none">Shift attendance logged</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-[var(--bg-card-alt)]/25 border border-[var(--border-base)]/40 rounded-xl flex items-center gap-4 transition duration-300 hover:border-emerald-500/20">
+                  <div className="w-9 h-9 flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg shrink-0">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="block text-[9px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Active Hours</span>
+                    <span className="text-base font-bold text-emerald-400 print:text-emerald-600 font-mono tracking-tight">{formatMs(totalWorkMs)}</span>
+                    <span className="text-[8px] text-emerald-400 font-mono block mt-0.5 leading-none">
+                       Efficiency: {totalLoggedMs > 0 ? Math.round((totalWorkMs / totalLoggedMs) * 100) : 0}%
                     </span>
-                  </h3>
-                  <p className="text-xs text-indigo-400 font-semibold mt-0.5">{currentEmployee?.designation || 'Staff Member'} ({currentEmployee?.employeeNum})</p>
-                </div>
-              </div>
-
-              {/* Action Toolbar */}
-              <div className="flex flex-wrap items-center gap-3 print:hidden">
-                <div className="flex gap-1 bg-[var(--bg-card-alt)] p-1 rounded-lg border border-[var(--border-base)]">
-                  {['day', 'week', 'month', 'year'].map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setTimeframe(t)}
-                      className={`px-3 py-1 text-xs font-semibold rounded-md uppercase transition ${
-                        timeframe === t
-                          ? 'bg-indigo-600 text-white shadow'
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                      }`}
-                    >
-                      {t === 'day' ? 'Last 24h' : t === 'week' ? 'Last 7d' : t === 'month' ? 'Last 30d' : 'Last 365d'}
-                    </button>
-                  ))}
+                  </div>
                 </div>
 
-                <Button onClick={handlePrint} variant="secondary" className="flex items-center gap-2 px-4 py-2 text-xs">
-                  <Printer className="w-3.5 h-3.5 text-indigo-400" /> Print Sheet
-                </Button>
-
-                <Button 
-                  onClick={handleResetData} 
-                  disabled={isResetting}
-                  variant="secondary" 
-                  className="flex items-center gap-2 px-4 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-800/40"
-                >
-                  <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin' : ''}`} /> Reset Data
-                </Button>
-              </div>
-            </div>
-
-            {/* KPI Stats Block */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl flex items-center gap-4 print:bg-white print:border-gray-200">
-                <div className="p-3 bg-indigo-950/40 border border-indigo-500/20 text-indigo-400 rounded-xl">
-                  <Clock className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="block text-[10px] text-[var(--text-secondary)] uppercase font-semibold">Total Logged Hours</span>
-                  <span className="text-xl font-bold text-indigo-400 print:text-black font-mono">{formatMs(totalLoggedMs)}</span>
-                </div>
-              </div>
-
-              <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl flex items-center gap-4 print:bg-white print:border-gray-200">
-                <div className="p-3 bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 rounded-xl">
-                  <Activity className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="block text-[10px] text-[var(--text-secondary)] uppercase font-semibold">Active Tracker Hours</span>
-                  <span className="text-xl font-bold text-emerald-400 print:text-emerald-600 font-mono">{formatMs(totalWorkMs)}</span>
-                </div>
-              </div>
-
-              <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl flex items-center gap-4 print:bg-white print:border-gray-200">
-                <div className="p-3 bg-amber-950/40 border border-amber-500/20 text-amber-400 rounded-xl">
-                  <Coffee className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="block text-[10px] text-[var(--text-secondary)] uppercase font-semibold">Shift Breaks / Idle</span>
-                  <span className="text-xl font-bold text-amber-400 print:text-amber-600 font-mono">{formatMs(totalBreakMs)}</span>
+                <div className="p-3 bg-[var(--bg-card-alt)]/25 border border-[var(--border-base)]/40 rounded-xl flex items-center gap-4 transition duration-300 hover:border-amber-500/20">
+                  <div className="w-9 h-9 flex items-center justify-center bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg shrink-0">
+                    <Coffee className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="block text-[9px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Break & Idle</span>
+                    <span className="text-base font-bold text-amber-400 print:text-amber-600 font-mono tracking-tight">{formatMs(totalBreakMs)}</span>
+                    <span className="text-[8px] text-amber-400 font-mono block mt-0.5 leading-none">
+                      Idle Share: {totalLoggedMs > 0 ? Math.round((totalBreakMs / totalLoggedMs) * 100) : 0}%
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Attendance and Breaks Sheet */}
-            <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl print:bg-white print:border-gray-200">
-              <h4 className="text-sm font-semibold text-[var(--text-primary)] print:text-black mb-4 uppercase tracking-wider flex items-center gap-2">
-                <Clock className="w-4 h-4 text-indigo-400" /> Attendance & Breaks Breakdown
-              </h4>
-              <div className="overflow-x-auto">
+            <Accordion title="Attendance & Breaks Breakdown" icon={<Clock className="w-4 h-4 text-indigo-400" />} badge={filteredAtts.length}>
+              <div className="overflow-x-auto border border-[var(--border-base)] rounded-xl bg-[var(--bg-card-alt)]/10">
                 <table className="w-full text-xs text-left">
                   <thead>
-                    <tr className="border-b border-[var(--border-base)] print:border-gray-300 text-[var(--text-secondary)] print:text-[var(--text-muted)] font-semibold">
-                      <th className="py-3">Login Time</th>
-                      <th className="py-3">Logout Time</th>
-                      <th className="py-3">Logged Duration</th>
-                      <th className="py-3">Active Working</th>
-                      <th className="py-3 text-right">Breaks Taken</th>
+                    <tr className="bg-[var(--bg-card-alt)] text-[var(--text-secondary)] border-b border-[var(--border-base)] font-bold uppercase tracking-wider text-[10px]">
+                      <th className="py-3 px-4">Login Time</th>
+                      <th className="py-3 px-4">Logout Time</th>
+                      <th className="py-3 px-4">Logged Duration</th>
+                      <th className="py-3 px-4">Active Working</th>
+                      <th className="py-3 px-4 text-right">Breaks Taken</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-[var(--border-base)]/30">
                     {filteredAtts.map((att, idx) => {
                       const clockInTime = new Date(att.clockIn).getTime();
                       const clockOutTime = att.clockOut ? new Date(att.clockOut).getTime() : now.getTime();
@@ -423,14 +441,14 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                       const shiftBreakMs = Math.max(0, shiftDuration - shiftWorkMs);
 
                       return (
-                        <tr key={att.id || idx} className="border-b border-[var(--border-base)]/50 print:border-gray-200 text-[var(--text-primary)] print:text-black hover:bg-[var(--bg-card-alt)]">
-                          <td className="py-3 text-[var(--text-primary)]">{new Date(att.clockIn).toLocaleString()}</td>
-                          <td className="py-3 text-[var(--text-primary)]">
-                            {att.clockOut ? new Date(att.clockOut).toLocaleString() : <span className="text-emerald-400 font-semibold">Active Clock-in</span>}
+                        <tr key={att.id || idx} className="border-b border-[var(--border-base)]/30 hover:bg-[var(--bg-card-alt)]/40 transition duration-200">
+                          <td className="py-3 px-4 text-[var(--text-primary)]">{new Date(att.clockIn).toLocaleString()}</td>
+                          <td className="py-3 px-4 text-[var(--text-primary)]">
+                            {att.clockOut ? new Date(att.clockOut).toLocaleString() : <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800/30">🟢 Active Shift</span>}
                           </td>
-                          <td className="py-3 font-mono text-indigo-400 font-bold">{formatMs(shiftDuration)}</td>
-                          <td className="py-3 text-emerald-400 print:text-emerald-600 font-mono font-bold">{formatMs(shiftWorkMs)}</td>
-                          <td className="py-3 text-right text-amber-400 print:text-amber-600 font-mono font-bold">{formatMs(shiftBreakMs)}</td>
+                          <td className="py-3 px-4 font-mono text-indigo-400 font-bold">{formatMs(shiftDuration)}</td>
+                          <td className="py-3 px-4 text-emerald-400 font-mono font-bold">{formatMs(shiftWorkMs)}</td>
+                          <td className="py-3 px-4 text-right text-amber-400 font-mono font-bold">{formatMs(shiftBreakMs)}</td>
                         </tr>
                       );
                     })}
@@ -444,40 +462,41 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </Accordion>
 
             {/* Active Session logs */}
-            <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl print:bg-white print:border-gray-200">
-              <h4 className="text-sm font-semibold text-[var(--text-primary)] print:text-black mb-4 uppercase tracking-wider flex items-center gap-2">
-                <Activity className="w-4 h-4 text-purple-400" /> Active Session Intervals
-              </h4>
-              <div className="overflow-x-auto">
+            <Accordion title="Active Session Intervals" icon={<Activity className="w-4 h-4 text-purple-400" />} badge={filteredSessions.length}>
+              <div className="overflow-x-auto border border-[var(--border-base)] rounded-xl bg-[var(--bg-card-alt)]/10">
                 <table className="w-full text-xs text-left">
                   <thead>
-                    <tr className="border-b border-[var(--border-base)] print:border-gray-300 text-[var(--text-secondary)] print:text-[var(--text-muted)] font-semibold">
-                      <th className="py-3">Session Start</th>
-                      <th className="py-3">Session End</th>
-                      <th className="py-3">Stop Reason</th>
-                      <th className="py-3 text-right">Status</th>
+                    <tr className="bg-[var(--bg-card-alt)] text-[var(--text-secondary)] border-b border-[var(--border-base)] font-bold uppercase tracking-wider text-[10px]">
+                      <th className="py-3 px-4">Session Start</th>
+                      <th className="py-3 px-4">Session End</th>
+                      <th className="py-3 px-4">Stop Reason</th>
+                      <th className="py-3 px-4 text-right">Status</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-[var(--border-base)]/30">
                     {filteredSessions.map((session, idx) => {
                       const startDate = new Date(session.start);
                       const endDate = session.end ? new Date(session.end) : null;
 
                       return (
-                        <tr key={session.id || idx} className="border-b border-[var(--border-base)]/50 print:border-gray-200 text-[var(--text-primary)] print:text-black hover:bg-[var(--bg-card-alt)]">
-                          <td className="py-3 text-[var(--text-primary)]">{startDate.toLocaleString()}</td>
-                          <td className="py-3 text-[var(--text-primary)]">
-                            {endDate ? endDate.toLocaleString() : '-'}
+                        <tr key={session.id || idx} className="border-b border-[var(--border-base)]/30 hover:bg-[var(--bg-card-alt)]/40 transition duration-200">
+                          <td className="py-3 px-4 text-[var(--text-primary)]">{startDate.toLocaleString()}</td>
+                          <td className="py-3 px-4 text-[var(--text-primary)]">
+                            {endDate ? endDate.toLocaleString() : <span className="text-[var(--text-muted)]">—</span>}
                           </td>
-                          <td className="py-3 text-[var(--text-secondary)] italic">
-                            {session.stopReason || '-'}
+                          <td className="py-3 px-4 text-[var(--text-secondary)] font-medium">
+                            {session.stopReason ? (
+                              <span className="px-2 py-0.5 rounded bg-amber-950/20 text-amber-400 border border-amber-800/20 text-[10px] font-semibold">{session.stopReason}</span>
+                            ) : (
+                              <span className="text-[var(--text-muted)]">—</span>
+                            )}
                           </td>
-                          <td className="py-3 text-right">
-                            <span className={`text-[10px] px-2 py-0.5 rounded font-semibold ${
-                              session.status === 'RUNNING' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/60' : 'bg-gray-800 text-[var(--text-secondary)]'
+                          <td className="py-3 px-4 text-right">
+                            <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold border ${
+                              session.status === 'RUNNING' ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800/30' : 'bg-gray-800/80 text-[var(--text-secondary)] border-[var(--border-base)]'
                             }`}>
                               {session.status}
                             </span>
@@ -487,7 +506,7 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                     })}
                     {filteredSessions.length === 0 && (
                       <tr>
-                        <td colSpan="4" className="py-4 text-center text-[var(--text-muted)] italic">
+                        <td colSpan="4" className="py-6 text-center text-[var(--text-muted)] italic">
                           No session activities logged.
                         </td>
                       </tr>
@@ -495,15 +514,12 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </Accordion>
 
             {/* Monitored Background Heartbeats */}
-            <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl print:bg-white print:border-gray-200">
+            <Accordion title="Monitored Application Usage" icon={<Monitor className="w-4 h-4 text-amber-400" />} badge={sortedAppStats.length}>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h4 className="text-sm font-semibold text-[var(--text-primary)] print:text-black uppercase tracking-wider flex items-center gap-2">
-                    <Monitor className="w-4 h-4 text-amber-400" /> Monitored Application Usage Graph
-                  </h4>
                   <p className="text-[11px] text-[var(--text-secondary)] mt-1">Smart visual breakdown of time spent across workstation software application sessions.</p>
                 </div>
                 
@@ -626,25 +642,25 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                 </div>
               ) : (
                 /* Raw Telemetry Logs Table */
-                <div className="overflow-x-auto max-h-80 overflow-y-auto border border-[var(--border-base)] rounded-xl">
+                <div className="overflow-x-auto max-h-80 overflow-y-auto border border-[var(--border-base)] rounded-xl bg-[var(--bg-card-alt)]/10">
                   <table className="w-full text-xs text-left">
-                    <thead className="sticky top-0 bg-[var(--bg-card-alt)] text-[var(--text-secondary)] border-b border-[var(--border-base)] font-semibold">
+                    <thead className="sticky top-0 bg-[var(--bg-card-alt)] text-[var(--text-secondary)] border-b border-[var(--border-base)] font-bold uppercase tracking-wider text-[10px]">
                       <tr>
-                        <th className="py-2.5 px-3">Timestamp</th>
-                        <th className="py-2.5 px-3">Application</th>
-                        <th className="py-2.5 px-3">Window Title</th>
-                        <th className="py-2.5 px-3 text-right">Active / Idle Ratio</th>
+                        <th className="py-3 px-4">Timestamp</th>
+                        <th className="py-3 px-4">Application</th>
+                        <th className="py-3 px-4">Window Title</th>
+                        <th className="py-3 px-4 text-right">Active / Idle Ratio</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[var(--border-base)]/40 font-mono text-[11px]">
+                    <tbody className="divide-y divide-[var(--border-base)]/30 font-mono text-[11px]">
                       {filteredSessions.flatMap(s => s.activities || []).map((act, idx) => (
-                        <tr key={act.id || idx} className="hover:bg-[var(--bg-card-alt)]/60 text-[var(--text-primary)] transition">
-                          <td className="py-2 px-3 text-[var(--text-secondary)] shrink-0 whitespace-nowrap">
+                        <tr key={act.id || idx} className="hover:bg-[var(--bg-card-alt)]/40 text-[var(--text-primary)] transition duration-150">
+                          <td className="py-2.5 px-4 text-[var(--text-secondary)] shrink-0 whitespace-nowrap">
                             {new Date(act.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                           </td>
-                          <td className="py-2 px-3 text-indigo-400 font-bold whitespace-nowrap">{act.app}</td>
-                          <td className="py-2 px-3 text-[var(--text-primary)] truncate max-w-xs">{act.windowTitle || 'N/A'}</td>
-                          <td className="py-2 px-3 text-right font-semibold whitespace-nowrap">
+                          <td className="py-2.5 px-4 text-indigo-400 font-bold whitespace-nowrap">{act.app}</td>
+                          <td className="py-2.5 px-4 text-[var(--text-primary)] truncate max-w-xs">{act.windowTitle || <span className="text-[var(--text-muted)]">N/A</span>}</td>
+                          <td className="py-2.5 px-4 text-right font-semibold whitespace-nowrap">
                             <span className="text-emerald-400">{act.activeDuration}s active</span>
                             <span className="text-[var(--text-muted)] mx-1">/</span>
                             <span className="text-amber-400">{act.idleDuration}s idle</span>
@@ -653,7 +669,7 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                       ))}
                       {filteredSessions.flatMap(s => s.activities || []).length === 0 && (
                         <tr>
-                          <td colSpan="4" className="py-6 text-center text-[var(--text-muted)] italic">
+                          <td colSpan="4" className="py-8 text-center text-[var(--text-muted)] italic">
                             No active desktop application heartbeats recorded.
                           </td>
                         </tr>
@@ -662,13 +678,10 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                   </table>
                 </div>
               )}
-            </div>
+            </Accordion>
 
             {/* Captured Laptop Screenshots Timeline */}
-            <div className="p-6 bg-[var(--bg-card)]/30 border border-[var(--border-base)] rounded-2xl print:bg-white print:border-gray-200">
-              <h4 className="text-sm font-semibold text-[var(--text-primary)] print:text-black mb-4 uppercase tracking-wider flex items-center gap-2">
-                <Monitor className="w-4 h-4 text-emerald-400" /> Laptop Captured Screens (Screenshot Timelines)
-              </h4>
+            <Accordion title="Captured Screenshots" icon={<Monitor className="w-4 h-4 text-emerald-400" />} badge={filteredSessions.flatMap(s => s.screenshots || []).length}>
               <p className="text-xs text-[var(--text-secondary)] mb-4 print:hidden">Continuous background laptop screen capture reports generated during active tracker sessions.</p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -717,96 +730,12 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                       );
                     });
                   }
-
-                  return allActivities.map((act, idx) => {
-                    const lowercaseApp = act.app.toLowerCase();
-                    const isIdle = act.idleDuration >= 300;
-
-                    return (
-                      <div key={act.id || idx} className="group relative border border-[var(--border-base)] hover:border-indigo-500/50 rounded-xl bg-[var(--bg-card-alt)] p-2.5 transition duration-300 hover:scale-[1.03] hover:shadow-xl hover:shadow-indigo-600/5 print:break-inside-avoid">
-                        <div className="flex items-center justify-between gap-2 mb-2 text-[10px]">
-                          <span className="font-bold text-[var(--text-primary)] truncate max-w-[100px]">{act.app}</span>
-                          <span className="text-[var(--text-muted)] font-mono">{new Date(act.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-
-                        {isIdle ? (
-                          <div className="w-full h-24 bg-red-955/20 rounded border border-red-900/40 flex flex-col items-center justify-center text-center p-2 text-red-400">
-                            <span className="text-xs">⚠️</span>
-                            <span className="text-[8px] font-bold mt-1">IDLE AUTO-SUSPEND</span>
-                            <span className="text-[7px] text-[var(--text-secondary)]">No activity for 5m</span>
-                          </div>
-                        ) : lowercaseApp.includes('code') || lowercaseApp.includes('vs') || lowercaseApp.includes('editor') ? (
-                          <div className="w-full h-24 bg-[#1e1e1e] rounded border border-[var(--border-base)] p-1 flex flex-col justify-between font-mono text-[5px] overflow-hidden select-none">
-                            <div className="flex items-center gap-1 border-b border-[#2d2d2d] pb-0.5 mb-1 text-[var(--text-muted)]">
-                              <span className="text-[#3c3c3c]">●</span>
-                              <span className="text-[var(--text-secondary)] truncate max-w-[80px]">{act.windowTitle || 'App.jsx'}</span>
-                            </div>
-                            <div className="flex-1 space-y-0.5">
-                              <div className="flex items-center gap-0.5"><span className="text-indigo-400">import</span> <span className="text-emerald-400">React</span> <span className="text-indigo-400">from</span> <span className="text-amber-400">'react'</span>;</div>
-                              <div className="flex items-center gap-0.5 pl-1"><span className="text-purple-400">const</span> <span className="text-blue-400">App</span> <span className="text-[var(--text-secondary)]">=</span> <span className="text-[var(--text-secondary)]">()</span> <span className="text-purple-400">=&gt;</span> <span className="text-[var(--text-secondary)]">{"{"}</span></div>
-                              <div className="flex items-center gap-0.5 pl-2"><span className="text-indigo-400">return</span> <span className="text-[var(--text-secondary)]">&lt;</span><span className="text-red-400">Dashboard</span> <span className="text-[var(--text-secondary)]">/&gt;</span>;</div>
-                              <div className="flex items-center pl-1"><span className="text-[var(--text-secondary)]">{"}"}</span></div>
-                            </div>
-                            <div className="bg-[#007acc] text-white flex items-center justify-between px-1 text-[4px]">
-                              <span>Ln 5, Col 12</span>
-                              <span>UTF-8</span>
-                            </div>
-                          </div>
-                        ) : lowercaseApp.includes('chrome') || lowercaseApp.includes('browser') || lowercaseApp.includes('safari') || lowercaseApp.includes('edge') ? (
-                          <div className="w-full h-24 bg-white text-gray-800 rounded border border-gray-300 p-1 flex flex-col justify-between text-[5px] overflow-hidden select-none">
-                            <div className="flex items-center gap-0.5 bg-gray-100 p-0.5 rounded mb-1 border-b border-gray-200">
-                              <span className="text-[4px]">🔒</span>
-                              <span className="text-[var(--text-muted)] bg-white px-1 rounded flex-1 truncate">{act.windowTitle || 'https://google.com'}</span>
-                            </div>
-                            <div className="flex-1 space-y-0.5 p-0.5">
-                              <div className="h-1 w-6 bg-indigo-500 rounded"></div>
-                              <div className="grid grid-cols-3 gap-0.5">
-                                <div className="h-8 bg-gray-150 rounded border border-gray-250"></div>
-                                <div className="h-8 bg-gray-150 rounded border border-gray-250"></div>
-                                <div className="h-8 bg-gray-150 rounded border border-gray-250"></div>
-                              </div>
-                            </div>
-                          </div>
-                        ) : lowercaseApp.includes('slack') || lowercaseApp.includes('teams') || lowercaseApp.includes('discord') || lowercaseApp.includes('chat') ? (
-                          <div className="w-full h-24 bg-[#4a154b] text-white rounded border border-[#3f0e40] p-1 flex gap-1 text-[5px] overflow-hidden select-none">
-                            <div className="w-6 border-r border-[#5b255c] pr-0.5 space-y-0.5 text-[4px]">
-                              <span className="block font-bold text-[3px] text-[#bca3bc]">CHANNELS</span>
-                              <span className="block text-[#e8912d]"># general</span>
-                              <span className="block text-[var(--text-primary)]"># team</span>
-                            </div>
-                            <div className="flex-1 bg-white text-gray-800 p-0.5 rounded-sm flex flex-col justify-between">
-                              <div className="space-y-0.5">
-                                <div className="flex gap-0.5"><span className="font-bold text-[4px] text-indigo-600">Sarah:</span> <span className="text-[4px]">Pushed code</span></div>
-                                <div className="flex gap-0.5"><span className="font-bold text-[4px] text-purple-600">John:</span> <span className="text-[4px]">Reviewing now</span></div>
-                              </div>
-                              <div className="border border-gray-200 p-0.5 rounded text-[var(--text-secondary)] bg-gray-50 text-[3px]">Message general...</div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="w-full h-24 bg-[#0c101b] rounded border border-[var(--border-base)] p-1 flex flex-col justify-between text-[4px] overflow-hidden select-none">
-                            <div className="flex items-center justify-between border-b border-[var(--border-base)] pb-0.5 mb-1 text-[var(--text-muted)]">
-                              <span className="font-semibold text-[var(--text-secondary)] truncate max-w-[70px]">{act.windowTitle || 'Desktop Workspace'}</span>
-                              <span>✖</span>
-                            </div>
-                            <div className="flex-1 grid grid-cols-4 gap-0.5 p-1.5">
-                              <div className="w-2 h-2 bg-indigo-500/20 rounded border border-indigo-500/40 flex items-center justify-center">📁</div>
-                              <div className="w-2 h-2 bg-purple-500/20 rounded border border-purple-500/40 flex items-center justify-center">⚙</div>
-                              <div className="w-2 h-2 bg-emerald-500/20 rounded border border-emerald-500/40 flex items-center justify-center">📊</div>
-                            </div>
-                            <div className="bg-[var(--bg-card)] border-t border-[var(--border-base)] p-0.5 flex items-center justify-between text-[var(--text-muted)]">
-                              <span>Start</span>
-                              <span>Taskbar</span>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="mt-2 flex items-center justify-between text-[9px] font-mono">
-                          <span className="text-emerald-400 font-semibold">{Math.round((act.activeDuration / (act.activeDuration + act.idleDuration || 1)) * 100)}% Active</span>
-                          <span className="text-[var(--text-muted)]">{act.activeDuration}s / {act.idleDuration}s</span>
-                        </div>
-                      </div>
-                    );
-                  });
+                  return (
+                    <div className="col-span-full text-center text-[var(--text-muted)] py-12 border border-dashed border-[var(--border-muted)] rounded-2xl bg-[var(--bg-card-alt)]/20">
+                      <Monitor className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-40" />
+                      <p className="text-xs">No screenshots captured for this timeframe yet.</p>
+                    </div>
+                  );
                 })()}
                 {filteredSessions.flatMap(s => (s.screenshots || []).concat(s.activities || [])).length === 0 && (
                   <div className="col-span-full text-center text-[var(--text-muted)] py-6 italic">
@@ -814,10 +743,9 @@ export default function ReportsTab({ employees = [], onRefresh }) {
                   </div>
                 )}
               </div>
-            </div>
+            </Accordion>
 
           </div>
-        </div>
       )}
 
       {/* Lightbox Fullscreen Modal */}

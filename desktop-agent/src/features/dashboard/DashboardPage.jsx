@@ -37,32 +37,7 @@ export const DashboardPage = () => {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    let unlisten;
-    const setupCloseListener = async () => {
-      unlisten = await listen('window-close-requested', async () => {
-        if (shiftActive) {
-          if (showReasonModal) {
-            await endShift('Inactivity / Idle Close');
-            const win = getCurrentWindow();
-            await win.hide();
-          } else {
-            setStopActionType('tracker');
-            setShowStopModal(true);
-            const win = getCurrentWindow();
-            await win.show();
-            await win.unminimize();
-            await win.setFocus();
-          }
-        } else {
-          const win = getCurrentWindow();
-          await win.hide();
-        }
-      });
-    };
-    setupCloseListener();
-    return () => { if (unlisten) unlisten(); };
-  }, [shiftActive, showReasonModal, endShift]);
+
 
   useEffect(() => {
     let timer;
