@@ -1,0 +1,36 @@
+[package]
+name = "employee-tracker-agent"
+version = "1.0.0"
+description = "Enterprise Employee Tracking & Productivity Desktop Agent"
+authors = ["Senior Architect"]
+edition = "2021"
+
+[lib]
+name = "employee_tracker_agent_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0.0", features = [] }
+tauri-plugin-notification = "2.0.0"
+tauri-plugin-os = "2.0.0"
+tauri-plugin-process = "2.0.0"
+tauri-plugin-updater = "2.0.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+sqlite = "0.32"
+chrono = { version = "0.4", features = ["serde"] }
+reqwest = { version = "0.11", features = ["json", "multipart"] }
+sysinfo = "0.30"
+device_query = "1.1"
+image = "0.24"
+base64 = "0.21"
+lazy_static = "1.4"
+log = "0.4"
+env_logger = "0.10"
+mac_address = "1.1"
+winapi = { version = "0.3", features = ["winuser", "impl-default"] }
+auto-launch = "0.5"

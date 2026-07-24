@@ -1,0 +1,51 @@
+:root {
+  --primary-color: #2b579a;
+  --bg-dark: #121212;
+  --bg-card-dark: #1e1e1e;
+  --text-light: #f8f9fa;
+  --accent-blue: #0078d4;
+  --accent-success: #107c41;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f9;
+  color: #333333;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+body.dark-theme {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
+.custom-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: none;
+  background: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.body.dark-theme .custom-card {
+  background: var(--bg-card-dark);
+  color: var(--text-light);
+}
+
+.custom-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+}
+.body.dark-theme .glass-panel {
+  background: rgba(30, 30, 30, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}

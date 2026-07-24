@@ -1,0 +1,19 @@
+# Node.js
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Tauri / Rust build artifacts
+src-tauri/target/
+
+# IDEs & System files
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+thumbs.db
