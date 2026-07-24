@@ -74,7 +74,23 @@ fn main() {
         .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
-                let _ = window.emit("window-close-requested", ());
+                let is_inactivity = {
+                    if let Ok(lock) = employee_tracker_agent_lib::commands::IN_INACTIVITY_MODAL.lock() {
+                        *lock
+                    } else {
+                        false
+                    }
+                };
+
+                if is_inactivity {
+                    // Idle state -> force window visible & focused, block close/hide
+                    let _ = window.show();
+                    let _ = window.unminimize();
+                    let _ = window.set_focus();
+                } else {
+                    // Standard state -> hide window immediately to system tray
+                    let _ = window.hide();
+                }
             }
             _ => {}
         })

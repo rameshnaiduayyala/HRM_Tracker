@@ -92,6 +92,9 @@ impl BackgroundScheduler {
 
                 let idle_secs = idle_ticks * (TICK_SECS as u32);
                 if idle_secs >= idle_threshold_secs {
+                    if let Ok(mut lock) = crate::commands::IN_INACTIVITY_MODAL.lock() {
+                        *lock = true;
+                    }
                     TrackingService::pause();
                     BackgroundScheduler::stop();
 

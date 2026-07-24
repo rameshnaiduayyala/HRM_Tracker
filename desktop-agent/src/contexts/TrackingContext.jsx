@@ -93,33 +93,7 @@ export const TrackingProvider = ({ children }) => {
     return () => { if (unlisten) unlisten(); };
   }, [agentConfig.idleThreshold]);
 
-  // Handle window close request globally: block close ONLY if idle time reason select modal is active, otherwise hide window
-  useEffect(() => {
-    let unlisten;
-    const setupCloseListener = async () => {
-      unlisten = await listen('window-close-requested', async () => {
-        if (showReasonModal) {
-          // Idle threshold reached and asking for reason -> block closing, force focus
-          try {
-            const win = getCurrentWindow();
-            await win.show();
-            await win.unminimize();
-            await win.setFocus();
-          } catch (_) {}
-        } else {
-          // All other states (working, paused, login page, logged out) -> hide window immediately
-          try {
-            const win = getCurrentWindow();
-            await win.hide();
-          } catch (e) {
-            console.error('Failed to hide window:', e);
-          }
-        }
-      });
-    };
-    setupCloseListener();
-    return () => { if (unlisten) unlisten(); };
-  }, [showReasonModal]);
+
 
   const clockIn = async () => {
     try {

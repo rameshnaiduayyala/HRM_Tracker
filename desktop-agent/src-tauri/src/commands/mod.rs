@@ -8,6 +8,7 @@ use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref AUTH_TOKEN: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
+    pub static ref IN_INACTIVITY_MODAL: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
 }
 
 #[tauri::command]
@@ -33,6 +34,9 @@ pub async fn start_tracking_command(
     if let Ok(mut lock) = AUTH_TOKEN.lock() {
         *lock = Some(token);
     }
+    if let Ok(mut lock) = IN_INACTIVITY_MODAL.lock() {
+        *lock = false;
+    }
     TrackingService::start();
     BackgroundScheduler::start(
         app,
@@ -44,6 +48,9 @@ pub async fn start_tracking_command(
 
 #[tauri::command]
 pub async fn pause_tracking_command() -> Result<(), String> {
+    if let Ok(mut lock) = IN_INACTIVITY_MODAL.lock() {
+        *lock = false;
+    }
     TrackingService::pause();
     BackgroundScheduler::stop();
     Ok(())
@@ -59,6 +66,9 @@ pub async fn resume_tracking_command(
     if let Ok(mut lock) = AUTH_TOKEN.lock() {
         *lock = Some(token);
     }
+    if let Ok(mut lock) = IN_INACTIVITY_MODAL.lock() {
+        *lock = false;
+    }
     TrackingService::resume();
     BackgroundScheduler::start(
         app,
@@ -70,6 +80,9 @@ pub async fn resume_tracking_command(
 
 #[tauri::command]
 pub async fn stop_tracking_command(_reason: String) -> Result<(), String> {
+    if let Ok(mut lock) = IN_INACTIVITY_MODAL.lock() {
+        *lock = false;
+    }
     TrackingService::stop();
     BackgroundScheduler::stop();
     Ok(())
