@@ -32,5 +32,5 @@ lazy_static = "1.4"
 log = "0.4"
 env_logger = "0.10"
 mac_address = "1.1"
-winapi = { version = "0.3", features = ["winuser", "impl-default"] }
+winapi = { version = "0.3", features = ["winuser", "impl-default", "processthreadsapi", "winnt", "handleapi", "psapi"] }
 auto-launch = "0.5"

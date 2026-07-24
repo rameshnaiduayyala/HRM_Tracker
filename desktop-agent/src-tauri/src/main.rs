@@ -11,6 +11,11 @@ use tauri::{
 };
 
 fn main() {
+    #[cfg(target_os = "windows")]
+    unsafe {
+        winapi::um::winuser::SetProcessDPIAware();
+    }
+
     // Initialize offline DB cache
     if let Err(e) = SqliteService::init() {
         eprintln!("Failed to initialize local offline SQLite: {}", e);

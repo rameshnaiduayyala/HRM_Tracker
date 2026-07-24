@@ -21,12 +21,12 @@ pub fn get_tracking_stats() -> TrackingStats {
 }
 
 #[tauri::command]
-pub async fn start_tracking_command(token: String) -> Result<(), String> {
+pub async fn start_tracking_command(app: tauri::AppHandle, token: String) -> Result<(), String> {
     if let Ok(mut lock) = AUTH_TOKEN.lock() {
         *lock = Some(token);
     }
     TrackingService::start();
-    BackgroundScheduler::start();
+    BackgroundScheduler::start(app);
     Ok(())
 }
 
@@ -38,12 +38,12 @@ pub async fn pause_tracking_command() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn resume_tracking_command(token: String) -> Result<(), String> {
+pub async fn resume_tracking_command(app: tauri::AppHandle, token: String) -> Result<(), String> {
     if let Ok(mut lock) = AUTH_TOKEN.lock() {
         *lock = Some(token);
     }
     TrackingService::resume();
-    BackgroundScheduler::start();
+    BackgroundScheduler::start(app);
     Ok(())
 }
 

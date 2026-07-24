@@ -34,25 +34,20 @@ body {
 }
 
 .custom-card {
-  border-radius: 0px; /* Minimalist flat corners */
+  border-radius: 0px;
   background: var(--bg-card);
-  border: 2px solid var(--border-color);
-  box-shadow: 6px 6px 0px 0px var(--border-color); /* Retro flat shadows */
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  border: 1px solid var(--border-color);
   color: var(--text-dark);
 }
 
 .custom-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0px 0px var(--border-color);
+  border-color: var(--primary-color);
 }
 
 /* Glassmorphism panel override for Swiss layout */
 .glass-panel {
   background: var(--bg-card);
-  border: 2px solid var(--border-color);
-  border-radius: 0px;
-  box-shadow: 4px 4px 0px 0px var(--border-color);
+  border: 1px solid var(--border-color);
 }
 
 /* Glowing animations -> Swiss Red Pulse */

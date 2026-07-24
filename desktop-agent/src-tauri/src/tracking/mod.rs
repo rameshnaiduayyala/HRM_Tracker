@@ -6,7 +6,6 @@ use std::collections::HashSet;
 use std::ffi::OsString;
 use std::os::windows::ffi::OsStringExt;
 use winapi::um::winuser::{GetForegroundWindow, GetWindowTextW, GetWindowTextLengthW, GetWindowThreadProcessId};
-use sysinfo::{System, Pid};
 
 lazy_static! {
     pub static ref KEYBOARD_COUNT: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
@@ -112,15 +111,25 @@ impl TrackingService {
                 "Unknown".to_string()
             };
 
-            // Get process name
+            // Get process name using Win32 APIs
             let mut pid: u32 = 0;
             GetWindowThreadProcessId(hwnd, &mut pid);
             let mut process_name = "Unknown".to_string();
             if pid > 0 {
-                let mut sys = System::new_all();
-                sys.refresh_processes();
-                if let Some(process) = sys.process(Pid::from(pid as usize)) {
-                    process_name = process.name().to_string();
+                use winapi::um::processthreadsapi::OpenProcess;
+                use winapi::um::winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ};
+                use winapi::um::handleapi::CloseHandle;
+                use winapi::um::psapi::GetModuleBaseNameW;
+
+                let handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 0, pid);
+                if !handle.is_null() {
+                    let mut buf = vec![0u16; 260];
+                    let len = GetModuleBaseNameW(handle, std::ptr::null_mut(), buf.as_mut_ptr(), buf.len() as u32);
+                    if len > 0 {
+                        let os_str = OsString::from_wide(&buf[0..(len as usize)]);
+                        process_name = os_str.to_string_lossy().into_owned();
+                    }
+                    CloseHandle(handle);
                 }
             }
 

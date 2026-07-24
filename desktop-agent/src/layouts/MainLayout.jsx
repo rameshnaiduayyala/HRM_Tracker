@@ -32,9 +32,6 @@ export const MainLayout = () => {
                 </span>
               </div>
             )}
-            <button className="btn btn-dark btn-sm px-3 rounded-0 fw-black text-uppercase border-2 border-dark" onClick={logout} style={{ fontSize: '11px', letterSpacing: '0.5px' }}>
-              Exit
-            </button>
           </div>
         </div>
       </nav>

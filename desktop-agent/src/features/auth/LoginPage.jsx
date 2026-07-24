@@ -26,69 +26,82 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="d-flex align-items-center justify-content-center vh-100 bg-dark">
-      <div className="card custom-card p-4 text-light bg-black border-secondary" style={{ width: '400px', borderRadius: '15px' }}>
+    <div className="d-flex align-items-center justify-content-center vh-100" style={{ backgroundColor: '#f3f4f6' }}>
+      <div className="card custom-card p-4 bg-white border border-2 border-dark" style={{ width: '380px', borderRadius: '0px' }}>
         <div className="text-center mb-4">
-          <i className="bi bi-shield-lock-fill text-primary fs-1"></i>
-          <h2 className="mt-2 fw-bold">Agent Secure Login</h2>
-          <p className="text-secondary small">Sign in to begin tracking productivity</p>
+          <div className="d-inline-block p-3 bg-danger text-white border border-2 border-dark mb-3" style={{ fontSize: '24px', fontWeight: '900', lineHeight: '1', width: '60px', height: '60px' }}>
+            +
+          </div>
+          <h4 className="fw-black text-uppercase font-monospace text-dark mb-1" style={{ letterSpacing: '-0.5px' }}>
+            taskTracky Agent
+          </h4>
+          <p className="text-muted text-uppercase font-monospace small mb-0" style={{ fontSize: '10px' }}>
+            Enterprise Authentication
+          </p>
         </div>
+
         {error && (
-          <div className="alert alert-danger d-flex align-items-center py-2" role="alert">
-            <i className="bi bi-exclamation-triangle-fill me-2"></i>
-            <div>{error}</div>
+          <div className="alert alert-danger rounded-0 border border-2 border-dark text-uppercase font-monospace py-2" role="alert" style={{ fontSize: '11px' }}>
+            ⚠️ {error}
           </div>
         )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label className="form-label text-secondary small">Work Email</label>
-            <div className="input-group">
-              <span className="input-group-text bg-dark border-secondary text-light"><i className="bi bi-envelope"></i></span>
-              <input
-                type="email"
-                className="form-control bg-dark text-light border-secondary"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="name@company.com"
-              />
-            </div>
+            <label className="form-label text-uppercase font-monospace text-dark fw-bold mb-1" style={{ fontSize: '10px' }}>
+              Work Email
+            </label>
+            <input
+              type="email"
+              className="form-control rounded-0 border border-2 border-dark font-monospace"
+              style={{ fontSize: '13px', padding: '10px' }}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="EMPLOYEE@COMPANY.COM"
+            />
           </div>
+
           <div className="mb-4">
-            <label className="form-label text-secondary small">Password</label>
-            <div className="input-group">
-              <span className="input-group-text bg-dark border-secondary text-light"><i className="bi bi-key"></i></span>
-              <input
-                type="password"
-                className="form-control bg-dark text-light border-secondary"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-              />
-            </div>
+            <label className="form-label text-uppercase font-monospace text-dark fw-bold mb-1" style={{ fontSize: '10px' }}>
+              Password
+            </label>
+            <input
+              type="password"
+              className="form-control rounded-0 border border-2 border-dark font-monospace"
+              style={{ fontSize: '13px', padding: '10px' }}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+            />
           </div>
+
           <div className="mb-4 form-check">
             <input
               type="checkbox"
-              className="form-check-input"
+              className="form-check-input rounded-0 border border-2 border-dark"
               id="rememberCheck"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
             />
-            <label className="form-check-label text-secondary small" htmlFor="rememberCheck">
+            <label className="form-check-label text-uppercase font-monospace text-muted fw-bold" htmlFor="rememberCheck" style={{ fontSize: '9px', userSelect: 'none' }}>
               Remember login on this device
             </label>
           </div>
-          <button type="submit" className="btn btn-primary w-100 py-2 fw-bold" disabled={loading}>
-            {loading ? (
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            ) : null}
-            Authenticate & Register
+
+          <button
+            type="submit"
+            className="btn btn-danger w-100 py-3 rounded-0 border border-2 border-dark text-uppercase fw-black font-monospace"
+            disabled={loading}
+            style={{ backgroundColor: 'var(--primary-color)' }}
+          >
+            {loading ? 'AUTHENTICATING...' : 'AUTHENTICATE'}
           </button>
         </form>
       </div>
     </div>
   );
 };
+
 export default LoginPage;

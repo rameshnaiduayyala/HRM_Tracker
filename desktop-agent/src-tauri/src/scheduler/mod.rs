@@ -4,6 +4,7 @@ use crate::database::SqliteService;
 use crate::screenshots::ScreenshotService;
 use crate::tracking::{TrackingService, KEYBOARD_COUNT, MOUSE_COUNT};
 use serde_json::json;
+use tauri::Emitter;
 
 lazy_static! {
     static ref SCHEDULER_RUNNING: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
@@ -12,7 +13,7 @@ lazy_static! {
 pub struct BackgroundScheduler;
 
 impl BackgroundScheduler {
-    pub fn start() {
+    pub fn start(app: tauri::AppHandle) {
         if let Ok(mut running) = SCHEDULER_RUNNING.lock() {
             if *running {
                 return;
@@ -20,9 +21,10 @@ impl BackgroundScheduler {
             *running = true;
         }
 
-        tokio::spawn(async {
+        tokio::spawn(async move {
             let client = reqwest::Client::new();
             let mut tick_count = 0;
+            let mut cumulative_idle_secs = 0;
 
             loop {
                 {
@@ -53,7 +55,28 @@ impl BackgroundScheduler {
                         *lock = 0;
                     }
 
-                    // 2. Get active window details
+                    // 2. Inactivity Detection (Threshold: 300 seconds)
+                    if kbd_diff + mouse_diff > 0 {
+                        cumulative_idle_secs = 0;
+                    } else {
+                        cumulative_idle_secs += 10;
+                    }
+
+                    if cumulative_idle_secs >= 300 {
+                        cumulative_idle_secs = 0;
+                        
+                        // Auto-pause tracking
+                        if let Ok(mut running) = SCHEDULER_RUNNING.lock() {
+                            *running = false;
+                        }
+                        TrackingService::pause();
+
+                        // Notify frontend
+                        let _ = app.emit("inactivity-detected", ());
+                        break;
+                    }
+
+                    // 3. Get active window details
                     let (app_process, window_title) = TrackingService::get_active_window_details();
 
                     // Calculate active/idle duration based on keyboard/mouse clicks
@@ -63,7 +86,7 @@ impl BackgroundScheduler {
                         (0, 10)
                     };
 
-                    // 3. Send Heartbeat to legacy API
+                    // 4. Send Heartbeat to legacy API
                     let heartbeat_payload = json!({
                         "app": app_process,
                         "windowTitle": window_title,
@@ -87,7 +110,7 @@ impl BackgroundScheduler {
                         }
                     }
 
-                    // 4. Periodically capture screen & upload/cache
+                    // 5. Periodically capture screen & upload/cache
                     tick_count += 10;
                     if tick_count >= 60 {
                         tick_count = 0;
