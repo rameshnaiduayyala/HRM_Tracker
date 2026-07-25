@@ -97,7 +97,17 @@ pub fn get_pending_sync_count() -> Result<i64, String> {
 #[tauri::command]
 pub fn toggle_autostart(app_name: String, app_path: String, enable: bool) -> Result<(), String> {
     if enable {
-        StartupService::enable_autostart(&app_name, &app_path)
+        let path = if app_path.is_empty() {
+            std::env::current_exe()
+                .map(|p| p.to_string_lossy().to_string())
+                .unwrap_or_default()
+        } else {
+            app_path
+        };
+        if path.is_empty() {
+            return Err("Could not determine executable path for autostart".to_string());
+        }
+        StartupService::enable_autostart(&app_name, &path)
     } else {
         StartupService::disable_autostart(&app_name)
     }

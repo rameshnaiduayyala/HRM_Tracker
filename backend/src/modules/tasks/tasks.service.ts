@@ -178,7 +178,9 @@ export class TasksService {
           },
         },
         project: true,
-        comments: true,
+        comments: {
+          orderBy: { createdAt: 'asc' }
+        },
         timeLogs: {
           include: {
             employee: {
@@ -187,6 +189,7 @@ export class TasksService {
               },
             },
           },
+          orderBy: { loggedAt: 'desc' }
         },
       },
     });
@@ -195,7 +198,23 @@ export class TasksService {
       throw new NotFoundError('Task not found');
     }
 
-    return task;
+    const authorIds = task.comments.map(c => c.authorId);
+    const users = await prisma.user.findMany({
+      where: { id: { in: authorIds } },
+      select: { id: true, firstName: true, lastName: true }
+    });
+
+    const userMap = new Map(users.map(u => [u.id, u]));
+
+    const commentsWithAuthors = task.comments.map(c => ({
+      ...c,
+      author: userMap.get(c.authorId) || { firstName: 'Team', lastName: 'Member' }
+    }));
+
+    return {
+      ...task,
+      comments: commentsWithAuthors
+    };
   }
 
   async createTask(data: {
