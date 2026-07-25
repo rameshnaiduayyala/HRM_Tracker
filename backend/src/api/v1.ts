@@ -17,6 +17,7 @@ import notificationsRoutes from '../modules/notifications/notifications.routes';
 import announcementsRoutes from '../modules/announcements/announcements.routes';
 import settingsRoutes from '../modules/settings/settings.routes';
 import reportsRoutes from '../modules/reports/reports.routes';
+import timesheetsRoutes from '../modules/timesheets/timesheets.routes';
 
 import { authenticate } from '../modules/authentication/auth.middleware';
 
@@ -42,5 +43,6 @@ router.use('/notifications', notificationsRoutes);
 router.use('/announcements', announcementsRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/reports', reportsRoutes);
+router.use('/timesheets', timesheetsRoutes);
 
 export default router;

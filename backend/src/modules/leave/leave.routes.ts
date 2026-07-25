@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { leaveController } from './leave.controller';
 import { authenticate } from '../authentication/auth.middleware';
 import { companyGuard } from '../../shared/middlewares/companyGuard';
+import { requireEntitlement } from '../tenants/entitlements.service';
 
 const router = Router();
 
 router.use(authenticate);
 router.use(companyGuard);
+router.use(requireEntitlement('leave'));
 
 // Leave Types
 router.get('/types', leaveController.listTypes);

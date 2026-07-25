@@ -119,6 +119,7 @@ model Employee {
   taskTimeLogs   TaskTimeLog[]
   projectMembers ProjectMember[]
   payslips       Payslip[]
+  timesheets     Timesheet[]
 
   @@map("employees")
 }
@@ -449,16 +450,34 @@ model TaskComment {
 }
 
 model TaskTimeLog {
-  id         String   @id @default(uuid())
-  taskId     String
-  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  minutes    Int
-  note       String?
-  loggedAt   DateTime @default(now())
+  id          String     @id @default(uuid())
+  taskId      String
+  task        Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  employeeId  String
+  employee    Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  minutes     Int
+  note        String?
+  loggedAt    DateTime   @default(now())
+  timesheetId String?
+  timesheet   Timesheet? @relation(fields: [timesheetId], references: [id], onDelete: SetNull)
 
   @@map("task_time_logs")
+}
+
+model Timesheet {
+  id          String        @id @default(uuid())
+  employeeId  String
+  employee    Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime
+  status      String        @default("PENDING") // PENDING, APPROVED, REJECTED
+  submittedAt DateTime      @default(now())
+  approvedAt  DateTime?
+  approvedBy  String?
+  comments    String?
+  timeLogs    TaskTimeLog[]
+
+  @@map("timesheets")
 }
 
 model ProjectMember {

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { employeesService } from './employees.service';
 import { ValidationError, BadRequestError, NotFoundError } from '../../shared/errors';
+import { AuditService } from '../../shared/services/audit.service';
 
 const createEmployeeSchema = z.object({
   employeeNum: z.string().min(2, 'Employee number is required'),
@@ -61,6 +62,19 @@ export class EmployeesController {
       }
 
       const employee = await employeesService.createEmployee(req.tenantId!, parsed.data);
+
+      if (employee) {
+        // Audit Log employee onboarding success
+        await AuditService.log({
+          companyId: employee.companyId,
+          userId: (req as any).user?.id || undefined,
+          action: 'EMPLOYEE_CREATE',
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+          details: { employeeId: employee.id, employeeNum: employee.employeeNum, email: parsed.data.email },
+        });
+      }
+
       return res.status(201).json({
         status: 'success',
         data: { employee },
@@ -85,6 +99,19 @@ export class EmployeesController {
       }
 
       const employee = await employeesService.updateEmployee(id, companyId, parsed.data);
+
+      if (employee) {
+        // Audit Log employee update success
+        await AuditService.log({
+          companyId: employee.companyId,
+          userId: (req as any).user?.id || undefined,
+          action: 'EMPLOYEE_UPDATE',
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+          details: { employeeId: employee.id, status: parsed.data.status },
+        });
+      }
+
       return res.status(200).json({
         status: 'success',
         data: { employee },
@@ -122,6 +149,17 @@ export class EmployeesController {
         return next(new BadRequestError('companyId is required'));
       }
       await employeesService.deleteEmployee(id, companyId);
+
+      // Audit Log employee deletion success
+      await AuditService.log({
+        companyId,
+        userId: (req as any).user?.id || undefined,
+        action: 'EMPLOYEE_DELETE',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        details: { employeeId: id },
+      });
+
       return res.status(200).json({
         status: 'success',
         message: 'Employee profile and user account deleted successfully',

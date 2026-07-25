@@ -38,7 +38,7 @@ export default function Login() {
     setLoading(true);
     try {
       const response = await authApi.login(email, password);
-      setAuth(response.data.accessToken, response.data.user);
+      setAuth(response.data.accessToken, response.data.user, response.data.refreshToken);
 
       const isHR = response.data.user.role === 'HR';
       const isManagement = ['ADMIN', 'SUPER_ADMIN', 'MANAGER'].includes(response.data.user.role);
@@ -59,7 +59,7 @@ export default function Login() {
     setLoading(true);
     try {
       const response = await authApi.login(targetEmail, targetPassword);
-      setAuth(response.data.accessToken, response.data.user);
+      setAuth(response.data.accessToken, response.data.user, response.data.refreshToken);
 
       const isHR = response.data.user.role === 'HR';
       const isManagement = ['ADMIN', 'SUPER_ADMIN', 'MANAGER'].includes(response.data.user.role);

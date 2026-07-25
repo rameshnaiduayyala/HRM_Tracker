@@ -1,6 +1,7 @@
 import React from 'react';
 import { Building, Users, Briefcase, Settings, LayoutGrid, BarChart3, Clock, FileText, Building2, Calendar, Bell, CheckSquare, Sparkles, ChevronRight } from 'lucide-react';
 import Select from './Select';
+import { useEntitlements } from '../contexts/EntitlementContext';
 
 const NavItem = ({ icon: Icon, label, active, onClick, iconColor }) => (
   <button
@@ -35,6 +36,7 @@ export default function Sidebar({
   const isCompanyAdmin = ['ADMIN', 'MANAGER', 'HR'].includes(user?.role);
   const isStaff        = user?.role === 'EMPLOYEE';
   const isHR           = user?.role === 'HR';
+  const { canUse }     = useEntitlements();
 
   return (
     <aside
@@ -77,12 +79,12 @@ export default function Sidebar({
         {!isStaff && (
           <NavSection label="Overview">
             {isHR ? (
-              <NavItem icon={LayoutGrid} label="HRM Dashboard" active={activeTab === 'hrm-dashboard'} onClick={() => setActiveTab('hrm-dashboard')} iconColor="#818cf8" />
+              canUse('hrm') && <NavItem icon={LayoutGrid} label="HRM Dashboard" active={activeTab === 'hrm-dashboard'} onClick={() => setActiveTab('hrm-dashboard')} iconColor="#818cf8" />
             ) : (
               <NavItem icon={BarChart3} label="Overview Dashboard" active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
             )}
 
-            {!isSuperAdmin && !isHR && (
+            {!isSuperAdmin && !isHR && canUse('tracking') && (
               <NavItem icon={Sparkles} label="AI Copilot" active={activeTab === 'ai-analytics'} onClick={() => setActiveTab('ai-analytics')} iconColor="#a78bfa" />
             )}
           </NavSection>
@@ -99,18 +101,20 @@ export default function Sidebar({
         {/* Company Admin / HR */}
         {isCompanyAdmin && (
           <>
-            <NavSection label="People">
-              <NavItem icon={Users} label="Staff Directory" active={activeTab === 'employees'} onClick={() => setActiveTab('employees')} />
+            {canUse('hrm') && (
+              <NavSection label="People">
+                <NavItem icon={Users} label="Staff Directory" active={activeTab === 'employees'} onClick={() => setActiveTab('employees')} />
 
-              {!isHR && (
-                <>
-                  <NavItem icon={Building2}   label="Departments"     active={activeTab === 'departments'} onClick={() => setActiveTab('departments')} />
-                  <NavItem icon={Users}        label="Teams"           active={activeTab === 'teams'}       onClick={() => setActiveTab('teams')} />
-                </>
-              )}
-            </NavSection>
+                {!isHR && (
+                  <>
+                    <NavItem icon={Building2}   label="Departments"     active={activeTab === 'departments'} onClick={() => setActiveTab('departments')} />
+                    <NavItem icon={Users}        label="Teams"           active={activeTab === 'teams'}       onClick={() => setActiveTab('teams')} />
+                  </>
+                )}
+              </NavSection>
+            )}
 
-            {!isHR && (
+            {!isHR && canUse('projects') && (
               <NavSection label="Work">
                 <NavItem icon={Briefcase}   label="Projects & Boards" active={activeTab === 'projects'} onClick={() => setActiveTab('projects')} />
                 <NavItem icon={CheckSquare} label="Task Board"        active={activeTab === 'tasks'}    onClick={() => setActiveTab('tasks')} />
@@ -118,10 +122,11 @@ export default function Sidebar({
             )}
 
             <NavSection label="HR & Payroll">
-              <NavItem icon={Calendar}  label="Leave Management"   active={activeTab === 'leaves'}        onClick={() => setActiveTab('leaves')} />
+              {canUse('leave') && <NavItem icon={Calendar}  label="Leave Management"   active={activeTab === 'leaves'}        onClick={() => setActiveTab('leaves')} />}
               <NavItem icon={Bell}      label="Communications"     active={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} />
-              <NavItem icon={Clock}     label="Time Reports"       active={activeTab === 'reports'}       onClick={() => setActiveTab('reports')} />
-              {(user?.role === 'ADMIN' || isHR) && (
+              {canUse('reports') && <NavItem icon={Clock}     label="Time Reports"       active={activeTab === 'reports'}       onClick={() => setActiveTab('reports')} />}
+              {canUse('timesheets') && <NavItem icon={FileText} label="Timesheet Review"   active={activeTab === 'timesheets'}    onClick={() => setActiveTab('timesheets')} />}
+              {canUse('hrm') && (user?.role === 'ADMIN' || isHR) && (
                 <NavItem icon={FileText} label="Payslip Management" active={activeTab === 'payslips' || activeTab === 'print-payslip'} onClick={() => setActiveTab('payslips')} iconColor="#a78bfa" />
               )}
             </NavSection>
@@ -137,9 +142,10 @@ export default function Sidebar({
         {/* Staff (Employee) */}
         {isStaff && (
           <NavSection label="My Workspace">
-            <NavItem icon={Clock}       label="Shift Attendance" active={activeTab === 'attendance'}   onClick={() => setActiveTab('attendance')} />
-            <NavItem icon={CheckSquare} label="My Tasks"         active={activeTab === 'tasks'}        onClick={() => setActiveTab('tasks')} />
-            <NavItem icon={Calendar}    label="My Leaves"        active={activeTab === 'leaves'}       onClick={() => setActiveTab('leaves')} />
+            {canUse('attendance') && <NavItem icon={Clock}       label="Shift Attendance" active={activeTab === 'attendance'}   onClick={() => setActiveTab('attendance')} />}
+            {canUse('projects') && <NavItem icon={CheckSquare} label="My Tasks"         active={activeTab === 'tasks'}        onClick={() => setActiveTab('tasks')} />}
+            {canUse('leave') && <NavItem icon={Calendar}    label="My Leaves"        active={activeTab === 'leaves'}       onClick={() => setActiveTab('leaves')} />}
+            {canUse('timesheets') && <NavItem icon={Clock}     label="My Timesheets"     active={activeTab === 'timesheets'}   onClick={() => setActiveTab('timesheets')} />}
             <NavItem icon={Bell}        label="Communications"   active={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} />
           </NavSection>
         )}
@@ -152,7 +158,3 @@ export default function Sidebar({
     </aside>
   );
 }
-
-
-
-

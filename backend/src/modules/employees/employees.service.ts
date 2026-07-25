@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import fs from 'fs';
 import path from 'path';
 import { prisma } from '../../shared/database';
+import { entitlementsService } from '../tenants/entitlements.service';
 
 export class EmployeesService {
   async getEmployeesByCompany(companyId: string) {
@@ -100,25 +101,16 @@ export class EmployeesService {
     }
   ) {
     return prisma.$transaction(async (tx) => {
-      // Enforce subscription plan employee limit check
-      const activeSubscription = await tx.subscription.findFirst({
-        where: {
-          companyId: data.companyId,
-          status: 'ACTIVE',
-        },
-        include: { plan: true },
+      // Enforce subscription plan employee limit check using centralized EntitlementsService
+      const currentCount = await tx.employee.count({
+        where: { companyId: data.companyId },
       });
 
-      if (activeSubscription) {
-        const currentCount = await tx.employee.count({
-          where: { companyId: data.companyId },
-        });
-
-        if (currentCount >= activeSubscription.plan.employeeLimit) {
-          throw new Error(
-            `Employee limit reached. Your active subscription plan "${activeSubscription.plan.name}" limits your workspace to a maximum of ${activeSubscription.plan.employeeLimit} employee profiles. Please upgrade your plan.`
-          );
-        }
+      const employeeLimit = await entitlementsService.getLimit(data.companyId, 'employees');
+      if (employeeLimit > 0 && currentCount >= employeeLimit) {
+        throw new Error(
+          `Employee limit reached. Your active subscription plan limits your workspace to a maximum of ${employeeLimit} employee profiles. Please upgrade your plan.`
+        );
       }
 
       let finalUserId = data.userId;

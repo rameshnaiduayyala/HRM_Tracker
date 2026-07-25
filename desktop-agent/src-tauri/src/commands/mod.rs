@@ -3,6 +3,7 @@ use crate::services::system_service::SystemService;
 use crate::tracking::TrackingService;
 use crate::database::SqliteService;
 use crate::scheduler::BackgroundScheduler;
+use crate::startup::StartupService;
 use std::sync::{Arc, Mutex};
 use lazy_static::lazy_static;
 
@@ -91,6 +92,15 @@ pub async fn stop_tracking_command(_reason: String) -> Result<(), String> {
 #[tauri::command]
 pub fn get_pending_sync_count() -> Result<i64, String> {
     SqliteService::get_pending_count()
+}
+
+#[tauri::command]
+pub fn toggle_autostart(app_name: String, app_path: String, enable: bool) -> Result<(), String> {
+    if enable {
+        StartupService::enable_autostart(&app_name, &app_path)
+    } else {
+        StartupService::disable_autostart(&app_name)
+    }
 }
 
 pub fn is_inactivity_active() -> bool {

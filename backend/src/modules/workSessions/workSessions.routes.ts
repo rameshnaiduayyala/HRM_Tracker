@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import { workSessionsController } from './workSessions.controller';
+import { requireEntitlement } from '../tenants/entitlements.service';
 
 const router = Router();
+
+router.use(requireEntitlement('tracking'));
 
 router.post('/start', workSessionsController.start);
 router.post('/stop', workSessionsController.stop);

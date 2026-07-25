@@ -95,7 +95,8 @@ fn main() {
             pause_tracking_command,
             resume_tracking_command,
             stop_tracking_command,
-            get_pending_sync_count
+            get_pending_sync_count,
+            toggle_autostart
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

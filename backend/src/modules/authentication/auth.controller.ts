@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { authService } from './auth.service';
 import { ValidationError } from '../../shared/errors';
+import { AuditService } from '../../shared/services/audit.service';
+import { prisma } from '../../shared/database';
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -64,6 +66,17 @@ export class AuthController {
         deviceFingerprint: parsed.data.deviceFingerprint,
       });
 
+      // Audit Log authentication success
+      const emp = await prisma.employee.findFirst({ where: { userId: result.user.id } });
+      await AuditService.log({
+        companyId: emp?.companyId || undefined,
+        userId: result.user.id,
+        action: 'LOGIN',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        details: { email: result.user.email, platform: 'web' },
+      });
+
       return res.status(200).json({
         status: 'success',
         data: result,
@@ -102,6 +115,17 @@ export class AuthController {
         email: parsed.data.email,
         passwordHash: parsed.data.password,
         deviceFingerprint: parsed.data.deviceFingerprint,
+      });
+
+      // Audit Log desktop legacy authentication success
+      const emp = await prisma.employee.findFirst({ where: { userId: result.user.id } });
+      await AuditService.log({
+        companyId: emp?.companyId || undefined,
+        userId: result.user.id,
+        action: 'LOGIN',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        details: { email: result.user.email, platform: 'desktop' },
       });
 
       return res.status(200).json({

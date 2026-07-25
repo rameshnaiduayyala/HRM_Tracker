@@ -5,3 +5,4 @@ pub mod database;
 pub mod tracking;
 pub mod screenshots;
 pub mod scheduler;
+pub mod startup;

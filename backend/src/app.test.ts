@@ -37,6 +37,47 @@ beforeAll(async () => {
   });
   acmeCompanyId = company!.id;
 
+  // Extend Acme subscription endDate to prevent expiration during test runs (year 2026 context)
+  const acmeSub = await prisma.subscription.findFirst({
+    where: { companyId: acmeCompanyId },
+  });
+  
+  if (acmeSub) {
+    let targetPlan = await prisma.plan.findFirst({
+      where: {
+        OR: [
+          { name: 'PRO' },
+          { name: 'ENTERPRISE' },
+          { features: { has: 'Task Management' } }
+        ]
+      }
+    });
+
+    if (!targetPlan) {
+      // Fallback: update existing plan to support Task Management
+      const existingPlan = await prisma.plan.findFirst();
+      if (existingPlan) {
+        targetPlan = await prisma.plan.update({
+          where: { id: existingPlan.id },
+          data: {
+            features: Array.from(new Set([...existingPlan.features, 'Task Management'])),
+          },
+        });
+      }
+    }
+
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 10);
+    await prisma.subscription.update({
+      where: { id: acmeSub.id },
+      data: { 
+        endDate: futureDate, 
+        status: 'ACTIVE',
+        ...(targetPlan && { planId: targetPlan.id })
+      },
+    });
+  }
+
   // Seed another Tenant and Company
   const otherTenant = await prisma.tenant.create({
     data: {
@@ -160,5 +201,15 @@ describe('Backend API Integration Tests & Tenant Isolation', () => {
     await prisma.device.delete({
       where: { fingerprint: 'test-fingerprint-uuid-abc-123' },
     });
+  });
+
+  it('Acme Admin can fetch Timesheets successfully (Entitlement & Auth Check)', async () => {
+    const res = await fetch(`${baseUrl}/api/v1/timesheets`, {
+      headers: { 'Authorization': `Bearer ${acmeToken}` },
+    });
+    expect(res.status).toBe(200);
+    const data: any = await res.json();
+    expect(data.status).toBe('success');
+    expect(Array.isArray(data.data.timesheets)).toBe(true);
   });
 });

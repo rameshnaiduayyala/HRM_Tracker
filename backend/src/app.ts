@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import v1Router from './api/v1';
 import legacyRouter from './api/legacy';
@@ -20,6 +21,16 @@ app.use(helmet({
 
 // Enable CORS
 app.use(cors());
+
+// Rate Limiting (Brute-force and DDoS protection)
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 2500, // Limit each IP to 2500 requests per 15 mins (ample for high-freq desktop heartbeats)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { status: 'error', message: 'Too many requests from this IP, please try again later.' }
+});
+app.use(globalLimiter);
 
 // Parse incoming request JSON payloads (increased for base64 screens)
 app.use(express.json({ limit: '50mb' }));

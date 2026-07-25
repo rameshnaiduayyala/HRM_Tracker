@@ -7,13 +7,14 @@ import Sidebar from '../components/Sidebar';
 import LeavesTab from '../components/dashboard/LeavesTab';
 import TasksTab from '../components/dashboard/TasksTab';
 import NotificationsTab from '../components/dashboard/NotificationsTab';
+import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import { Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function EmployeePortal() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('attendance'); // attendance, tasks, leaves, notifications
+  const [activeTab, setActiveTab] = useState('attendance'); // attendance, tasks, leaves, notifications, timesheets
 
   const [attendance, setAttendance] = useState(null);
   const [clockedIn, setClockedIn] = useState(false);
@@ -148,6 +149,11 @@ export default function EmployeePortal() {
             <NotificationsTab
               companyId={employeeProfile.companyId}
             />
+          )}
+
+          {/* Timesheets Tab */}
+          {activeTab === 'timesheets' && employeeProfile && (
+            <TimesheetsTab />
           )}
         </main>
       </div>

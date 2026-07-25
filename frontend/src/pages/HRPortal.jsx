@@ -10,6 +10,7 @@ import PayslipsTab from '../components/dashboard/PayslipsTab';
 import ReportsTab from '../components/dashboard/ReportsTab';
 import SettingsTab from '../components/dashboard/SettingsTab';
 import PrintPayslipView from '../components/dashboard/PrintPayslipView';
+import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import { Users, Calendar, Clock, DollarSign, ArrowUpRight, TrendingUp, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -289,6 +290,11 @@ export default function HRPortal() {
             <SettingsTab
               companyId={selectedCompanyId}
             />
+          )}
+
+          {/* 6.5 Timesheets Tab */}
+          {activeTab === 'timesheets' && (
+            <TimesheetsTab />
           )}
         </main>
       </div>

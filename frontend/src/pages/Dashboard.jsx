@@ -20,6 +20,7 @@ import SettingsTab from '../components/dashboard/SettingsTab';
 import AIAnalyticsTab from '../components/dashboard/AIAnalyticsTab';
 import PayslipsTab from '../components/dashboard/PayslipsTab';
 import PrintPayslipView from '../components/dashboard/PrintPayslipView';
+import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -67,6 +68,9 @@ export default function Dashboard() {
     'reports',
     'settings',
     'configurations',
+    'payslips',
+    'timesheets',
+    'print-payslip',
   ];
   const activeTab = validTabs.includes(lastPathPart) ? lastPathPart : 'analytics';
 
@@ -579,6 +583,10 @@ export default function Dashboard() {
               payslip={viewingPayslip}
               onBack={handleBackFromPrint}
             />
+          )}
+
+          {!isSuperAdmin && activeTab === 'timesheets' && (
+            <TimesheetsTab />
           )}
 
           {!isSuperAdmin && activeTab === 'reports' && (
