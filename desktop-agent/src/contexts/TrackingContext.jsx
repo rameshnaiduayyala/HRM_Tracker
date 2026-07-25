@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/plugin-notification';
 import apiClient from '../api/apiClient';
 import { LOCAL_STORAGE_JWT_KEY } from '../constants/appConstants';
 import { useAuth } from './AuthContext';
@@ -20,6 +21,28 @@ export const TrackingProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
   const [activeTask, setActiveTask] = useState(null);
   const statsIntervalRef = useRef(null);
+
+  // Request notifications permission on startup
+  useEffect(() => {
+    const askPermission = async () => {
+      try {
+        const granted = await isPermissionGranted();
+        if (!granted) {
+          await requestPermission();
+        }
+      } catch (_) {}
+    };
+    askPermission();
+  }, []);
+
+  const triggerNotification = async (title, body) => {
+    try {
+      const granted = await isPermissionGranted();
+      if (granted) {
+        sendNotification({ title, body });
+      }
+    } catch (_) {}
+  };
 
   const addLog = (msg) => {
     const timeStr = new Date().toLocaleTimeString();
@@ -92,6 +115,7 @@ export const TrackingProvider = ({ children }) => {
         setIsPaused(true);
         setShowReasonModal(true);
         addLog(`⚠ Inactivity detected. Window forced open — submit a reason to continue.`);
+        triggerNotification('Inactivity Detected', 'Please enter a reason to resume session tracking.');
       };
 
       try {
@@ -154,6 +178,7 @@ export const TrackingProvider = ({ children }) => {
       setShiftActive(true);
       setIsPaused(false);
       addLog('✔ Work session started. Background tracker active.');
+      triggerNotification('Tracking Started', 'WorkforcePro is now recording your session activity.');
     } catch (e) {
       const msg = e.response?.data?.message || e.message;
       addLog('✖ Start tracker failed: ' + msg);
@@ -166,6 +191,7 @@ export const TrackingProvider = ({ children }) => {
       await invoke('pause_tracking_command');
       setIsPaused(true);
       addLog('⏸ Tracker paused.');
+      triggerNotification('Tracking Paused', 'Session recording is temporarily suspended.');
     } catch (e) {
       addLog('✖ Pause failed: ' + e.message);
       throw e;
@@ -182,6 +208,7 @@ export const TrackingProvider = ({ children }) => {
       });
       setIsPaused(false);
       addLog('▶ Tracker resumed.');
+      triggerNotification('Tracking Resumed', 'WorkforcePro has resumed recording your activity.');
     } catch (e) {
       addLog('✖ Resume failed: ' + e.message);
       throw e;
@@ -195,6 +222,7 @@ export const TrackingProvider = ({ children }) => {
       setShiftActive(false);
       setIsPaused(false);
       addLog(`✔ Work session stopped. Reason: ${reason}`);
+      triggerNotification('Tracking Stopped', 'Your work session has been logged and ended.');
     } catch (e) {
       const msg = e.response?.data?.message || e.message;
       addLog('✖ Stop tracker failed: ' + msg);
