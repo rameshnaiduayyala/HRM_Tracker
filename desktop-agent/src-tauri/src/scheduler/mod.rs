@@ -109,6 +109,7 @@ impl BackgroundScheduler {
                         let _ = window.unminimize();
                         let _ = window.set_focus();
                         let _ = window.set_always_on_top(true);
+                        let _ = window.emit("inactivity-detected", ());
                     }
 
                     // Notify the frontend to display the unclosable reason modal

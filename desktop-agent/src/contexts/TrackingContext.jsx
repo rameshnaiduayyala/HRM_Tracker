@@ -79,19 +79,34 @@ export const TrackingProvider = ({ children }) => {
     return () => clearInterval(statsIntervalRef.current);
   }, [shiftActive, isPaused]);
 
-  // Listen for Rust inactivity detection — force window visible + show unclosable modal
+  // Listen for Rust inactivity detection — force window visible, pause shift + show unclosable modal
   useEffect(() => {
-    let unlisten;
+    let unlistenApp;
+    let unlistenWin;
     const setupListener = async () => {
-      unlisten = await listen('inactivity-detected', async () => {
+      const handler = () => {
         setIsPaused(true);
         setShowReasonModal(true);
-        addLog(`⚠ Inactivity detected (${agentConfig.idleThreshold}s). Window forced open — submit a reason to continue.`);
-      });
+        addLog(`⚠ Inactivity detected. Window forced open — submit a reason to continue.`);
+      };
+
+      try {
+        unlistenApp = await listen('inactivity-detected', handler);
+      } catch (e) { console.error('Failed to listen to global inactivity-detected:', e); }
+
+      try {
+        const win = getCurrentWindow();
+        unlistenWin = await win.listen('inactivity-detected', handler);
+      } catch (e) { console.error('Failed to listen to window inactivity-detected:', e); }
     };
+
     setupListener();
-    return () => { if (unlisten) unlisten(); };
-  }, [agentConfig.idleThreshold]);
+
+    return () => {
+      if (typeof unlistenApp === 'function') unlistenApp();
+      if (typeof unlistenWin === 'function') unlistenWin();
+    };
+  }, []);
 
 
 
@@ -124,7 +139,7 @@ export const TrackingProvider = ({ children }) => {
     try {
       // Fetch latest company config before starting
       const cfg = await fetchAgentConfig();
-      const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY) || '';
+      const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY) || sessionStorage.getItem(LOCAL_STORAGE_JWT_KEY) || '';
 
       await apiClient.post('/work-sessions/start');
       await invoke('start_tracking_command', {
@@ -155,7 +170,7 @@ export const TrackingProvider = ({ children }) => {
 
   const resumeShift = async () => {
     try {
-      const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY) || '';
+      const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY) || sessionStorage.getItem(LOCAL_STORAGE_JWT_KEY) || '';
       await invoke('resume_tracking_command', {
         token,
         screenshotInterval: agentConfig.screenshotInterval,
