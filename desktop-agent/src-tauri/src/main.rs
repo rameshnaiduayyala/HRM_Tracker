@@ -7,7 +7,7 @@ use employee_tracker_agent_lib::commands::*;
 use tauri::{
     menu::{MenuBuilder, MenuItem},
     tray::TrayIconBuilder,
-    Emitter, Manager,
+    Manager,
 };
 
 fn main() {
@@ -74,21 +74,15 @@ fn main() {
         .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
-                let is_inactivity = {
-                    if let Ok(lock) = employee_tracker_agent_lib::commands::IN_INACTIVITY_MODAL.lock() {
-                        *lock
-                    } else {
-                        false
-                    }
-                };
+                let is_inactivity = employee_tracker_agent_lib::commands::is_inactivity_active();
 
                 if is_inactivity {
-                    // Idle state -> force window visible & focused, block close/hide
+                    // Idle state -> force window visible & focused, block close/hide until reason entered
                     let _ = window.show();
                     let _ = window.unminimize();
                     let _ = window.set_focus();
                 } else {
-                    // Standard state -> hide window immediately to system tray
+                    // Normal work, paused, login page, logged out -> hide window immediately to system tray
                     let _ = window.hide();
                 }
             }

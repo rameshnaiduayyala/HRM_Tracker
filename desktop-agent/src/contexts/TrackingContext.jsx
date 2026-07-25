@@ -189,10 +189,11 @@ export const TrackingProvider = ({ children }) => {
       setShowReasonModal(false);
       addLog(`✔ Inactivity reason logged: ${reason}. Resuming session...`);
 
-      // Remove always-on-top after reason submitted
+      // Remove always-on-top and close/hide window after reason submitted
       try {
         const win = getCurrentWindow();
         await win.setAlwaysOnTop(false);
+        await win.hide();
       } catch (_) { /* non-critical */ }
 
       // Auto-resume the session

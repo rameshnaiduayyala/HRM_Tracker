@@ -147,4 +147,12 @@ impl TrackingService {
             active_window: title,
         }
     }
+
+    pub fn is_active() -> bool {
+        if let Ok(lock) = TRACKING_ACTIVE.lock() {
+            *lock
+        } else {
+            false
+        }
+    }
 }

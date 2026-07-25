@@ -24,12 +24,19 @@ export const DashboardPage = () => {
   const { logout } = useAuth();
   const [sysInfo, setSysInfo] = useState(null);
   const [sessionTime, setSessionTime] = useState(0);
-  const [selectedReason, setSelectedReason] = useState('End of Day');
+  const [selectedReason, setSelectedReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showStopModal, setShowStopModal] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [stopActionType, setStopActionType] = useState('tracker');
+
+  useEffect(() => {
+    if (showReasonModal || showStopModal) {
+      setSelectedReason('');
+      setCustomReason('');
+    }
+  }, [showReasonModal, showStopModal]);
 
   useEffect(() => {
     invoke('get_system_info')
@@ -156,12 +163,13 @@ export const DashboardPage = () => {
           onSelectOption={setSelectedReason}
           customReason={customReason}
           onChangeCustomReason={setCustomReason}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || !selectedReason || (selectedReason === 'Other' && !customReason.trim())}
           onSubmit={async () => {
+            if (!selectedReason || (selectedReason === 'Other' && !customReason.trim())) return;
             setIsSubmitting(true);
             try {
               const reason = selectedReason === 'Other' ? customReason : selectedReason;
-              await submitStopReason(reason || 'Idle');
+              await submitStopReason(reason);
             } catch (e) { console.error(e); }
             finally { setIsSubmitting(false); }
           }}
@@ -179,13 +187,14 @@ export const DashboardPage = () => {
           onSelectOption={setSelectedReason}
           customReason={customReason}
           onChangeCustomReason={setCustomReason}
-          isSubmitting={false}
+          isSubmitting={!selectedReason || (selectedReason === 'Other' && !customReason.trim())}
           onSubmit={async () => {
+            if (!selectedReason || (selectedReason === 'Other' && !customReason.trim())) return;
             const reason = selectedReason === 'Other' ? customReason : selectedReason;
             setShowStopModal(false);
             setCustomReason('');
             if (stopActionType === 'tracker') {
-              await endShift(reason || 'Manual Stop');
+              await endShift(reason);
               if (clockedIn) {
                 await clockOut();
               }

@@ -168,6 +168,7 @@ export default function SettingsTab({ companyId }) {
                   onChange={(e) => setSettings({ ...settings, idleThreshold: Number(e.target.value) })}
                   className={inputClass}
                 >
+                  <option value={10}>10 Seconds (Test/Debug)</option>
                   <option value={60}>1 Minute (Strict)</option>
                   <option value={120}>2 Minutes</option>
                   <option value={180}>3 Minutes</option>
@@ -176,7 +177,7 @@ export default function SettingsTab({ companyId }) {
                   <option value={900}>15 Minutes (Relaxed)</option>
                 </select>
                 <p className="text-[9px] text-[var(--text-muted)] mt-2 font-mono">
-                  Current: {settings.idleThreshold}s ({Math.round(settings.idleThreshold / 60)} min)
+                  Current: {settings.idleThreshold}s {settings.idleThreshold >= 60 ? `(${Math.round(settings.idleThreshold / 60)} min)` : ''}
                 </p>
               </div>
             </div>

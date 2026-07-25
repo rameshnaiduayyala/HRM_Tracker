@@ -6,7 +6,7 @@ import { ValidationError, BadRequestError } from '../../shared/errors';
 const updateSettingsSchema = z.object({
   workingHoursPerDay: z.number().int().min(1).max(24).optional(),
   screenshotInterval: z.number().int().min(10).optional(),
-  idleThreshold: z.number().int().min(30).optional(),
+  idleThreshold: z.number().int().min(10).optional(),
   timezone: z.string().min(1).optional(),
   shiftStart: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid shift start format (HH:MM)').optional(),
   shiftEnd: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid shift end format (HH:MM)').optional(),

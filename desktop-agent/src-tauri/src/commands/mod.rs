@@ -92,3 +92,11 @@ pub async fn stop_tracking_command(_reason: String) -> Result<(), String> {
 pub fn get_pending_sync_count() -> Result<i64, String> {
     SqliteService::get_pending_count()
 }
+
+pub fn is_inactivity_active() -> bool {
+    if let Ok(lock) = IN_INACTIVITY_MODAL.lock() {
+        *lock
+    } else {
+        false
+    }
+}

@@ -22,20 +22,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const performLogout = async () => {
+    try {
+      await invoke('stop_tracking_command', { reason: 'Logout' });
+    } catch (_) {}
+    localStorage.removeItem(LOCAL_STORAGE_JWT_KEY);
+    localStorage.removeItem(LOCAL_STORAGE_REFRESH_KEY);
+    sessionStorage.removeItem(LOCAL_STORAGE_JWT_KEY);
+    sessionStorage.removeItem(LOCAL_STORAGE_REFRESH_KEY);
+    setUser(null);
+  };
+
   useEffect(() => {
-    const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY);
+    const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY) || sessionStorage.getItem(LOCAL_STORAGE_JWT_KEY);
     if (token) {
       fetchProfile();
     } else {
-      login('employee@acme.com', 'employee123')
-        .catch((err) => {
-          console.error("Auto login failed", err);
-          setLoading(false);
-        });
+      setLoading(false);
     }
 
     const handleExpired = () => {
-      setUser(null);
+      performLogout();
     };
     window.addEventListener('auth-session-expired', handleExpired);
     return () => window.removeEventListener('auth-session-expired', handleExpired);
@@ -55,8 +62,15 @@ export const AuthProvider = ({ children }) => {
       });
 
       const { accessToken: token, refreshToken, user: userData } = response.data.data;
-      localStorage.setItem(LOCAL_STORAGE_JWT_KEY, token);
-      localStorage.setItem(LOCAL_STORAGE_REFRESH_KEY, refreshToken);
+      if (rememberMe) {
+        localStorage.setItem(LOCAL_STORAGE_JWT_KEY, token);
+        localStorage.setItem(LOCAL_STORAGE_REFRESH_KEY, refreshToken);
+        localStorage.setItem('remembered_email', email);
+      } else {
+        sessionStorage.setItem(LOCAL_STORAGE_JWT_KEY, token);
+        sessionStorage.setItem(LOCAL_STORAGE_REFRESH_KEY, refreshToken);
+        localStorage.removeItem('remembered_email');
+      }
       setUser(userData);
       return userData;
     } catch (err) {
@@ -67,9 +81,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem(LOCAL_STORAGE_JWT_KEY);
-    localStorage.removeItem(LOCAL_STORAGE_REFRESH_KEY);
-    setUser(null);
+    performLogout();
   };
 
   return (
