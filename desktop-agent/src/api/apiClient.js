@@ -12,7 +12,7 @@ const apiClient = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY);
+    const token = localStorage.getItem(LOCAL_STORAGE_JWT_KEY) || sessionStorage.getItem(LOCAL_STORAGE_JWT_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,14 +29,21 @@ apiClient.interceptors.response.use(
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const refreshToken = localStorage.getItem(LOCAL_STORAGE_REFRESH_KEY);
+        const refreshToken = localStorage.getItem(LOCAL_STORAGE_REFRESH_KEY) || sessionStorage.getItem(LOCAL_STORAGE_REFRESH_KEY);
         if (refreshToken) {
           const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
           const { accessToken, newRefreshToken } = response.data;
           
-          localStorage.setItem(LOCAL_STORAGE_JWT_KEY, accessToken);
-          if (newRefreshToken) {
-            localStorage.setItem(LOCAL_STORAGE_REFRESH_KEY, newRefreshToken);
+          if (localStorage.getItem(LOCAL_STORAGE_JWT_KEY)) {
+            localStorage.setItem(LOCAL_STORAGE_JWT_KEY, accessToken);
+            if (newRefreshToken) {
+              localStorage.setItem(LOCAL_STORAGE_REFRESH_KEY, newRefreshToken);
+            }
+          } else {
+            sessionStorage.setItem(LOCAL_STORAGE_JWT_KEY, accessToken);
+            if (newRefreshToken) {
+              sessionStorage.setItem(LOCAL_STORAGE_REFRESH_KEY, newRefreshToken);
+            }
           }
           
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -46,6 +53,8 @@ apiClient.interceptors.response.use(
         // Clear tokens and dispatch logout event/redirect
         localStorage.removeItem(LOCAL_STORAGE_JWT_KEY);
         localStorage.removeItem(LOCAL_STORAGE_REFRESH_KEY);
+        sessionStorage.removeItem(LOCAL_STORAGE_JWT_KEY);
+        sessionStorage.removeItem(LOCAL_STORAGE_REFRESH_KEY);
         window.dispatchEvent(new Event('auth-session-expired'));
       }
     }

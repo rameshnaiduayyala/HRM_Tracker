@@ -6,6 +6,8 @@ import { ProtectedRoute } from './guards/ProtectedRoute';
 import { MainLayout } from './layouts/MainLayout';
 import LoginPage from './features/auth/LoginPage';
 import DashboardPage from './features/dashboard/DashboardPage';
+import TasksPage from './pages/TasksPage';
+import SettingsPage from './pages/SettingsPage';
 
 export const App = () => {
   return (
@@ -23,6 +25,8 @@ export const App = () => {
               }
             >
               <Route index element={<DashboardPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

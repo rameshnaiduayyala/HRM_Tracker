@@ -11,10 +11,18 @@ export const AuthProvider = ({ children }) => {
 
   const fetchProfile = async () => {
     try {
-      // In a real application, fetch user profile from the profile endpoint.
-      // We can also ask Rust for current system device registration details.
       const response = await apiClient.get('/work-sessions/profile');
-      setUser(response.data.data);
+      const emp = response.data.data;
+      if (emp) {
+        setUser({
+          ...emp,
+          firstName: emp.user?.firstName || '',
+          lastName: emp.user?.lastName || '',
+          email: emp.user?.email || '',
+        });
+      } else {
+        setUser(null);
+      }
     } catch (err) {
       setUser(null);
     } finally {
@@ -71,6 +79,21 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.setItem(LOCAL_STORAGE_REFRESH_KEY, refreshToken);
         localStorage.removeItem('remembered_email');
       }
+
+      // Fetch complete profile before returning to ensure user state is consistent
+      const profileRes = await apiClient.get('/work-sessions/profile');
+      const emp = profileRes.data.data;
+      if (emp) {
+        const fullUser = {
+          ...emp,
+          firstName: emp.user?.firstName || '',
+          lastName: emp.user?.lastName || '',
+          email: emp.user?.email || '',
+        };
+        setUser(fullUser);
+        return fullUser;
+      }
+
       setUser(userData);
       return userData;
     } catch (err) {

@@ -4,6 +4,7 @@ import legacyAuthRoutes from '../modules/authentication/auth.legacy.routes';
 import attendanceRoutes from '../modules/attendance/attendance.routes';
 import workSessionsRoutes from '../modules/workSessions/workSessions.routes';
 import devicesRoutes from '../modules/devices/devices.routes';
+import tasksRoutes from '../modules/tasks/tasks.routes';
 
 const router = Router();
 
@@ -13,5 +14,6 @@ router.use(legacyAuthenticate);
 router.use('/attendance', attendanceRoutes);
 router.use('/work-sessions', workSessionsRoutes);
 router.use('/devices', devicesRoutes);
+router.use('/tasks', tasksRoutes);
 
 export default router;

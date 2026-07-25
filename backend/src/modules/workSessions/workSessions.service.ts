@@ -12,6 +12,9 @@ export class WorkSessionsService {
   async getEmployeeProfile(userId: string) {
     const employee = await prisma.employee.findFirst({
       where: { userId },
+      include: {
+        user: true,
+      },
     });
     if (!employee) {
       throw new NotFoundError('Employee profile not found for this user');

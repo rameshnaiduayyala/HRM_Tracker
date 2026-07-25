@@ -7,10 +7,9 @@ export const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="d-flex align-items-center justify-content-center vh-100 bg-dark text-light">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading Session...</span>
-        </div>
+      <div className="app-loading-screen">
+        <div className="app-spinner" />
+        <div className="app-loading-text">Loading Session...</div>
       </div>
     );
   }
