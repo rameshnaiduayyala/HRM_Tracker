@@ -1,5 +1,6 @@
 import { prisma } from '../../shared/database';
 import { NotFoundError } from '../../shared/errors';
+import { notifyUser } from '../../infrastructure/socket';
 
 export class NotificationsService {
   async list(userId: string) {
@@ -32,7 +33,7 @@ export class NotificationsService {
   }
 
   async create(userId: string, title: string, message: string, type = 'INFO', link?: string) {
-    return prisma.notification.create({
+    const notification = await prisma.notification.create({
       data: {
         userId,
         title,
@@ -41,6 +42,10 @@ export class NotificationsService {
         link,
       },
     });
+
+    notifyUser(userId, notification);
+
+    return notification;
   }
 }
 

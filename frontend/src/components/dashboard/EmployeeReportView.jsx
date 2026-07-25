@@ -280,7 +280,10 @@ export default function EmployeeReportView({ employee, onBack, onRefresh }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 transition">
+              <button 
+                onClick={() => window.dispatchEvent(new Event('chat:open'))}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 transition"
+              >
                 <MessageSquare className="w-3.5 h-3.5" /> Message
               </button>
             </div>

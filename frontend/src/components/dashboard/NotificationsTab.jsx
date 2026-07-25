@@ -19,6 +19,21 @@ export default function NotificationsTab({ companyId }) {
     fetchData();
   }, [companyId]);
 
+  useEffect(() => {
+    const handleRefresh = () => {
+      console.log('Real-time notifications/announcements update received: Refreshing');
+      fetchData();
+    };
+
+    window.addEventListener('announcement:created', handleRefresh);
+    window.addEventListener('notification:received', handleRefresh);
+
+    return () => {
+      window.removeEventListener('announcement:created', handleRefresh);
+      window.removeEventListener('notification:received', handleRefresh);
+    };
+  }, [companyId]);
+
   const fetchData = async () => {
     setLoading(true);
     try {

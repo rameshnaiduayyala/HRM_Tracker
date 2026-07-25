@@ -373,7 +373,17 @@ export const TrackingProvider = ({ children }) => {
         fetchTasks(user.companyId, user.id, true);
       }, 15000);
 
-      return () => clearInterval(pollInterval);
+      const handleLiveTaskUpdate = () => {
+        addLog('⚡ Live task update received. Reloading board...');
+        fetchTasks(user.companyId, user.id, true);
+      };
+
+      window.addEventListener('task:updated', handleLiveTaskUpdate);
+
+      return () => {
+        clearInterval(pollInterval);
+        window.removeEventListener('task:updated', handleLiveTaskUpdate);
+      };
     } else {
       setTasks([]);
       setActiveTask(null);

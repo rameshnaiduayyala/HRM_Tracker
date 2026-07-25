@@ -1,5 +1,7 @@
 import { prisma } from '../../shared/database';
 import { NotFoundError } from '../../shared/errors';
+import { notifyTaskUpdated } from '../../infrastructure/socket';
+import { notificationsService } from '../notifications/notifications.service';
 
 export class TasksService {
   // --- Projects ---
@@ -225,7 +227,7 @@ export class TasksService {
     priority?: string;
     status?: string;
   }) {
-    return prisma.task.create({
+    const newTask = await prisma.task.create({
       data: {
         title: data.title,
         description: data.description || null,
@@ -234,7 +236,33 @@ export class TasksService {
         priority: data.priority || 'MEDIUM',
         status: data.status || 'TODO',
       },
+      include: {
+        project: true,
+      },
     });
+
+    // Notify assignee on creation
+    if (newTask.employeeId) {
+      const assignedEmployee = await prisma.employee.findUnique({
+        where: { id: newTask.employeeId },
+        include: { user: true }
+      });
+      if (assignedEmployee?.userId) {
+        await notificationsService.create(
+          assignedEmployee.userId,
+          'New Task Assigned',
+          `You have been assigned to task: "${newTask.title}"`,
+          'TASK',
+          `/dashboard/tasks`
+        );
+      }
+    }
+
+    if (newTask.project?.companyId) {
+      notifyTaskUpdated(newTask.project.companyId, newTask.id, 'create');
+    }
+
+    return newTask;
   }
 
   async updateTask(id: string, data: {
@@ -244,12 +272,15 @@ export class TasksService {
     priority?: string;
     status?: string;
   }) {
-    const task = await prisma.task.findUnique({ where: { id } });
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: { project: true }
+    });
     if (!task) {
       throw new NotFoundError('Task not found');
     }
 
-    return prisma.task.update({
+    const updatedTask = await prisma.task.update({
       where: { id },
       data: {
         title: data.title,
@@ -258,29 +289,75 @@ export class TasksService {
         priority: data.priority,
         status: data.status,
       },
+      include: {
+        project: true,
+      },
     });
+
+    // Notify new assignee if the assignee has changed
+    if (data.employeeId && data.employeeId !== task.employeeId) {
+      const assignedEmployee = await prisma.employee.findUnique({
+        where: { id: data.employeeId },
+        include: { user: true }
+      });
+      if (assignedEmployee?.userId) {
+        await notificationsService.create(
+          assignedEmployee.userId,
+          'New Task Assigned',
+          `You have been assigned to task: "${updatedTask.title}"`,
+          'TASK',
+          `/dashboard/tasks`
+        );
+      }
+    }
+
+    if (updatedTask.project?.companyId) {
+      notifyTaskUpdated(updatedTask.project.companyId, updatedTask.id, 'update');
+    }
+
+    return updatedTask;
   }
 
   async deleteTask(id: string) {
-    const task = await prisma.task.findUnique({ where: { id } });
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: { project: true }
+    });
     if (!task) {
       throw new NotFoundError('Task not found');
     }
 
-    return prisma.task.delete({
+    const deletedTask = await prisma.task.delete({
       where: { id },
     });
+
+    if (task.project?.companyId) {
+      notifyTaskUpdated(task.project.companyId, id, 'delete');
+    }
+
+    return deletedTask;
   }
 
   // --- Task Comments ---
   async addTaskComment(taskId: string, authorId: string, body: string) {
-    return prisma.taskComment.create({
+    const comment = await prisma.taskComment.create({
       data: {
         taskId,
         authorId,
         body,
       },
+      include: {
+        task: {
+          include: { project: true }
+        }
+      }
     });
+
+    if (comment.task?.project?.companyId) {
+      notifyTaskUpdated(comment.task.project.companyId, taskId, 'comment');
+    }
+
+    return comment;
   }
 
   // --- Task Time Logs ---
@@ -293,14 +370,25 @@ export class TasksService {
       throw new NotFoundError('Employee profile not found');
     }
 
-    return prisma.taskTimeLog.create({
+    const log = await prisma.taskTimeLog.create({
       data: {
         taskId,
         employeeId: employee.id,
         minutes,
         note,
       },
+      include: {
+        task: {
+          include: { project: true }
+        }
+      }
     });
+
+    if (log.task?.project?.companyId) {
+      notifyTaskUpdated(log.task.project.companyId, taskId, 'timeLog');
+    }
+
+    return log;
   }
 }
 

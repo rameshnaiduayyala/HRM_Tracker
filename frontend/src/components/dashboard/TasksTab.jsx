@@ -32,6 +32,18 @@ export default function TasksTab({ companyId, employees = [], employeeId }) {
     }
   }, [companyId, filterAssignee, filterProject, filterPriority]);
 
+  useEffect(() => {
+    const handleLiveTaskUpdate = () => {
+      console.log('Real-time task update received: Refreshing board');
+      fetchData(filterAssignee, filterProject, filterPriority);
+    };
+
+    window.addEventListener('task:updated', handleLiveTaskUpdate);
+    return () => {
+      window.removeEventListener('task:updated', handleLiveTaskUpdate);
+    };
+  }, [companyId, filterAssignee, filterProject, filterPriority, employeeId]);
+
   const fetchData = async (assigneeFilter = filterAssignee, projectFilter = filterProject, priorityFilter = filterPriority) => {
     setLoading(true);
     try {

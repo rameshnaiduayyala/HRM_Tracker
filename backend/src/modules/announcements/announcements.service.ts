@@ -1,5 +1,6 @@
 import { prisma } from '../../shared/database';
 import { NotFoundError } from '../../shared/errors';
+import { notifyAnnouncementCreated } from '../../infrastructure/socket';
 
 export class AnnouncementsService {
   async getEmployeeProfile(userId: string) {
@@ -22,7 +23,7 @@ export class AnnouncementsService {
   async create(userId: string, title: string, body: string) {
     const employee = await this.getEmployeeProfile(userId);
 
-    return prisma.announcement.create({
+    const announcement = await prisma.announcement.create({
       data: {
         title,
         body,
@@ -30,6 +31,10 @@ export class AnnouncementsService {
         authorId: employee.id,
       },
     });
+
+    notifyAnnouncementCreated(employee.companyId, announcement);
+
+    return announcement;
   }
 
   async delete(id: string, userId: string) {
