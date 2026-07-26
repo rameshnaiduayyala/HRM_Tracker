@@ -371,7 +371,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row" style={{ background: 'var(--bg-canvas)', fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif', color: 'var(--text-primary)' }}>
-      
+
       {/* Sidebar Navigation Shell on the Left */}
       {!hasNoSubscription && (
         <Sidebar
@@ -417,7 +417,7 @@ export default function Dashboard() {
                         <span className="text-xs" style={{ color: 'var(--text-muted)' }}>/ seat / month</span>
                       </div>
                       <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>Up to {p.employeeLimit} employees allowed</p>
-                      
+
                       <ul className="mt-6 space-y-2.5 text-left text-xs border-t pt-6" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
                         {(p.features || []).map((feat, i) => (
                           <li key={i} className="flex items-center gap-2">

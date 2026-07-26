@@ -204,9 +204,13 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
                 <label className={labelClass}>Workspace Logo</label>
                 <div className="flex items-center gap-4">
                   {logoPreview ? (
-                    <img src={logoPreview} alt="Company Logo" className="w-12 h-12 object-contain rounded-xl border border-[var(--border-muted)] bg-[var(--bg-canvas)]" />
+                    <img
+                      src={logoPreview.startsWith('data:') || logoPreview.startsWith('http') ? logoPreview : `http://localhost:5000${logoPreview}`}
+                      alt="Company Logo"
+                      className="w-16 h-12 object-contain rounded-xl border border-[var(--border-muted)] bg-slate-900 p-1"
+                    />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl border border-dashed border-[var(--border-muted)] flex items-center justify-center text-xs text-[var(--text-muted)] bg-[var(--bg-canvas)]">
+                    <div className="w-16 h-12 rounded-xl border border-dashed border-[var(--border-muted)] flex items-center justify-center text-xs text-[var(--text-muted)] bg-[var(--bg-canvas)]">
                       Logo
                     </div>
                   )}

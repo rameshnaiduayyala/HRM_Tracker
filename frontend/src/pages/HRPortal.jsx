@@ -172,19 +172,20 @@ export default function HRPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] flex flex-col font-sans">
-      <Header />
+    <div className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] flex flex-col md:flex-row font-sans">
+      {/* HRM Navigation Sidebar on the Left */}
+      <Sidebar
+        user={user}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        companies={companies}
+        selectedCompanyId={selectedCompanyId}
+        setSelectedCompanyId={setSelectedCompanyId}
+      />
 
-      <div className="flex-1 flex flex-col md:flex-row">
-        {/* HRM Navigation Sidebar */}
-        <Sidebar
-          user={user}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          companies={companies}
-          selectedCompanyId={selectedCompanyId}
-          setSelectedCompanyId={setSelectedCompanyId}
-        />
+      {/* Main Right Content Shell with Header at top */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        <Header />
 
         <main className="flex-1 p-6 overflow-y-auto">
           {/* 1. Core HRM Hub Dashboard Tab */}
@@ -214,7 +215,7 @@ export default function HRPortal() {
           {activeTab === 'projects' && (
             <ProjectsTab
               projects={[]}
-              onCreateProject={() => {}}
+              onCreateProject={() => { }}
               loading={loading}
             />
           )}

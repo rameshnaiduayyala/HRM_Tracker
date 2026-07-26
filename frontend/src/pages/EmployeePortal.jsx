@@ -76,15 +76,17 @@ export default function EmployeePortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-canvas)] flex flex-col font-sans">
-      <Header />
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar configured with Employee Portal active tab state */}
-        <Sidebar
-          user={user}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
+    <div className="min-h-screen bg-[var(--bg-canvas)] flex flex-col md:flex-row font-sans">
+      {/* Sidebar configured on Left */}
+      <Sidebar
+        user={user}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+      
+      {/* Right Content Area with Header at top */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        <Header />
         
         <main className="flex-1 overflow-y-auto p-8">
           {/* Employee Dashboard / Attendance Tab */}
