@@ -600,6 +600,7 @@ export default function Dashboard() {
                 {!isSuperAdmin && activeTab === 'settings' && (
                   <SettingsTab
                     companyId={selectedCompanyId}
+                    onSettingsSaved={fetchCompanies}
                   />
                 )}
 

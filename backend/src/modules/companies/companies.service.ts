@@ -2,6 +2,8 @@ import { prisma } from '../../shared/database';
 import fs from 'fs';
 import path from 'path';
 
+import sharp from 'sharp';
+
 export class CompaniesService {
   async getCompanyById(tenantId: string, companyId: string) {
     return prisma.company.findFirst({
@@ -59,13 +61,26 @@ export class CompaniesService {
       throw new Error('Company not found');
     }
 
-    const buffer = Buffer.from(imageBase64, 'base64');
+    const inputBuffer = Buffer.from(imageBase64, 'base64');
+    
+    // Process image with Sharp node package for exact sidebar fit
+    // 1. Trim surrounding blank whitespace
+    // 2. Resize proportionally to max 180x44 px inside 200x48 px frame
+    const processedBuffer = await sharp(inputBuffer)
+      .trim()
+      .resize(180, 44, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 }
+      })
+      .png()
+      .toBuffer();
+
     const relativeFilePath = `tenants/${tenantId}/company/${companyId}/logo.png`;
     const localPath = path.join(__dirname, '../../../uploads', relativeFilePath);
 
     fs.mkdirSync(path.dirname(localPath), { recursive: true });
-    fs.writeFileSync(localPath, buffer);
-    const logoUrl = `/uploads/${relativeFilePath}`;
+    fs.writeFileSync(localPath, processedBuffer);
+    const logoUrl = `/uploads/${relativeFilePath}?v=${Date.now()}`;
 
     return prisma.company.update({
       where: { id: companyId },

@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, Shield, Clock, Camera, Timer } from 'lucide-react';
-import { settingsApi } from '../../services';
+import { Settings, Save, Shield, Clock, Camera, Timer, Building, Upload } from 'lucide-react';
+import { settingsApi, companyApi } from '../../services';
 import { toast } from 'react-hot-toast';
 
-export default function SettingsTab({ companyId }) {
+export default function SettingsTab({ companyId, onSettingsSaved }) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [companyDetails, setCompanyDetails] = useState({
+    name: '',
+    logoUrl: '',
+  });
+  const [logoPreview, setLogoPreview] = useState('');
   const [settings, setSettings] = useState({
     shiftStart: '09:00',
     shiftEnd: '18:00',
@@ -18,8 +23,90 @@ export default function SettingsTab({ companyId }) {
   });
 
   useEffect(() => {
-    if (companyId) fetchSettings();
+    if (companyId) {
+      fetchSettings();
+      fetchCompanyDetails();
+    }
   }, [companyId]);
+
+  const fetchCompanyDetails = async () => {
+    try {
+      const res = await companyApi.get(companyId);
+      const c = res.data?.company || res.data || res;
+      if (c) {
+        setCompanyDetails({
+          name: c.name || '',
+          logoUrl: c.logoUrl || c.logo || '',
+        });
+        setLogoPreview(c.logoUrl || c.logo || '');
+      }
+    } catch (err) {
+      console.error('Failed to fetch company details:', err);
+    }
+  };
+
+  const [rawImageSrc, setRawImageSrc] = useState(null);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+
+  const handleLogoFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Logo file size must be less than 10MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setRawImageSrc(reader.result);
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      setCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleApplyCrop = async () => {
+    if (!rawImageSrc) return;
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+      const TARGET_WIDTH = 200;
+      const TARGET_HEIGHT = 48;
+      canvas.width = TARGET_WIDTH;
+      canvas.height = TARGET_HEIGHT;
+      const ctx = canvas.getContext('2d');
+
+      ctx.clearRect(0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+
+      const drawWidth = img.width * zoom;
+      const drawHeight = img.height * zoom;
+      const drawX = (TARGET_WIDTH - drawWidth) / 2 + pan.x;
+      const drawY = (TARGET_HEIGHT - drawHeight) / 2 + pan.y;
+
+      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+      const croppedBase64 = canvas.toDataURL('image/png');
+      setLogoPreview(croppedBase64);
+      setCompanyDetails(prev => ({ ...prev, logoUrl: croppedBase64 }));
+      setCropModalOpen(false);
+
+      // Instantly upload cropped logo to backend
+      try {
+        const base64Data = croppedBase64.split(',')[1] || croppedBase64;
+        await companyApi.uploadLogo(companyId, base64Data);
+        toast.success('Cropped logo saved & updated!');
+        if (onSettingsSaved) {
+          onSettingsSaved();
+        }
+      } catch (err) {
+        toast.error('Failed to save cropped logo to server');
+      }
+    };
+    img.src = rawImageSrc;
+  };
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -49,6 +136,16 @@ export default function SettingsTab({ companyId }) {
     e.preventDefault();
     setSaving(true);
     try {
+      // 1. Save Company Profile (Name & Logo)
+      if (companyDetails.name) {
+        await companyApi.update(companyId, { name: companyDetails.name });
+      }
+      if (logoPreview && logoPreview.startsWith('data:')) {
+        const base64Data = logoPreview.split(',')[1] || logoPreview;
+        await companyApi.uploadLogo(companyId, base64Data);
+      }
+
+      // 2. Save Tracking & Policy Settings
       await settingsApi.update(companyId, {
         shiftStart: settings.shiftStart,
         shiftEnd: settings.shiftEnd,
@@ -57,9 +154,12 @@ export default function SettingsTab({ companyId }) {
         idleThreshold: settings.idleThreshold,
         timezone: settings.timezone,
       });
-      toast.success('Settings saved! Desktop agents will pick up the new config on next session start.');
+      toast.success('Company profile & configuration saved successfully!');
+      if (onSettingsSaved) {
+        onSettingsSaved();
+      }
     } catch (err) {
-      toast.error(err.message || 'Failed to save settings');
+      toast.error(err.message || 'Failed to save company settings');
     } finally {
       setSaving(false);
     }
@@ -72,14 +172,58 @@ export default function SettingsTab({ companyId }) {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-white tracking-tight">Company Configuration & Policies</h2>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5">Configure tracking preferences, working hours, and security rules. Desktop agents fetch these settings on every session start.</p>
+        <h2 className="text-xl font-bold text-white tracking-tight">Company Management & Settings</h2>
+        <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage company details, workspace logo, tracking policies, and standard working shift hours.</p>
       </div>
 
       {loading ? (
-        <div className="py-12 text-center text-xs text-[var(--text-muted)]">Loading settings...</div>
+        <div className="py-12 text-center text-xs text-[var(--text-muted)]">Loading company profile & settings...</div>
       ) : (
         <form onSubmit={handleSave} className="space-y-6">
+          {/* Section 0: Company Details & Logo Management */}
+          <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Building className="w-4 h-4 text-indigo-400" />
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Company Profile Details</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className={labelClass}>Company Name</label>
+                <input
+                  type="text"
+                  value={companyDetails.name}
+                  onChange={(e) => setCompanyDetails({ ...companyDetails, name: e.target.value })}
+                  placeholder="e.g. Acme Corporation"
+                  className={inputClass}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Workspace Logo</label>
+                <div className="flex items-center gap-4">
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="Company Logo" className="w-12 h-12 object-contain rounded-xl border border-[var(--border-muted)] bg-[var(--bg-canvas)]" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl border border-dashed border-[var(--border-muted)] flex items-center justify-center text-xs text-[var(--text-muted)] bg-[var(--bg-canvas)]">
+                      Logo
+                    </div>
+                  )}
+                  <div>
+                    <label className="flex items-center gap-2 px-3 py-2 bg-[var(--bg-card-alt)] hover:bg-indigo-600/20 text-xs font-semibold text-white rounded-lg border border-[var(--border-muted)] cursor-pointer transition">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload & Adjust Logo</span>
+                      <input type="file" accept="image/*" onChange={handleLogoFileSelect} className="hidden" />
+                    </label>
+                    <p className="text-[10px] text-indigo-300 font-mono mt-1">
+                      Recommended: <strong>240 × 80 px</strong> (PNG with transparent background)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Section 1: Work Schedule */}
           <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-4">
             <div className="flex items-center gap-2 mb-2">
@@ -226,6 +370,122 @@ export default function SettingsTab({ companyId }) {
             <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Settings'}
           </button>
         </form>
+      )}
+
+      {/* ── Logo Crop & Adjust Modal ── */}
+      {cropModalOpen && rawImageSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
+            <div>
+              <h3 className="text-base font-bold text-white tracking-tight">Crop & Adjust Workspace Logo</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Scale and position your logo image to fit perfectly in the sidebar header.</p>
+            </div>
+
+            {/* Live Sidebar Preview Container */}
+            <div className="flex flex-col items-center justify-center py-6 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden">
+              <span className="text-[10px] uppercase font-bold text-indigo-400 mb-2 tracking-widest flex items-center gap-1.5">
+                Exact Sidebar Header Box Preview
+              </span>
+              <div className="w-[220px] h-[52px] border-2 border-indigo-500/60 rounded-xl overflow-hidden bg-[#0f172a] flex items-center justify-start px-3 relative shadow-2xl">
+                <img
+                  src={rawImageSrc}
+                  alt="Crop Preview"
+                  className="max-w-none transition-transform duration-75 select-none"
+                  style={{
+                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                    maxHeight: '36px',
+                    objectFit: 'contain',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Controls: Zoom & Pan */}
+            <div className="space-y-4 pt-2">
+              <div>
+                <div className="flex justify-between text-xs text-slate-300 font-semibold mb-1">
+                  <span>Zoom Level</span>
+                  <span>{Math.round(zoom * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.3"
+                  max="3"
+                  step="0.05"
+                  value={zoom}
+                  onChange={(e) => setZoom(parseFloat(e.target.value))}
+                  className="w-full accent-indigo-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Horizontal Offset (X)</label>
+                  <input
+                    type="range"
+                    min="-120"
+                    max="120"
+                    value={pan.x}
+                    onChange={(e) => setPan({ ...pan, x: parseInt(e.target.value) })}
+                    className="w-full accent-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Vertical Offset (Y)</label>
+                  <input
+                    type="range"
+                    min="-60"
+                    max="60"
+                    value={pan.y}
+                    onChange={(e) => setPan({ ...pan, y: parseInt(e.target.value) })}
+                    className="w-full accent-indigo-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!rawImageSrc) return;
+                  setLogoPreview(rawImageSrc);
+                  setCompanyDetails(prev => ({ ...prev, logoUrl: rawImageSrc }));
+                  setCropModalOpen(false);
+                  try {
+                    const base64Data = rawImageSrc.split(',')[1] || rawImageSrc;
+                    await companyApi.uploadLogo(companyId, base64Data);
+                    toast.success('Original logo saved!');
+                    if (onSettingsSaved) onSettingsSaved();
+                  } catch (err) {
+                    toast.error('Failed to save logo');
+                  }
+                }}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-lg transition"
+              >
+                Use Original (No Crop)
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCropModalOpen(false)}
+                  className="px-3 py-1.5 bg-slate-800/60 hover:bg-slate-800 text-xs font-semibold text-slate-400 rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyCrop}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white rounded-xl transition shadow-lg shadow-indigo-600/20 uppercase tracking-wider"
+                >
+                  Apply Crop & Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -10,11 +10,10 @@ import FocusTrackLogo from '../assets/focustrack-logo.png';
 const NavItem = ({ icon: Icon, label, active, onClick, iconColor }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium tracking-tight transition-all duration-150 ${
-      active
-        ? 'font-bold'
-        : 'hover:opacity-100'
-    }`}
+    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium tracking-tight transition-all duration-150 ${active
+      ? 'font-bold'
+      : 'hover:opacity-100'
+      }`}
     style={{
       background: active ? 'var(--bg-elevated, rgba(99,102,241,0.12))' : 'transparent',
       color: active ? 'var(--text-primary, #ffffff)' : 'var(--text-secondary, #94a3b8)',
@@ -69,6 +68,14 @@ export default function Sidebar({
     }
   };
 
+  const activeCompany = companies.find((c) => c.id === selectedCompanyId) ||
+    (user?.company ? user.company : (user?.companyId ? { logoUrl: user?.companyLogo || user?.company?.logoUrl } : null));
+  const rawLogo = activeCompany?.logoUrl || activeCompany?.logo || user?.companyLogo;
+  const tenantLogo = rawLogo
+    ? (rawLogo.startsWith('data:') || rawLogo.startsWith('http') ? rawLogo : `http://localhost:5000${rawLogo}`)
+    : FocusTrackLogo;
+  const companyName = activeCompany?.name || 'Workspace';
+
   return (
     <aside
       className="w-full md:w-60 flex-shrink-0 flex flex-col justify-between p-4 h-auto md:h-screen md:sticky md:top-0 select-none transition-colors duration-200 border-r"
@@ -79,9 +86,16 @@ export default function Sidebar({
       }}
     >
       <div className="space-y-6 flex-1 overflow-y-auto">
-        {/* Brand Header with FocusTrack Logo */}
-        <div className="flex items-center gap-3 px-2 pt-1 pb-2 border-b" style={{ borderColor: 'var(--border-subtle, rgba(255,255,255,0.06))' }}>
-          <img src={FocusTrackLogo} alt="FocusTrack Logo" className="h-8 object-contain shrink-0" />
+        {/* Tenant Workspace Brand Header */}
+        <div className="flex items-center justify-start px-3 py-3 border-b" style={{ borderColor: 'var(--border-subtle, rgba(255,255,255,0.06))' }}>
+          <img
+            src={tenantLogo}
+            alt={companyName}
+            className="h-9 w-auto max-w-[175px] object-contain shrink-0"
+            onError={(e) => {
+              e.currentTarget.src = FocusTrackLogo;
+            }}
+          />
         </div>
 
         {/* Workspace Selector */}
