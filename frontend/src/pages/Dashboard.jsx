@@ -104,7 +104,7 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (selectedCompanyId && !isSuperAdmin) {
+    if (selectedCompanyId) {
       fetchCompanyData(selectedCompanyId);
     }
   }, [selectedCompanyId]);

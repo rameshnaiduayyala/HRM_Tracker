@@ -71,7 +71,7 @@ export default function Sidebar({
 
   const activeCompany = companies.find((c) => c.id === selectedCompanyId) ||
     (user?.company ? user.company : (user?.companyId ? { logoUrl: user?.companyLogo || user?.company?.logoUrl } : null));
-  const rawLogo = activeCompany?.logoUrl || activeCompany?.logo || user?.companyLogo;
+  const rawLogo = isSuperAdmin ? null : (activeCompany?.logoUrl || activeCompany?.logo || user?.companyLogo);
   const tenantLogo = rawLogo
     ? (rawLogo.startsWith('data:') || rawLogo.startsWith('http') ? rawLogo : `http://localhost:5000${rawLogo}`)
     : FocusTrackLogo;
@@ -100,7 +100,7 @@ export default function Sidebar({
         </div>
 
         {/* Workspace Selector */}
-        {(isCompanyAdmin || isSuperAdmin) && (
+        {!isSuperAdmin && isCompanyAdmin && (
           <div className="space-y-1.5 px-1">
             <label className="block text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted, #64748b)' }}>
               Workspace

@@ -11,6 +11,8 @@ import ConfirmModal from '../ConfirmModal';
 import { useReactToPrint } from 'react-to-print';
 import { formatCurrency } from '../../utils/currency';
 
+import WorkspaceDetailsView from './WorkspaceDetailsView';
+
 export default function WorkspacesTab({ 
   workspaces = [], 
   plans = [], 
@@ -133,6 +135,28 @@ export default function WorkspacesTab({
       cell: (info) => <span className="font-mono text-xs text-indigo-600 dark:text-indigo-400">{info.getValue()}</span>,
     },
     {
+      id: 'associatedCompanies',
+      header: 'Company Branches / Locations',
+      cell: ({ row }) => {
+        const ws = row.original;
+        const comps = ws.companies || [];
+        return (
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-emerald-400 block font-mono">
+              {comps.length} {comps.length === 1 ? 'Location' : 'Locations'}
+            </span>
+            <div className="flex flex-wrap gap-1 max-w-[220px]">
+              {comps.map(c => (
+                <span key={c.id} className="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-semibold truncate max-w-[140px]">
+                  {c.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
       id: 'employeesCount',
       header: 'Active Seats',
       cell: ({ row }) => {
@@ -226,6 +250,20 @@ export default function WorkspacesTab({
       },
     },
   ];
+
+  if (viewingDetailsWorkspace) {
+    return (
+      <WorkspaceDetailsView
+        workspace={viewingDetailsWorkspace}
+        onBack={() => setViewingDetailsWorkspace(null)}
+        onToggleStatus={onToggleStatus}
+        onEdit={(ws) => {
+          setViewingDetailsWorkspace(null);
+          handleEditClick(ws);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -377,37 +415,38 @@ export default function WorkspacesTab({
 
                 {/* Company Title */}
                 <div>
-                  <h3 className="text-xl font-bold text-white print:text-black">{viewingDetailsWorkspace.name}</h3>
-                  <p className="text-xs text-[var(--text-muted)] font-mono mt-1">Tenant ID: {viewingDetailsWorkspace.id}</p>
-                  <p className="text-xs text-[var(--text-muted)] font-mono">Subdomain: {viewingDetailsWorkspace.subdomain}.tasktracky.com</p>
+                  <h3 className="text-xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>{viewingDetailsWorkspace.name}</h3>
+                  <p className="text-xs font-mono mt-1" style={{ color: 'var(--text-muted)' }}>Tenant ID: {viewingDetailsWorkspace.id}</p>
+                  <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>Subdomain: {viewingDetailsWorkspace.subdomain}.tasktracky.com</p>
                 </div>
 
                 {/* Subscription Details */}
-                <div className="border-t border-[var(--border-base)] pt-4 print:border-gray-300">
-                  <h4 className="text-sm font-semibold text-indigo-400 print:text-indigo-600 mb-2">Active Subscription Tiers</h4>
+                <div className="border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider mb-2.5 text-indigo-400">Active Subscription Tiers</h4>
                   {plan ? (
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Plan Name:</span>
-                        <span className="font-semibold text-white print:text-black">{plan.name}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Plan Name:</span>
+                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{plan.name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Price Per Seat:</span>
-                        <span className="font-semibold text-white print:text-black">{formatCurrency(plan.pricePerUser || plan.price || 0)} / month</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Price Per Seat:</span>
+                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(plan.pricePerUser || plan.price || 0)} / month</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Billing Cycle:</span>
-                        <span className="font-semibold text-white print:text-black">{plan.billingCycle}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Billing Cycle:</span>
+                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{plan.billingCycle}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Maximum Capacity:</span>
-                        <span className="font-semibold text-white print:text-black">{plan.employeeLimit} Seats</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Maximum Capacity:</span>
+                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{plan.employeeLimit} Seats</span>
                       </div>
-                      <div className="mt-2">
-                        <span className="block text-[var(--text-secondary)] print:text-[var(--text-muted)] mb-1">Included Features:</span>
+                      <div className="mt-2.5">
+                        <span className="block text-[11px] font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>Included Features:</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {plan.features?.map((f, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-gray-800 text-[var(--text-primary)] rounded print:border print:bg-white print:text-black text-[10px]">
+                            <span key={i} className="px-2 py-0.5 rounded text-[10px] font-medium border"
+                              style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', borderColor: 'var(--border-subtle)' }}>
                               {f}
                             </span>
                           ))}
@@ -415,43 +454,88 @@ export default function WorkspacesTab({
                       </div>
                     </div>
                   ) : (
-                    <p className="text-xs text-[var(--text-muted)]">No active subscription plan assigned.</p>
+                    <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>No active subscription plan assigned.</p>
                   )}
                 </div>
 
                 {/* Seat Allocations & MRR */}
-                <div className="border-t border-[var(--border-base)] pt-4 print:border-gray-300">
-                  <h4 className="text-sm font-semibold text-indigo-400 print:text-indigo-600 mb-2">Metrics & Revenues</h4>
+                <div className="border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider mb-2.5 text-indigo-400">Metrics & Financial Overview</h4>
                   <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Active Seat Usage:</span>
-                      <span className="font-semibold text-white print:text-black">{stats.totalEmployees} Employees</span>
+                    <div className="flex justify-between items-center">
+                      <span style={{ color: 'var(--text-secondary)' }}>Active Tenant Status:</span>
+                      <span className={`font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider ${viewingDetailsWorkspace.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
+                        {viewingDetailsWorkspace.status}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Monthly Recurring Revenue (MRR):</span>
-                      <span className="font-semibold text-emerald-400 print:text-emerald-700 font-mono">{formatCurrency(stats.monthlyRevenue)} / mo</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>Total Active Seat Usage:</span>
+                      <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{stats.totalEmployees} Registered Staff</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span style={{ color: 'var(--text-secondary)' }}>Monthly Recurring Revenue (MRR):</span>
+                      <span className="font-semibold text-emerald-400 font-mono">{formatCurrency(stats.monthlyRevenue)} / month</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span style={{ color: 'var(--text-secondary)' }}>Tenant Onboarded Date:</span>
+                      <span className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>
+                        {viewingDetailsWorkspace.createdAt ? new Date(viewingDetailsWorkspace.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                      </span>
                     </div>
                   </div>
                 </div>
 
+                {/* Associated Company Locations & Branches Full Breakdown */}
+                <div className="border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider mb-2.5 text-emerald-400">
+                    All Registered Companies & Locations ({viewingDetailsWorkspace.companies?.length || 0})
+                  </h4>
+                  <div className="space-y-2">
+                    {viewingDetailsWorkspace.companies?.map((c) => {
+                      const empCount = c._count?.employees || c.employees?.length || 0;
+                      const sub = c.subscriptions?.[0];
+                      return (
+                        <div key={c.id} className="p-3 rounded-xl border space-y-1 text-xs"
+                          style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{c.name}</span>
+                            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                              {empCount} Employees
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                            <span>Company ID: <code className="font-mono" style={{ color: 'var(--text-secondary)' }}>{c.id.slice(0, 8)}</code></span>
+                            {sub?.plan && (
+                              <span className="text-indigo-400 font-medium">Plan: {sub.plan.name}</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {(!viewingDetailsWorkspace.companies || viewingDetailsWorkspace.companies.length === 0) && (
+                      <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>No company locations registered.</p>
+                    )}
+                  </div>
+                </div>
+
                 {/* Primary Administrator */}
-                <div className="border-t border-[var(--border-base)] pt-4 print:border-gray-300">
-                  <h4 className="text-sm font-semibold text-indigo-400 print:text-indigo-600 mb-2">Primary Company Admin</h4>
+                <div className="border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider mb-2.5 text-indigo-400">Primary Company Admin Credentials</h4>
                   {viewingDetailsWorkspace.companies?.[0]?.employees?.[0]?.user ? (
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Full Name:</span>
-                        <span className="font-semibold text-white print:text-black">
+                        <span style={{ color: 'var(--text-secondary)' }}>Full Name:</span>
+                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                           {viewingDetailsWorkspace.companies[0].employees[0].user.firstName} {viewingDetailsWorkspace.companies[0].employees[0].user.lastName}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Email Address:</span>
-                        <span className="font-semibold text-white print:text-black">{viewingDetailsWorkspace.companies[0].employees[0].user.email}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Email Address:</span>
+                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{viewingDetailsWorkspace.companies[0].employees[0].user.email}</span>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-xs text-[var(--text-muted)]">No administrator details found.</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Default System Tenant Admin</p>
                   )}
                 </div>
               </div>
