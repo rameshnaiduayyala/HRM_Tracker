@@ -24,6 +24,7 @@ import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import EmployeeProfileView from '../components/dashboard/EmployeeProfileView';
 import EmployeeReportView from '../components/dashboard/EmployeeReportView';
 import SystemMonitoringTab from '../components/dashboard/SystemMonitoringTab';
+import HRMDashboardTab from '../components/dashboard/HRMDashboardTab';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -76,6 +77,7 @@ export default function Dashboard() {
     'employee-profile',
     'employee-report',
     'system-ops',
+    'hrm-dashboard',
   ];
   const activeTab = validTabs.includes(lastPathPart) ? lastPathPart : 'analytics';
 
@@ -522,6 +524,16 @@ export default function Dashboard() {
 
                 {isSuperAdmin && activeTab === 'system-ops' && (
                   <SystemMonitoringTab />
+                )}
+
+                {user?.role === 'HR' && activeTab === 'hrm-dashboard' && (
+                  <HRMDashboardTab
+                    companyId={selectedCompanyId}
+                    employees={employees}
+                    departments={[]}
+                    teams={[]}
+                    onNavigateTab={setActiveTab}
+                  />
                 )}
 
                 {!isSuperAdmin && activeTab === 'employees' && (

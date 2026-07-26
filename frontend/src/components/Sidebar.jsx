@@ -79,7 +79,7 @@ export default function Sidebar({
         {!isStaff && (
           <NavSection label="Overview">
             {isHR ? (
-              canUse('hrm') && <NavItem icon={LayoutGrid} label="HRM Dashboard" active={activeTab === 'hrm-dashboard'} onClick={() => setActiveTab('hrm-dashboard')} iconColor="#818cf8" />
+              canUse('hrm') && <NavItem icon={LayoutGrid} label="HRM Core Hub" active={activeTab === 'hrm-dashboard'} onClick={() => setActiveTab('hrm-dashboard')} iconColor="#818cf8" />
             ) : (
               <NavItem icon={BarChart3} label="Overview Dashboard" active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
             )}
