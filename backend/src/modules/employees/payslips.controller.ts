@@ -15,8 +15,11 @@ export class PayslipsController {
   async list(req: Request, res: Response, next: NextFunction) {
     try {
       const companyId = (req.query.companyId as string) || (req.headers['x-company-id'] as string);
-      if (!companyId) {
-        throw new Error('companyId query parameter is required');
+      if (!companyId || companyId === 'undefined') {
+        return res.status(200).json({
+          status: 'success',
+          data: { payslips: [] },
+        });
       }
 
       const payslips = await payslipsService.listPayslips(companyId);

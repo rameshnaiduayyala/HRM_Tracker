@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Laptop, Play, Coffee, Activity, Clock, Monitor, Sun } from 'lucide-react';
+import { Laptop, Play, Coffee, Activity, Clock, Monitor, Sun, Eye } from 'lucide-react';
 
 export default function ReportsTab({ employees = [], onRefresh, onViewReport }) {
   const [teamFilter, setTeamFilter] = useState('ALL');
@@ -7,6 +7,7 @@ export default function ReportsTab({ employees = [], onRefresh, onViewReport }) 
   const [subTab, setSubTab] = useState('live'); // 'live' or 'attendance'
 
   // Today's Date String
+  const now = new Date();
   const todayStr = new Date().toDateString();
 
   // Dynamic calculations for Today's Attendance metrics

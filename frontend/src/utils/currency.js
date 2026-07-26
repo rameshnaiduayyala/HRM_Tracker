@@ -1,6 +1,6 @@
 /**
- * Global Enterprise Currency & Localization Formatter
- * Supports INR (en-IN) default with dynamic ISO currency formatting.
+ * Global Enterprise Currency & Localization Formatter.
+ * Defaults to en-IN and INR while allowing tenant-specific locale/currency.
  */
 export function formatCurrency(
   amount,
@@ -8,14 +8,15 @@ export function formatCurrency(
   locale = 'en-IN'
 ) {
   const numericAmount = Number(amount) || 0;
+
   try {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currencyCode,
       maximumFractionDigits: 2,
     }).format(numericAmount);
-  } catch (e) {
-    return `${currencyCode === 'INR' ? '₹' : currencyCode} ${numericAmount.toLocaleString()}`;
+  } catch {
+    return `${currencyCode} ${numericAmount.toLocaleString(locale)}`;
   }
 }
 

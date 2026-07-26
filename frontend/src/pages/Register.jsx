@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { tenantApi, planApi } from '../services/api';
 import { UserPlus, ArrowLeft, CheckCircle, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { formatCurrency } from '../utils/currency';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -290,7 +291,7 @@ export default function Register() {
                         </div>
                         <div className="text-right">
                           <span className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>
-                            ₹{Number(p.pricePerUser || p.price || 0)}
+                            {formatCurrency(p.pricePerUser || p.price || 0)}
                           </span>
                           <span className="text-[9px] block leading-none" style={{ color: 'var(--text-muted)' }}>/ user / mo</span>
                         </div>

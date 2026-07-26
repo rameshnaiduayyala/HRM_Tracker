@@ -10,18 +10,18 @@ import NotificationsTab from '../components/dashboard/NotificationsTab';
 import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import { Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { EMPLOYEE_TAB_ROUTES, getTabRoute, resolveTabFromPath } from '../config/navigationRoutes';
 
 export default function EmployeePortal() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthStore();
 
-  const lastPathPart = location.pathname.split('/').pop();
   const validTabs = ['attendance', 'tasks', 'leaves', 'timesheets', 'notifications'];
-  const activeTab = validTabs.includes(lastPathPart) ? lastPathPart : 'attendance';
+  const activeTab = resolveTabFromPath(location.pathname, validTabs, 'attendance');
 
   const setActiveTab = (tab) => {
-    navigate(`/employee/${tab}`);
+    navigate(getTabRoute(EMPLOYEE_TAB_ROUTES, tab, '/employee'));
   };
 
   const [attendance, setAttendance] = useState(null);

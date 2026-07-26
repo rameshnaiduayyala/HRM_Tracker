@@ -9,6 +9,7 @@ import Modal from '../Modal';
 import Toggle from '../Toggle';
 import ConfirmModal from '../ConfirmModal';
 import { useReactToPrint } from 'react-to-print';
+import { formatCurrency } from '../../utils/currency';
 
 export default function WorkspacesTab({ 
   workspaces = [], 
@@ -152,7 +153,7 @@ export default function WorkspacesTab({
         const { monthlyRevenue } = getWorkspaceStats(ws);
         return (
           <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">
-            ₹{monthlyRevenue.toFixed(2)} / mo
+            {formatCurrency(monthlyRevenue)} / mo
           </span>
         );
       },
@@ -324,7 +325,7 @@ export default function WorkspacesTab({
             <option value="">-- Select Billing Plan --</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} (₹{Number(p.pricePerUser || p.price || 0).toFixed(2)} / seat)
+                {p.name} ({formatCurrency(p.pricePerUser || p.price || 0)} / seat)
               </option>
             ))}
           </Select>
@@ -392,7 +393,7 @@ export default function WorkspacesTab({
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Price Per Seat:</span>
-                        <span className="font-semibold text-white print:text-black">₹{Number(plan.pricePerUser || plan.price || 0).toFixed(2)} / month</span>
+                        <span className="font-semibold text-white print:text-black">{formatCurrency(plan.pricePerUser || plan.price || 0)} / month</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Billing Cycle:</span>
@@ -428,7 +429,7 @@ export default function WorkspacesTab({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Monthly Recurring Revenue (MRR):</span>
-                      <span className="font-semibold text-emerald-400 print:text-emerald-700 font-mono">₹{stats.monthlyRevenue.toFixed(2)} / mo</span>
+                      <span className="font-semibold text-emerald-400 print:text-emerald-700 font-mono">{formatCurrency(stats.monthlyRevenue)} / mo</span>
                     </div>
                   </div>
                 </div>

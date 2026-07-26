@@ -29,10 +29,13 @@ export default function PayslipsTab({ companyId, employees = [], onViewPayslip }
   });
 
   useEffect(() => {
-    fetchPayslips();
+    if (companyId) {
+      fetchPayslips();
+    }
   }, [companyId]);
 
   const fetchPayslips = async () => {
+    if (!companyId) return;
     setLoading(true);
     try {
       const res = await payslipApi.list(companyId);

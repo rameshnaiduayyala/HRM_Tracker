@@ -6,9 +6,9 @@ import { useEntitlements } from '../contexts/EntitlementContext';
  * Wraps routes/components to enforce SaaS module entitlements.
  */
 export default function ModuleGuard({ module, children, fallback = null }) {
-  const { canUse } = useEntitlements();
+  const { canUseModule } = useEntitlements();
 
-  if (!module || canUse(module)) {
+  if (!module || canUseModule(module)) {
     return children;
   }
 

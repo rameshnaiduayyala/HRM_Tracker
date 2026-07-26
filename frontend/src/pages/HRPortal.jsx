@@ -18,13 +18,13 @@ import EmployeeProfileView from '../components/dashboard/EmployeeProfileView';
 import EmployeeReportView from '../components/dashboard/EmployeeReportView';
 import { Users, Calendar, Clock, DollarSign, ArrowUpRight, TrendingUp, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { HR_TAB_ROUTES, getTabRoute, resolveTabFromPath } from '../config/navigationRoutes';
 
 export default function HRPortal() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthStore();
 
-  const lastPathPart = location.pathname.split('/').pop();
   const validTabs = [
     'hrm-dashboard',
     'employees',
@@ -42,10 +42,10 @@ export default function HRPortal() {
     'employee-profile',
     'employee-report',
   ];
-  const activeTab = validTabs.includes(lastPathPart) ? lastPathPart : 'hrm-dashboard';
+  const activeTab = resolveTabFromPath(location.pathname, validTabs, 'hrm-dashboard');
 
   const setActiveTab = (tab) => {
-    navigate(`/hr/${tab}`);
+    navigate(getTabRoute(HR_TAB_ROUTES, tab, '/hr'));
   };
   const [companies, setCompanies] = useState([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState('');

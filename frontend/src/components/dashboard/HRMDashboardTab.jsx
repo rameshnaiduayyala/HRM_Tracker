@@ -6,6 +6,7 @@ import Button from '../Button';
 import FilterBar from '../FilterBar';
 import { attendanceApi, leaveApi, payslipApi } from '../../services/api';
 import { toast } from 'react-hot-toast';
+import { formatCurrency } from '../../utils/currency';
 
 export default function HRMDashboardTab({ companyId, employees = [], departments = [], teams = [], onNavigateTab }) {
   const [attendance, setAttendance] = useState([]);
@@ -153,7 +154,7 @@ export default function HRMDashboardTab({ companyId, employees = [], departments
           <div>
             <Text variant="muted" size="xs" className="font-bold uppercase tracking-wider">Monthly Payroll</Text>
             <Heading level={2} className="mt-1 text-emerald-600 dark:text-emerald-400">
-              ₹{totalPayrollCost.toLocaleString('en-IN')}
+              {formatCurrency(totalPayrollCost)}
             </Heading>
             <Text variant="secondary" size="xs" className="mt-1">{payslips.length} payslips issued</Text>
           </div>
@@ -198,7 +199,7 @@ export default function HRMDashboardTab({ companyId, employees = [], departments
         >
           <FileText className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mb-2 group-hover:scale-110 transition" />
           <Heading level={5}>Payroll & Payslips</Heading>
-          <Text variant="muted" size="xs">Process INR salary slips</Text>
+          <Text variant="muted" size="xs">Process localized salary slips</Text>
         </button>
       </div>
 

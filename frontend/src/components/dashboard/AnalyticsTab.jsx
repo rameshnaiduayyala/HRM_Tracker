@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart3, TrendingUp, Users, ShieldAlert, Award, FileText, CheckCircle2 } from 'lucide-react';
 import { systemApi } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 // ── Reusable sub-components ───────────────────────────────────────────────────
 const StatCard = ({ label, value, sub, note, icon: Icon, iconColor, accent }) => (
@@ -147,7 +148,7 @@ export default function AnalyticsTab({
             </div>
             <div className="col-span-12 md:col-span-3">
               <StatCard
-                label="Monthly Revenue" value={`₹${totalMRR.toFixed(0)}`}
+                label="Monthly Revenue" value={formatCurrency(totalMRR)}
                 note="Seats × plan rate (MRR)"
                 icon={TrendingUp} iconColor="#10b981" accent="#10b981"
               />
@@ -162,7 +163,7 @@ export default function AnalyticsTab({
             <div className="col-span-12 md:col-span-3">
               <StatCard
                 label="ARPU / Workspace"
-                value={`₹${totalWorkspaces > 0 ? (totalMRR / totalWorkspaces).toFixed(2) : '0.00'}`}
+                value={formatCurrency(totalWorkspaces > 0 ? totalMRR / totalWorkspaces : 0)}
                 note="Average revenue per tenant"
                 icon={Award} iconColor="#a78bfa"
               />

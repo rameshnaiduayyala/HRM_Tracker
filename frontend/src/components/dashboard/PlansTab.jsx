@@ -8,6 +8,7 @@ import Drawer from '../Drawer';
 import Modal from '../Modal';
 import ConfirmModal from '../ConfirmModal';
 import { useReactToPrint } from 'react-to-print';
+import { formatCurrency } from '../../utils/currency';
 
 export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDeletePlan, loading }) {
   const [editingPlan, setEditingPlan] = useState(null);
@@ -79,7 +80,7 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
     {
       header: 'Per User Price',
       accessorKey: 'pricePerUser',
-      cell: (info) => <span className="font-bold font-mono text-emerald-600 dark:text-emerald-400">₹{Number(info.getValue() || info.row.original.price || 0).toFixed(2)}</span>,
+      cell: (info) => <span className="font-bold font-mono text-emerald-600 dark:text-emerald-400">{formatCurrency(info.getValue() || info.row.original.price || 0)}</span>,
     },
     {
       header: 'Allowed Modules',
@@ -202,7 +203,7 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
           />
 
           <Input
-            label="Seat Price (₹ INR / month)"
+            label="Seat Price / month"
             required
             type="number"
             min="0"
@@ -293,7 +294,7 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Price Rate (Seat / Month):</span>
-                    <span className="font-semibold text-white print:text-black">${Number(viewingDetailsPlan.price).toFixed(2)}</span>
+                    <span className="font-semibold text-white print:text-black">{formatCurrency(viewingDetailsPlan.price)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Billing Cycle:</span>

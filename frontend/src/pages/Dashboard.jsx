@@ -27,6 +27,8 @@ import SystemMonitoringTab from '../components/dashboard/SystemMonitoringTab';
 import HRMDashboardTab from '../components/dashboard/HRMDashboardTab';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { DASHBOARD_TAB_ROUTES, getTabRoute, resolveTabFromPath } from '../config/navigationRoutes';
+import { formatCurrency } from '../utils/currency';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -55,7 +57,6 @@ export default function Dashboard() {
   };
 
   const location = useLocation();
-  const lastPathPart = location.pathname.split('/').pop();
   const validTabs = [
     'analytics',
     'ai-analytics',
@@ -79,10 +80,10 @@ export default function Dashboard() {
     'system-ops',
     'hrm-dashboard',
   ];
-  const activeTab = validTabs.includes(lastPathPart) ? lastPathPart : 'analytics';
+  const activeTab = resolveTabFromPath(location.pathname, validTabs, 'analytics');
 
   const setActiveTab = (tab) => {
-    navigate(`/dashboard/${tab}`);
+    navigate(getTabRoute(DASHBOARD_TAB_ROUTES, tab, '/dashboard'));
   };
 
   const [loading, setLoading] = useState(false);
@@ -412,7 +413,7 @@ export default function Dashboard() {
                       </span>
                       <h4 className="text-base font-extrabold mt-3 uppercase tracking-wide" style={{ color: 'var(--text-primary)' }}>{p.name}</h4>
                       <div className="mt-4 flex items-baseline justify-center gap-1">
-                        <span className="text-3xl font-black" style={{ color: 'var(--text-primary)' }}>₹{Number(p.pricePerUser || p.price || 0)}</span>
+                        <span className="text-3xl font-black" style={{ color: 'var(--text-primary)' }}>{formatCurrency(p.pricePerUser || p.price || 0)}</span>
                         <span className="text-xs" style={{ color: 'var(--text-muted)' }}>/ seat / month</span>
                       </div>
                       <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>Up to {p.employeeLimit} employees allowed</p>

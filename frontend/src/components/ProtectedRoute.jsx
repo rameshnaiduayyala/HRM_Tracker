@@ -31,7 +31,11 @@ export default function ProtectedRoute({
       return <Navigate to={fallbackPath} replace />;
     }
     // Smart role-based fallback destinations
-    const defaultDest = ['ADMIN', 'SUPER_ADMIN'].includes(user?.role) ? '/dashboard' : '/employee';
+    const defaultDest = user?.role === 'SUPER_ADMIN'
+      ? '/platform/organizations'
+      : user?.role === 'ADMIN'
+        ? '/dashboard'
+        : '/employee';
     return <Navigate to={defaultDest} replace />;
   }
 
@@ -44,7 +48,11 @@ export default function ProtectedRoute({
       if (fallbackPath) {
         return <Navigate to={fallbackPath} replace />;
       }
-      const defaultDest = ['ADMIN', 'SUPER_ADMIN'].includes(user?.role) ? '/dashboard' : '/employee';
+      const defaultDest = user?.role === 'SUPER_ADMIN'
+        ? '/platform/organizations'
+        : user?.role === 'ADMIN'
+          ? '/dashboard'
+          : '/employee';
       return <Navigate to={defaultDest} replace />;
     }
   }

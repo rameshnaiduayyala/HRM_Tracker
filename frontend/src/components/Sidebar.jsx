@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Select from './Select';
 import { useEntitlements } from '../contexts/EntitlementContext';
 import { ROLE_NAV_CONFIG } from '../config/roleNavigation';
@@ -37,6 +38,16 @@ export default function Sidebar({
   const roleConfig = ROLE_NAV_CONFIG[role] || ROLE_NAV_CONFIG.EMPLOYEE;
   const isCompanyAdmin = ['ADMIN', 'MANAGER', 'HR'].includes(role);
   const { canUse } = useEntitlements();
+  const navigate = useNavigate();
+
+  const handleNavigate = (item) => {
+    if (item.path) {
+      navigate(item.path);
+      return;
+    }
+
+    setActiveTab(item.id);
+  };
 
   return (
     <aside
@@ -75,7 +86,7 @@ export default function Sidebar({
       {/* Dynamic Scalable Role Navigation */}
       <nav className="space-y-5 flex-1 overflow-y-auto pr-1">
         {roleConfig.sections.map((section, sIdx) => {
-          const visibleItems = section.items.filter(item => !item.module || canUse(item.module));
+          const visibleItems = section.items.filter(item => item.alwaysShow || !item.module || canUse(item.module));
           if (visibleItems.length === 0) return null;
 
           return (
@@ -86,7 +97,7 @@ export default function Sidebar({
                   icon={item.icon}
                   label={item.label}
                   active={activeTab === item.id || (item.id === 'payslips' && activeTab === 'print-payslip')}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleNavigate(item)}
                   iconColor={item.iconColor}
                 />
               ))}

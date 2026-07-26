@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { companyApi } from '../services/company.service';
+import {
+  ENTITLEMENT_FEATURES,
+  FEATURE_ENTITLEMENT_MAP,
+  MODULE_ENTITLEMENT_MAP,
+  MODULE_KEYS,
+} from '../config/entitlements';
 
 const EntitlementContext = createContext(null);
 
@@ -48,37 +54,36 @@ export function EntitlementProvider({ children }) {
     loadEntitlements();
   }, [token, user]);
 
-  const canUse = (featureKey) => {
+  const hasAnyRequiredFeature = (requiredFeatures = []) => {
     if (user?.role === 'SUPER_ADMIN') return true;
-    if (features.includes('All Features')) return true;
-    if (featureKey === 'hrm') return true; // Core HR always active for any subscriber
+    if (features.includes(ENTITLEMENT_FEATURES.ALL)) return true;
+    if (requiredFeatures.length === 0) return true;
 
-    // Map module key to seeded database plan feature strings
-    let requiredSeededFeatures = [];
-    switch (featureKey) {
-      case 'attendance':
-      case 'leave':
-        requiredSeededFeatures = ['Attendance Tracking'];
-        break;
-      case 'tracking':
-        requiredSeededFeatures = ['Basic Activity Monitoring', 'Detailed Activity Monitoring'];
-        break;
-      case 'screenshots':
-        requiredSeededFeatures = ['Screenshots'];
-        break;
-      case 'tasks':
-      case 'projects':
-      case 'timesheets':
-        requiredSeededFeatures = ['Task Management'];
-        break;
-      case 'reports':
-        requiredSeededFeatures = ['Detailed Activity Monitoring'];
-        break;
-      default:
-        requiredSeededFeatures = [featureKey];
+    return requiredFeatures.some((requiredFeature) => features.includes(requiredFeature));
+  };
+
+  const canUseModule = (moduleKey) => {
+    if (!moduleKey) return true;
+    if (user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'MANAGER') return true;
+    if (moduleKey === MODULE_KEYS.HRM) return true;
+
+    const requiredFeatures = MODULE_ENTITLEMENT_MAP[moduleKey] || [moduleKey];
+    return hasAnyRequiredFeature(requiredFeatures);
+  };
+
+  const canUseFeature = (featureKey) => {
+    if (!featureKey) return true;
+
+    const requiredFeatures = FEATURE_ENTITLEMENT_MAP[featureKey] || [featureKey];
+    return hasAnyRequiredFeature(requiredFeatures);
+  };
+
+  const canUse = (key) => {
+    if (MODULE_ENTITLEMENT_MAP[key]) {
+      return canUseModule(key);
     }
 
-    return requiredSeededFeatures.some(sf => features.includes(sf));
+    return canUseFeature(key);
   };
 
   const getLimit = (limitType) => {
@@ -89,7 +94,7 @@ export function EntitlementProvider({ children }) {
   };
 
   return (
-    <EntitlementContext.Provider value={{ canUse, getLimit, loading, features }}>
+    <EntitlementContext.Provider value={{ canUse, canUseModule, canUseFeature, getLimit, loading, features }}>
       {children}
     </EntitlementContext.Provider>
   );
@@ -106,9 +111,8 @@ export function useEntitlements() {
 /**
  * Route protection guard based on Feature Entitlement.
  */
-export function EntitlementGuard({ feature, children, fallbackPath }) {
+export function EntitlementGuard({ feature, children }) {
   const { canUse, loading } = useEntitlements();
-  const { user } = useAuthStore();
 
   if (loading) {
     return (
@@ -121,7 +125,6 @@ export function EntitlementGuard({ feature, children, fallbackPath }) {
   }
 
   if (!canUse(feature)) {
-    const dest = fallbackPath || (['ADMIN', 'SUPER_ADMIN'].includes(user?.role) ? '/dashboard' : '/employee');
     return <React.Fragment>{React.createElement('span', null, `Not Entitled to feature ${feature}`)}</React.Fragment>;
   }
 
