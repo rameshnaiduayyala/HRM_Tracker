@@ -15,7 +15,7 @@ const updateCompanySchema = z.object({
 export class CompaniesController {
   async list(req: Request, res: Response, next: NextFunction) {
     try {
-      const companies = await companiesService.getCompaniesByTenant(req.tenantId!);
+      const companies = await companiesService.getCompaniesByTenant(req.tenantId);
       return res.status(200).json({
         status: 'success',
         data: { companies },

@@ -18,9 +18,10 @@ export class CompaniesService {
     });
   }
 
-  async getCompaniesByTenant(tenantId: string) {
+  async getCompaniesByTenant(tenantId?: string) {
+    const where = tenantId ? { tenantId } : {};
     return prisma.company.findMany({
-      where: { tenantId },
+      where,
       include: {
         subscriptions: {
           include: {

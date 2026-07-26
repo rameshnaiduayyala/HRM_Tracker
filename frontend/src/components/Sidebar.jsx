@@ -53,6 +53,7 @@ export default function Sidebar({
 }) {
   const role = user?.role || 'EMPLOYEE';
   const roleConfig = ROLE_NAV_CONFIG[role] || ROLE_NAV_CONFIG.EMPLOYEE;
+  const isSuperAdmin = role === 'SUPER_ADMIN';
   const isCompanyAdmin = ['ADMIN', 'MANAGER', 'HR'].includes(role);
   const { canUse } = useEntitlements();
   const navigate = useNavigate();
@@ -99,7 +100,7 @@ export default function Sidebar({
         </div>
 
         {/* Workspace Selector */}
-        {isCompanyAdmin && (
+        {(isCompanyAdmin || isSuperAdmin) && (
           <div className="space-y-1.5 px-1">
             <label className="block text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted, #64748b)' }}>
               Workspace

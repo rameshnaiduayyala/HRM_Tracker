@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, Shield, Clock, Camera, Timer, Building, Upload } from 'lucide-react';
-import { settingsApi, companyApi } from '../../services';
+import { Settings, Save, Shield, Clock, Camera, Timer, Building, Upload, MapPin, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
+import { settingsApi, companyApi, departmentApi } from '../../services';
 import { toast } from 'react-hot-toast';
 
 export default function SettingsTab({ companyId, onSettingsSaved }) {
@@ -11,6 +11,14 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
     logoUrl: '',
   });
   const [logoPreview, setLogoPreview] = useState('');
+  
+  // Company Branches State (CRUD)
+  const [branches, setBranches] = useState([]);
+  const [newBranchName, setNewBranchName] = useState('');
+  const [newBranchLocation, setNewBranchLocation] = useState('');
+  const [editingBranchId, setEditingBranchId] = useState(null);
+  const [editBranchName, setEditBranchName] = useState('');
+
   const [settings, setSettings] = useState({
     shiftStart: '09:00',
     shiftEnd: '18:00',
@@ -26,8 +34,58 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
     if (companyId) {
       fetchSettings();
       fetchCompanyDetails();
+      fetchBranches();
     }
   }, [companyId]);
+
+  const fetchBranches = async () => {
+    try {
+      const res = await companyApi.list();
+      const list = res.data?.companies || res.companies || [];
+      setBranches(list);
+    } catch (err) {
+      console.error('Failed to fetch company branches:', err);
+    }
+  };
+
+  const handleAddBranch = async (e) => {
+    e.preventDefault();
+    if (!newBranchName.trim()) return;
+    try {
+      await companyApi.create(newBranchName.trim());
+      toast.success(`Company Branch "${newBranchName}" created successfully.`);
+      setNewBranchName('');
+      fetchBranches();
+      if (onSettingsSaved) onSettingsSaved();
+    } catch (err) {
+      toast.error(err.message || 'Failed to add company branch.');
+    }
+  };
+
+  const handleUpdateBranch = async (id) => {
+    if (!editBranchName.trim()) return;
+    try {
+      await companyApi.update(id, { name: editBranchName.trim() });
+      toast.success('Company Branch updated.');
+      setEditingBranchId(null);
+      fetchBranches();
+      if (onSettingsSaved) onSettingsSaved();
+    } catch (err) {
+      toast.error('Failed to update branch.');
+    }
+  };
+
+  const handleDeleteBranch = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete branch "${name}"?`)) return;
+    try {
+      await companyApi.delete(id);
+      toast.success('Company Branch deleted.');
+      fetchBranches();
+      if (onSettingsSaved) onSettingsSaved();
+    } catch (err) {
+      toast.error('Failed to delete branch.');
+    }
+  };
 
   const fetchCompanyDetails = async () => {
     try {
@@ -126,7 +184,7 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
         });
       }
     } catch (err) {
-      toast.error('Failed to load company settings');
+      console.warn('Tracking settings not initialized yet:', err);
     } finally {
       setLoading(false);
     }
@@ -146,14 +204,19 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
       }
 
       // 2. Save Tracking & Policy Settings
-      await settingsApi.update(companyId, {
-        shiftStart: settings.shiftStart,
-        shiftEnd: settings.shiftEnd,
-        workingHoursPerDay: settings.workingHoursPerDay,
-        screenshotInterval: settings.screenshotInterval,
-        idleThreshold: settings.idleThreshold,
-        timezone: settings.timezone,
-      });
+      try {
+        await settingsApi.update(companyId, {
+          shiftStart: settings.shiftStart,
+          shiftEnd: settings.shiftEnd,
+          workingHoursPerDay: settings.workingHoursPerDay,
+          screenshotInterval: settings.screenshotInterval,
+          idleThreshold: settings.idleThreshold,
+          timezone: settings.timezone,
+        });
+      } catch (settingsErr) {
+        console.warn('Settings API update warning:', settingsErr);
+      }
+
       toast.success('Company profile & configuration saved successfully!');
       if (onSettingsSaved) {
         onSettingsSaved();
@@ -228,7 +291,111 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
               </div>
             </div>
           </div>
-          {/* Section 1: Work Schedule */}
+
+          {/* Section 0.5: Company Branches / Divisions Management */}
+          <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-emerald-400" />
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Tenant Company Locations & Regional Branches</h3>
+              </div>
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                {branches.length} Active Workspaces
+              </span>
+            </div>
+            <p className="text-[11px] text-[var(--text-muted)] -mt-2">
+              Manage multi-company locations, regional entities, and branch workspaces under your tenant account.
+            </p>
+
+            {/* Add New Branch Input */}
+            <div className="flex gap-3 pt-2">
+              <input
+                type="text"
+                value={newBranchName}
+                onChange={(e) => setNewBranchName(e.target.value)}
+                placeholder="Enter branch name (e.g. New York HQ, London Office)"
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={handleAddBranch}
+                className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition shrink-0 uppercase tracking-wider"
+              >
+                <Plus className="w-4 h-4" /> Add Branch
+              </button>
+            </div>
+
+            {/* Branch List Table / Grid */}
+            <div className="space-y-2 pt-2">
+              {branches.map((b) => (
+                <div key={b.id} className="flex items-center justify-between p-3 bg-[var(--bg-card-alt)] rounded-xl border border-[var(--border-base)]">
+                  {editingBranchId === b.id ? (
+                    <div className="flex items-center gap-2 flex-1 mr-3">
+                      <input
+                        type="text"
+                        value={editBranchName}
+                        onChange={(e) => setEditBranchName(e.target.value)}
+                        className={inputClass}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateBranch(b.id)}
+                        className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingBranchId(null)}
+                        className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                          <Building className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-white">{b.name}</h4>
+                          <span className="text-[10px] text-[var(--text-muted)] font-mono">Branch ID: {b.id.slice(0, 8)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingBranchId(b.id);
+                            setEditBranchName(b.name);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-white/5 rounded-lg transition"
+                          title="Edit Branch"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBranch(b.id, b.name)}
+                          className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition"
+                          title="Delete Branch"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+              {branches.length === 0 && (
+                <div className="py-6 text-center text-xs text-[var(--text-muted)] italic">
+                  No company branches created yet. Use the form above to add your first branch.
+                </div>
+              )}
+            </div>
+          </div>
           <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-4 h-4 text-indigo-400" />

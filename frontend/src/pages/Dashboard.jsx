@@ -97,10 +97,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchPlans();
+    fetchCompanies();
     if (isSuperAdmin) {
       fetchWorkspaces();
-    } else {
-      fetchCompanies();
     }
   }, []);
 
@@ -146,11 +145,10 @@ export default function Dashboard() {
   };
 
   const fetchCompanies = async () => {
-    if (isSuperAdmin) return;
     try {
       const res = await companyApi.list();
-      setCompanies(res.data.companies);
-      if (res.data.companies.length > 0) {
+      setCompanies(res.data.companies || []);
+      if (res.data.companies && res.data.companies.length > 0) {
         setSelectedCompanyId(res.data.companies[0].id);
       }
     } catch (err) {
