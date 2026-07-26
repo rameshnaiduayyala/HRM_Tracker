@@ -18,7 +18,7 @@ const createEmployeeSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters long').optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  roleName: z.enum(['MANAGER', 'EMPLOYEE', 'HR']).optional(),
+  roleName: z.enum(['ADMIN', 'MANAGER', 'EMPLOYEE', 'HR']).optional(),
 });
 
 const updateEmployeeSchema = z.object({

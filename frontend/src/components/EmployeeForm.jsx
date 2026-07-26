@@ -112,10 +112,12 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
           <select
             value={roleName}
             onChange={(e) => setRoleName(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
+            className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-[var(--text-primary)] text-sm rounded-lg focus:outline-none focus:border-indigo-500 font-medium"
           >
             <option value="EMPLOYEE">Standard Employee</option>
             <option value="MANAGER">Manager / Lead</option>
+            <option value="HR">HR Specialist</option>
+            <option value="ADMIN">Company Admin</option>
           </select>
         </div>
       </div>
