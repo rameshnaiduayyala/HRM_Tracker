@@ -37,22 +37,6 @@ export default function Header() {
     >
       {/* ── Brand ── */}
       <div className="flex items-center gap-3">
-        <img
-          src={FocusTrackLogo}
-          alt="FocusTrack"
-          className="h-10 w-auto object-contain"
-          draggable={false}
-        />
-
-        <span
-          className="w-px h-4 hidden sm:block"
-          style={{ background: "var(--border-muted)" }}
-        />
-
-        <span className={`badge ${cfg.color} hidden sm:inline-flex`}>
-          <Shield className="w-2.5 h-2.5" />
-          {cfg.label}
-        </span>
       </div>
 
       {/* ── Right Controls ── */}

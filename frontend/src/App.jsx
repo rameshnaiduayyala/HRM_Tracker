@@ -23,17 +23,10 @@ const LoadingRoute = () => (
   </div>
 );
 
-const TenantDashboardRoute = ({ children, module }) => (
-  <ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MANAGER', 'HR']}>
-    <ModuleGuard module={module}>
-      {children || <Dashboard />}
-    </ModuleGuard>
-  </ProtectedRoute>
-);
-
-const PlatformRoute = () => (
-  <ProtectedRoute allowedRoles={['SUPER_ADMIN']} fallbackPath="/dashboard">
-    <Dashboard />
+// Route Guard Helpers
+const GuardedRoute = ({ allowedRoles, module, children }) => (
+  <ProtectedRoute allowedRoles={allowedRoles}>
+    {module ? <ModuleGuard module={module}>{children}</ModuleGuard> : children}
   </ProtectedRoute>
 );
 
@@ -55,51 +48,29 @@ export default function App() {
         <BrowserRouter>
           <Suspense fallback={<LoadingRoute />}>
             <Routes>
+              {/* Public Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-            
-              <Route path="/dashboard/*" element={<TenantDashboardRoute />} />
 
-              <Route
-                path="/hr/*"
-                element={
-                  <ProtectedRoute allowedRoles={['HR']}>
-                    <HRPortal />
-                  </ProtectedRoute>
-                }
-              />
+              {/* Company Admin & Manager Routes */}
+              <Route path="/dashboard/*" element={<GuardedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MANAGER', 'HR']}><Dashboard /></GuardedRoute>} />
+              <Route path="/work/*" element={<GuardedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MANAGER', 'HR']}><Dashboard /></GuardedRoute>} />
+              <Route path="/tracking/*" element={<GuardedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MANAGER', 'HR']}><Dashboard /></GuardedRoute>} />
+              <Route path="/payroll/*" element={<GuardedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MANAGER', 'HR']}><Dashboard /></GuardedRoute>} />
+              <Route path="/reports/*" element={<GuardedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MANAGER', 'HR']}><Dashboard /></GuardedRoute>} />
+              <Route path="/admin/*" element={<GuardedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']}><Dashboard /></GuardedRoute>} />
 
-              <Route path="/work" element={<Navigate to="/work/projects" replace />} />
-              <Route path="/work/projects" element={<TenantDashboardRoute module={MODULE_KEYS.PROJECTS} />} />
-              <Route path="/work/tasks" element={<TenantDashboardRoute module={MODULE_KEYS.TASKS} />} />
-              <Route path="/work/timesheets" element={<TenantDashboardRoute module={MODULE_KEYS.TIMESHEETS} />} />
+              {/* HR Portal Routes */}
+              <Route path="/hr/*" element={<GuardedRoute allowedRoles={['HR']}><HRPortal /></GuardedRoute>} />
 
-              <Route path="/tracking" element={<Navigate to="/tracking/reports" replace />} />
-              <Route path="/tracking/reports" element={<TenantDashboardRoute module={MODULE_KEYS.TRACKING} />} />
+              {/* Super Admin Platform Routes */}
+              <Route path="/platform/*" element={<GuardedRoute allowedRoles={['SUPER_ADMIN']}><Dashboard /></GuardedRoute>} />
 
-              <Route path="/payroll" element={<Navigate to="/payroll/payslips" replace />} />
-              <Route path="/payroll/payslips" element={<TenantDashboardRoute module={MODULE_KEYS.PAYROLL} />} />
+              {/* Employee Portal Routes */}
+              <Route path="/employee" element={<Navigate to="/employee/attendance" replace />} />
+              <Route path="/employee/*" element={<GuardedRoute allowedRoles={['EMPLOYEE']}><EmployeePortal /></GuardedRoute>} />
 
-              <Route path="/reports" element={<TenantDashboardRoute />} />
-              <Route path="/admin/settings" element={<TenantDashboardRoute />} />
-              <Route path="/admin/configurations" element={<TenantDashboardRoute />} />
-
-              <Route path="/platform" element={<Navigate to="/platform/organizations" replace />} />
-              <Route path="/platform/dashboard" element={<PlatformRoute />} />
-              <Route path="/platform/organizations" element={<PlatformRoute />} />
-              <Route path="/platform/plans" element={<PlatformRoute />} />
-              <Route path="/platform/system/health" element={<PlatformRoute />} />
-              <Route path="/platform/audit-logs" element={<PlatformRoute />} />
-            
-              <Route
-                path="/employee/*"
-                element={
-                  <ProtectedRoute allowedRoles={['EMPLOYEE']}>
-                    <EmployeePortal />
-                  </ProtectedRoute>
-                }
-              />
-
+              {/* Fallback Redirect */}
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </Suspense>

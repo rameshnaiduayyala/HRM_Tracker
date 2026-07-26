@@ -175,16 +175,17 @@ export const ROLE_NAV_CONFIG = {
 
   EMPLOYEE: {
     portalPath: '/employee',
-    defaultTab: 'attendance',
+    defaultTab: 'dashboard',
     sections: [
       {
         label: 'My Workspace',
         items: [
-          { id: 'attendance', label: 'Shift Attendance', icon: Clock, module: MODULE_KEYS.ATTENDANCE, path: '/employee/attendance' },
-          { id: 'tasks', label: 'My Assigned Tasks', icon: CheckSquare, module: MODULE_KEYS.TASKS, path: '/employee/tasks' },
-          { id: 'leaves', label: 'My Leave Requests', icon: Calendar, module: MODULE_KEYS.LEAVE, path: '/employee/leave' },
-          { id: 'timesheets', label: 'My Timesheets', icon: Clock, module: MODULE_KEYS.TIMESHEETS, path: '/employee/timesheet' },
-          { id: 'notifications', label: 'Announcements', icon: Bell, path: '/employee/notifications' },
+          { id: 'dashboard', label: 'Employee Dashboard', icon: LayoutGrid, path: '/employee/dashboard', alwaysShow: true },
+          { id: 'attendance', label: 'Shift Attendance', icon: Clock, module: MODULE_KEYS.ATTENDANCE, path: '/employee/attendance', alwaysShow: true },
+          { id: 'tasks', label: 'My Assigned Tasks', icon: CheckSquare, module: MODULE_KEYS.TASKS, path: '/employee/tasks', alwaysShow: true },
+          { id: 'leaves', label: 'My Leave Requests', icon: Calendar, module: MODULE_KEYS.LEAVE, path: '/employee/leave', alwaysShow: true },
+          { id: 'timesheets', label: 'My Timesheets', icon: Clock, module: MODULE_KEYS.TIMESHEETS, path: '/employee/timesheet', alwaysShow: true },
+          { id: 'notifications', label: 'Announcements', icon: Bell, path: '/employee/notifications', alwaysShow: true },
         ],
       },
     ],

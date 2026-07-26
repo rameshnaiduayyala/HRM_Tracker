@@ -17,8 +17,8 @@ export default function EmployeePortal() {
   const location = useLocation();
   const { user } = useAuthStore();
 
-  const validTabs = ['attendance', 'tasks', 'leaves', 'timesheets', 'notifications'];
-  const activeTab = resolveTabFromPath(location.pathname, validTabs, 'attendance');
+  const validTabs = ['dashboard', 'attendance', 'tasks', 'leaves', 'timesheets', 'notifications'];
+  const activeTab = resolveTabFromPath(location.pathname, validTabs, 'dashboard');
 
   const setActiveTab = (tab) => {
     navigate(getTabRoute(EMPLOYEE_TAB_ROUTES, tab, '/employee'));
@@ -87,8 +87,8 @@ export default function EmployeePortal() {
         />
         
         <main className="flex-1 overflow-y-auto p-8">
-          {/* Attendance Tab */}
-          {activeTab === 'attendance' && (
+          {/* Employee Dashboard / Attendance Tab */}
+          {(activeTab === 'dashboard' || activeTab === 'attendance') && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-white tracking-tight">Shift Attendance</h2>
