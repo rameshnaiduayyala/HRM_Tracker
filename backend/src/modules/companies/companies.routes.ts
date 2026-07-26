@@ -10,6 +10,7 @@ router.get('/', companiesController.list);
 router.post('/', companiesController.create);
 router.get('/:id', companiesController.get);
 router.put('/:id', companiesController.update);
+router.post('/:id/logo', companiesController.uploadLogo);
 router.delete('/:id', companiesController.delete);
 
 export default router;

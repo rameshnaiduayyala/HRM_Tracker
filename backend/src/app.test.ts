@@ -45,25 +45,12 @@ beforeAll(async () => {
   if (acmeSub) {
     let targetPlan = await prisma.plan.findFirst({
       where: {
-        OR: [
-          { name: 'PRO' },
-          { name: 'ENTERPRISE' },
-          { features: { has: 'Task Management' } }
-        ]
-      }
+        name: 'Enterprise All-in-One',
+      },
     });
 
     if (!targetPlan) {
-      // Fallback: update existing plan to support Task Management
-      const existingPlan = await prisma.plan.findFirst();
-      if (existingPlan) {
-        targetPlan = await prisma.plan.update({
-          where: { id: existingPlan.id },
-          data: {
-            features: Array.from(new Set([...existingPlan.features, 'Task Management'])),
-          },
-        });
-      }
+      targetPlan = await prisma.plan.findFirst();
     }
 
     const futureDate = new Date();

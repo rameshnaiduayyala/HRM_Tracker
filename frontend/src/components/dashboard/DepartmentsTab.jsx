@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Building2, Plus, Pencil, Trash2, Users, X, Check } from 'lucide-react';
 import { departmentApi } from '../../services';
 import { toast } from 'react-hot-toast';
+import Input from '../Input';
+import Select from '../Select';
+import { Label } from '../Typography';
 
 export default function DepartmentsTab({ companyId, employees = [] }) {
   const [departments, setDepartments] = useState([]);
@@ -87,43 +90,42 @@ export default function DepartmentsTab({ companyId, employees = [] }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-muted)] rounded-2xl p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-5">
-              <h3 className="text-base font-bold text-white">{editing ? 'Edit Department' : 'New Department'}</h3>
-              <button onClick={() => setShowForm(false)} className="text-[var(--text-secondary)] hover:text-white transition"><X className="w-5 h-5" /></button>
+              <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{editing ? 'Edit Department' : 'New Department'}</h3>
+              <button onClick={() => setShowForm(false)} className="transition" style={{ color: 'var(--text-secondary)' }}><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">Name</label>
-                <input
-                  required
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="e.g. Engineering"
-                  className="w-full px-3 py-2 bg-[var(--bg-card-alt)] border border-[var(--border-muted)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">Description</label>
+              <Input
+                label="Name"
+                required
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="e.g. Engineering"
+              />
+              <div className="space-y-1.5">
+                <Label>Description</Label>
                 <textarea
                   value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   rows={2}
                   placeholder="Optional description..."
-                  className="w-full px-3 py-2 bg-[var(--bg-card-alt)] border border-[var(--border-muted)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500 transition resize-none"
+                  className="w-full px-3 py-2 rounded-xl text-sm font-medium transition focus:outline-none focus:border-indigo-600 resize-none"
+                  style={{
+                    background: 'var(--bg-canvas)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                  }}
                 />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">Department Head</label>
-                <select
-                  value={form.headId}
-                  onChange={e => setForm(f => ({ ...f, headId: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--bg-card-alt)] border border-[var(--border-muted)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500 transition"
-                >
-                  <option value="">— No Head —</option>
-                  {employees.map(emp => (
-                    <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
-                  ))}
-                </select>
-              </div>
+              <Select
+                label="Department Head"
+                value={form.headId}
+                onChange={e => setForm(f => ({ ...f, headId: e.target.value }))}
+              >
+                <option value="">— No Head —</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
+                ))}
+              </Select>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-2 border border-[var(--border-muted)] text-[var(--text-primary)] text-sm rounded-lg hover:bg-[var(--bg-elevated)] transition">Cancel</button>
                 <button type="submit" className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition">

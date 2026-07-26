@@ -289,15 +289,28 @@ export default function Register() {
                           </span>
                         </div>
                         <div className="text-right">
-                          <span className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>${Number(p.price)}</span>
-                          <span className="text-[9px] block leading-none" style={{ color: 'var(--text-muted)' }}>/ mo</span>
+                          <span className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>
+                            ₹{Number(p.pricePerUser || p.price || 0)}
+                          </span>
+                          <span className="text-[9px] block leading-none" style={{ color: 'var(--text-muted)' }}>/ user / mo</span>
                         </div>
                       </div>
+
+                      {p.modules && p.modules.length > 0 && (
+                        <div className="mt-2.5 flex flex-wrap gap-1">
+                          {p.modules.map((m) => (
+                            <span key={m} className="text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wider"
+                              style={{ background: 'rgba(16,185,129,0.08)', color: '#10b981', borderColor: 'rgba(16,185,129,0.25)' }}>
+                              {m === 'PROJECTS_TASKS' ? 'Projects & Tasks' : m === 'WORK_TRACKER' ? 'Work Tracker' : m}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       <div className="mt-3.5 flex items-baseline gap-1 text-[11px] px-2.5 py-1.5 rounded-lg border"
                         style={{ background: 'var(--bg-card-alt)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
                         <ShieldCheck className="w-3.5 h-3.5 shrink-0" style={{ color: '#6366f1' }} />
-                        <span>Up to <strong>{p.employeeLimit} employees</strong></span>
+                        <span>Max <strong>{p.employeeLimit} employees</strong> limit</span>
                       </div>
 
                       <ul className="mt-4 space-y-2 text-[10px] border-t pt-3" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>

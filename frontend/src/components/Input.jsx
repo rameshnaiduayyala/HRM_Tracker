@@ -1,4 +1,5 @@
 import React from 'react';
+import { Label } from './Typography';
 
 export default function Input({
   label,
@@ -9,23 +10,26 @@ export default function Input({
   required = false,
   disabled = false,
   className = '',
+  style = {},
   ...props
 }) {
   return (
     <div className={`space-y-1.5 ${className}`}>
-      {label && (
-        <label className="block text-xs font-medium text-[var(--text-primary)]">
-          {label} {required && <span className="text-red-500">*</span>}
-        </label>
-      )}
+      {label && <Label required={required}>{label}</Label>}
       <input
         type={type}
         required={required}
         disabled={disabled}
         placeholder={placeholder}
-        value={value}
+        value={value ?? ''}
         onChange={onChange}
-        className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        className="w-full px-3 py-2 rounded-xl text-sm font-medium transition focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{
+          background: 'var(--bg-canvas)',
+          border: '1px solid var(--border-subtle)',
+          color: 'var(--text-primary)',
+          ...style,
+        }}
         {...props}
       />
     </div>

@@ -7,6 +7,7 @@ declare global {
       tenant?: Tenant;
       userId?: string;
       userRole?: string;
+      companyId?: string;
     }
   }
 }

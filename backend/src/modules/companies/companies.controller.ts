@@ -7,6 +7,11 @@ const createCompanySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
 });
 
+const updateCompanySchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
+  logo: z.string().optional(),
+});
+
 export class CompaniesController {
   async list(req: Request, res: Response, next: NextFunction) {
     try {
@@ -56,11 +61,30 @@ export class CompaniesController {
   async update(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const parsed = createCompanySchema.safeParse(req.body);
+      const parsed = updateCompanySchema.safeParse(req.body);
       if (!parsed.success) {
         return next(new ValidationError(parsed.error.format()));
       }
-      const company = await companiesService.updateCompany(id, req.tenantId!, parsed.data.name);
+      const company = await companiesService.updateCompany(id, req.tenantId!, parsed.data);
+      return res.status(200).json({
+        status: 'success',
+        data: { company },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async uploadLogo(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { logoBase64 } = req.body;
+
+      if (!logoBase64) {
+        return next(new ValidationError({ logoBase64: { _errors: ['logoBase64 is required'] } }));
+      }
+
+      const company = await companiesService.uploadCompanyLogo(id, req.tenantId!, logoBase64);
       return res.status(200).json({
         status: 'success',
         data: { company },

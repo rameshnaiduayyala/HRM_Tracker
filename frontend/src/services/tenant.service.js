@@ -5,5 +5,6 @@ export const tenantApi = {
   list: () => api.get('/tenants'),
   updateStatus: (id, status) => api.patch(`/tenants/${id}/status`, { status }),
   update: (id, data) => api.patch(`/tenants/${id}`, data),
-  subscribe: (companyId, planId) => api.post(`/tenants/companies/${companyId}/subscribe`, { planId }),
+  subscribe: (companyId, planId, userCount) => api.post(`/tenants/companies/${companyId}/subscribe`, { planId, userCount }),
+  getBranding: (subdomain, tenantId) => api.get(`/tenants/branding`, { params: { subdomain, tenantId } }),
 };

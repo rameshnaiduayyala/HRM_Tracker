@@ -14,6 +14,8 @@ const createTenantSchema = z.object({
   adminFirstName: z.string().min(1, 'First name is required').optional(),
   adminLastName: z.string().min(1, 'Last name is required').optional(),
   planId: z.string().optional(),
+  selectedModules: z.array(z.enum(['HRM', 'PROJECTS_TASKS', 'WORK_TRACKER'])).optional(),
+  userCount: z.number().int().min(1).optional(),
 });
 
 const updateTenantSchema = z.object({
@@ -116,6 +118,21 @@ export class TenantsController {
       return next(error);
     }
   }
+  async getBranding(req: Request, res: Response, next: NextFunction) {
+    try {
+      const tenantId = (req.query.tenantId as string) || req.tenantId;
+      const subdomain = req.query.subdomain as string;
+
+      const branding = await tenantsService.getTenantBranding(tenantId, subdomain);
+      return res.status(200).json({
+        status: 'success',
+        data: branding,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   async subscribePlan(req: Request, res: Response, next: NextFunction) {
     try {
       const { companyId } = req.params;

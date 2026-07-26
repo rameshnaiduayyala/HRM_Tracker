@@ -8,6 +8,11 @@ export const useThemeStore = create((set, get) => ({
     if (typeof window !== 'undefined') {
       localStorage.setItem('theme', newTheme);
       document.documentElement.setAttribute('data-theme', newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
     set({ theme: newTheme });
   },
@@ -16,6 +21,11 @@ export const useThemeStore = create((set, get) => ({
     if (typeof window === 'undefined') return;
     const saved = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', saved);
+    if (saved === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
     set({ theme: saved });
   },
 }));

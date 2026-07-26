@@ -27,9 +27,29 @@ export const tenantHandler = async (
     }
   }
 
+  // Strict check: If user is authenticated, ensure authenticated JWT tenantId matches header/subdomain tenantId (unless SUPER_ADMIN)
+  if (req.tenantId && tenantId && req.userRole !== 'SUPER_ADMIN') {
+    const matchingTenant = await prisma.tenant.findFirst({
+      where: {
+        OR: [{ id: tenantId }, { subdomain: tenantId }],
+      },
+    });
+
+    if (matchingTenant && matchingTenant.id !== req.tenantId) {
+      return next(
+        new BadRequestError('Tenant Isolation Violation: Authenticated session does not belong to the requested tenant context')
+      );
+    }
+  }
+
+  // Fallback to token's tenantId if not provided in header/subdomain
+  if (!tenantId && req.tenantId) {
+    tenantId = req.tenantId;
+  }
+
   if (!tenantId) {
     return next(
-      new BadRequestError('Tenant identifier (X-Tenant-ID header or subdomain) is required')
+      new BadRequestError('Tenant identifier (X-Tenant-ID header, subdomain, or authenticated session) is required')
     );
   }
 

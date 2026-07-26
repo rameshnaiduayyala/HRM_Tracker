@@ -46,9 +46,21 @@ export class EntitlementsService {
     }
 
     const planFeatures = subscription.plan.features || [];
+    const planModules = subscription.plan.modules || [];
 
-    // Enterprise plan bypasses all feature locks
-    if (planFeatures.includes('All Features')) {
+    // Enterprise plan or all modules enabled bypasses feature locks
+    if (planFeatures.includes('All Features') || planModules.length === 3) {
+      return true;
+    }
+
+    // Module array checks
+    if (['attendance', 'leave', 'hrm', 'departments', 'teams', 'timesheets'].includes(featureKey) && planModules.includes('HRM')) {
+      return true;
+    }
+    if (['tasks', 'projects', 'reports', 'timesheets'].includes(featureKey) && planModules.includes('PROJECTS_TASKS')) {
+      return true;
+    }
+    if (['tracking', 'screenshots', 'work-sessions', 'devices'].includes(featureKey) && planModules.includes('WORK_TRACKER')) {
       return true;
     }
 
@@ -73,7 +85,7 @@ export class EntitlementsService {
       case 'tasks':
       case 'projects':
       case 'timesheets':
-        requiredSeededFeatures = ['Task Management'];
+        requiredSeededFeatures = ['Task Management', 'Time Logging & Timesheets'];
         break;
       case 'reports':
         requiredSeededFeatures = ['Detailed Activity Monitoring'];

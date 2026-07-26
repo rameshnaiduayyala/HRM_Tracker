@@ -8,15 +8,18 @@ generator client {
 }
 
 model Tenant {
-  id        String    @id @default(uuid())
-  name      String
-  subdomain String    @unique
-  status    String    @default("ACTIVE") // ACTIVE, SUSPENDED, PENDING
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  users     User[]
-  roles     Role[]
-  companies Company[]
+  id           String    @id @default(uuid())
+  name         String
+  subdomain    String    @unique
+  logo         String?   // URL/path to tenant logo e.g. /uploads/tenants/{id}/logo.png
+  favicon      String?   // URL/path to tenant favicon
+  primaryColor String?   @default("#4F46E5") // Custom brand accent color
+  status       String    @default("ACTIVE") // ACTIVE, SUSPENDED, PENDING
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  users        User[]
+  roles        Role[]
+  companies    Company[]
 
   @@map("tenants")
 }
@@ -24,6 +27,7 @@ model Tenant {
 model Company {
   id            String           @id @default(uuid())
   name          String
+  logo          String?          // URL/path to company logo e.g. /uploads/tenants/{tenantId}/company/{id}/logo.png
   tenantId      String
   tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt     DateTime         @default(now())
@@ -45,10 +49,12 @@ model Company {
 
 model Plan {
   id            String         @id @default(uuid())
-  name          String         @unique // e.g. "BASIC", "PRO", "ENTERPRISE"
-  price         Decimal        @db.Decimal(10, 2)
+  name          String         @unique // e.g. "HRM Starter", "Projects Pro", "Enterprise Suite"
+  pricePerUser  Decimal        @db.Decimal(10, 2) // Price per user in INR (₹)
+  currency      String         @default("INR") // INR (₹)
   billingCycle  String         @default("MONTHLY") // MONTHLY, YEARLY
-  employeeLimit Int            @default(5)
+  employeeLimit Int            @default(100)
+  modules       String[]       // e.g. ["HRM"], ["PROJECTS_TASKS"], ["WORK_TRACKER"]
   features      String[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -58,16 +64,18 @@ model Plan {
 }
 
 model Subscription {
-  id        String   @id @default(uuid())
-  companyId String
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  planId    String
-  plan      Plan     @relation(fields: [planId], references: [id])
-  status    String   @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED
-  startDate DateTime @default(now())
-  endDate   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  planId     String
+  plan       Plan     @relation(fields: [planId], references: [id])
+  userCount  Int      @default(1) // Number of paid user seats in INR
+  totalPrice Decimal  @default(0) @db.Decimal(10, 2) // Calculated in INR (₹)
+  status     String   @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED
+  startDate  DateTime @default(now())
+  endDate    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("subscriptions")
 }
@@ -543,3 +551,5 @@ model Payslip {
 
   @@map("payslips")
 }
+
+

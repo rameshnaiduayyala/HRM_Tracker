@@ -5,9 +5,11 @@ import { ValidationError } from '../../shared/errors';
 
 const planSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  price: z.number().min(0, 'Price must be positive'),
+  pricePerUser: z.number().min(0, 'Price per user in INR must be non-negative'),
+  currency: z.string().default('INR'),
   billingCycle: z.enum(['MONTHLY', 'YEARLY']).optional(),
   employeeLimit: z.number().int().min(1).optional(),
+  modules: z.array(z.enum(['HRM', 'PROJECTS_TASKS', 'WORK_TRACKER'])).min(1, 'Select at least one module'),
   features: z.array(z.string()).optional(),
 });
 

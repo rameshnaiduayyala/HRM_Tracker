@@ -1,6 +1,7 @@
 export * from './request';
 export * from './auth.service';
 export * from './tenant.service';
+export * from './system.service';
 export * from './company.service';
 export * from './employee.service';
 export * from './attendance.service';

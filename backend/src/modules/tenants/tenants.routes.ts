@@ -5,6 +5,7 @@ import { requireSuperAdmin } from '../authorization/authz.middleware';
 
 const router = Router();
 
+router.get('/branding', tenantsController.getBranding);
 router.post('/', tenantsController.create);
 router.post('/companies/:companyId/subscribe', authenticate, tenantsController.subscribePlan);
 router.get('/', authenticate, requireSuperAdmin, tenantsController.list);

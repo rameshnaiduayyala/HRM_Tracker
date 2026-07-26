@@ -6,43 +6,55 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Starting database seeding...');
 
-  // 1. Seed Plans
+  // 1. Seed Plans with INR (₹) Per-User Pricing and Allowed Modules
   await prisma.plan.upsert({
-    where: { name: 'BASIC' },
+    where: { name: 'HRM Starter' },
     update: {},
     create: {
-      name: 'BASIC',
-      price: 10.0,
+      name: 'HRM Starter',
+      pricePerUser: 199.0, // ₹199 per user / month
+      currency: 'INR',
       billingCycle: 'MONTHLY',
-      employeeLimit: 5,
-      features: ['Attendance Tracking', 'Basic Activity Monitoring'],
+      employeeLimit: 100,
+      modules: ['HRM'],
+      features: ['Attendance Tracking', 'Leave Management', 'Department & Teams', 'Payslip Generator'],
+    },
+  });
+
+  await prisma.plan.upsert({
+    where: { name: 'Projects & Tasks Pro' },
+    update: {},
+    create: {
+      name: 'Projects & Tasks Pro',
+      pricePerUser: 299.0, // ₹299 per user / month
+      currency: 'INR',
+      billingCycle: 'MONTHLY',
+      employeeLimit: 250,
+      modules: ['PROJECTS_TASKS'],
+      features: ['Jira-like Agile Board', 'Project Milestones', 'Task Comments', 'Time Logging & Timesheets'],
     },
   });
 
   const proPlan = await prisma.plan.upsert({
-    where: { name: 'PRO' },
+    where: { name: 'Enterprise All-in-One' },
     update: {},
     create: {
-      name: 'PRO',
-      price: 29.0,
-      billingCycle: 'MONTHLY',
-      employeeLimit: 20,
-      features: ['Attendance Tracking', 'Detailed Activity Monitoring', 'Screenshots', 'Task Management'],
-    },
-  });
-
-  await prisma.plan.upsert({
-    where: { name: 'ENTERPRISE' },
-    update: {},
-    create: {
-      name: 'ENTERPRISE',
-      price: 99.0,
+      name: 'Enterprise All-in-One',
+      pricePerUser: 499.0, // ₹499 per user / month
+      currency: 'INR',
       billingCycle: 'MONTHLY',
       employeeLimit: 9999,
-      features: ['All Features', 'Dedicated Support', 'Custom Integrations', 'AI Insights'],
+      modules: ['HRM', 'PROJECTS_TASKS', 'WORK_TRACKER'],
+      features: [
+        'Full HRM Suite',
+        'Jira-like Project & Task Management',
+        'Desktop Activity & Screenshot Tracker',
+        'Dedicated Priority Support',
+        'Advanced Analytics & Audit Logs',
+      ],
     },
   });
-  console.log('Billing plans seeded');
+  console.log('INR Billing plans seeded with modules entitlement');
 
   // 2. Seed Tenant
   const tenant = await prisma.tenant.upsert({
@@ -79,10 +91,15 @@ async function main() {
   if (!existingSub) {
     const endDate = new Date();
     endDate.setFullYear(endDate.getFullYear() + 1); // 1 year active subscription
+    const userCount = 10;
+    const totalPrice = Number(proPlan.pricePerUser) * userCount;
+
     await prisma.subscription.create({
       data: {
         companyId: company.id,
         planId: proPlan.id,
+        userCount,
+        totalPrice,
         status: 'ACTIVE',
         startDate: new Date(),
         endDate,
@@ -498,6 +515,48 @@ async function main() {
     });
   }
   console.log('Default Feature Flags seeded');
+
+  // Seed Default Audit Logs
+  const auditLogsCount = await prisma.auditLog.count();
+  if (auditLogsCount === 0) {
+    await prisma.auditLog.createMany({
+      data: [
+        {
+          companyId: company.id,
+          userId: superAdminUser.id,
+          action: 'COMPANY_PROVISIONED',
+          ipAddress: '127.0.0.1',
+          userAgent: 'TaskTracky Enterprise Portal Engine',
+          details: { companyName: 'Acme Corporation', plan: 'PRO' },
+        },
+        {
+          companyId: company.id,
+          userId: adminUser.id,
+          action: 'USER_LOGIN',
+          ipAddress: '192.168.1.45',
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          details: { role: 'ADMIN', loginStatus: 'SUCCESS' },
+        },
+        {
+          companyId: company.id,
+          userId: adminUser.id,
+          action: 'EMPLOYEE_CREATED',
+          ipAddress: '192.168.1.45',
+          userAgent: 'TaskTracky Web Dashboard',
+          details: { employeeName: 'Alex Developer', designation: 'Senior Software Engineer' },
+        },
+        {
+          companyId: company.id,
+          userId: superAdminUser.id,
+          action: 'PLAN_CREATED',
+          ipAddress: '127.0.0.1',
+          userAgent: 'TaskTracky Engine',
+          details: { planName: 'ENTERPRISE ALL-IN-ONE', pricePerUser: 499 },
+        },
+      ],
+    });
+    console.log('Default AuditLogs seeded');
+  }
 
   console.log('Seeding completed successfully!');
 }

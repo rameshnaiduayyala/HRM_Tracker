@@ -95,6 +95,7 @@ export default function Sidebar({
           <NavSection label="Platform">
             <NavItem icon={LayoutGrid}  label="Registered Workspaces" active={activeTab === 'workspaces'} onClick={() => setActiveTab('workspaces')} />
             <NavItem icon={Building}    label="Billing Plans"          active={activeTab === 'plans'}      onClick={() => setActiveTab('plans')} />
+            <NavItem icon={BarChart3}   label="System Ops & Audit"     active={activeTab === 'system-ops'} onClick={() => setActiveTab('system-ops')} iconColor="#a78bfa" />
           </NavSection>
         )}
 

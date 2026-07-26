@@ -14,6 +14,7 @@ export class WorkSessionsService {
       where: { userId },
       include: {
         user: true,
+        company: true,
       },
     });
     if (!employee) {
@@ -149,14 +150,17 @@ export class WorkSessionsService {
     }
 
     const buffer = Buffer.from(imageBase64, 'base64');
-    const relativeFilePath = `screenshots/${active.id}/${Date.now()}.png`;
+    // Organized storage path: uploads/tenants/{tenantId}/company/{companyId}/users/{userId}/screenshots/{sessionId}/{timestamp}.png
+    const tenantId = employee.company.tenantId;
+    const companyId = employee.companyId;
+    const relativeFilePath = `tenants/${tenantId}/company/${companyId}/users/${userId}/screenshots/${active.id}/${Date.now()}.png`;
 
     let storagePath = `/uploads/${relativeFilePath}`;
     try {
       await storageService.uploadFile(relativeFilePath, buffer, 'image/png');
       storagePath = relativeFilePath;
     } catch (err: any) {
-      // Save locally inside backend/uploads/screenshots/ directory
+      // Save locally inside backend/uploads/tenants/... directory
       const localPath = path.join(__dirname, '../../../uploads', relativeFilePath);
       fs.mkdirSync(path.dirname(localPath), { recursive: true });
       fs.writeFileSync(localPath, buffer);

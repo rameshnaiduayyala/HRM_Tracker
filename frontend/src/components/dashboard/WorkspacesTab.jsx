@@ -111,15 +111,15 @@ export default function WorkspacesTab({
 
   const workspaceColumns = [
     {
-      accessorKey: 'name',
+      id: 'name',
       header: 'Company Workspace',
       cell: ({ row }) => {
         const ws = row.original;
         const { planName } = getWorkspaceStats(ws);
         return (
           <div>
-            <span className="font-semibold text-white block">{ws.name}</span>
-            <span className="inline-block text-[9px] font-bold uppercase tracking-wider bg-indigo-950/80 border border-indigo-800 text-indigo-400 px-1.5 py-0.5 rounded-md mt-1">
+            <span className="font-semibold block" style={{ color: 'var(--text-primary)' }}>{ws.name}</span>
+            <span className="badge badge-indigo text-[9px] mt-1">
               Plan: {planName}
             </span>
           </div>
@@ -129,7 +129,7 @@ export default function WorkspacesTab({
     {
       accessorKey: 'subdomain',
       header: 'Subdomain ID',
-      cell: (info) => <span className="font-mono text-xs text-indigo-400">{info.getValue()}</span>,
+      cell: (info) => <span className="font-mono text-xs text-indigo-600 dark:text-indigo-400">{info.getValue()}</span>,
     },
     {
       id: 'employeesCount',
@@ -138,7 +138,7 @@ export default function WorkspacesTab({
         const ws = row.original;
         const { totalEmployees } = getWorkspaceStats(ws);
         return (
-          <span className="text-sm font-semibold text-[var(--text-primary)]">
+          <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             {totalEmployees} {totalEmployees === 1 ? 'Employee' : 'Employees'}
           </span>
         );
@@ -151,8 +151,8 @@ export default function WorkspacesTab({
         const ws = row.original;
         const { monthlyRevenue } = getWorkspaceStats(ws);
         return (
-          <span className="text-sm font-black text-emerald-400 font-mono">
-            ${monthlyRevenue.toFixed(2)} / mo
+          <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">
+            ₹{monthlyRevenue.toFixed(2)} / mo
           </span>
         );
       },
@@ -170,13 +170,13 @@ export default function WorkspacesTab({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => onToggleStatus(ws.id, 'PENDING')} // calls updateStatus to ACTIVE
-                className="px-2.5 py-1 text-[10px] font-bold bg-emerald-650 hover:bg-emerald-700 text-white rounded-md uppercase tracking-wider transition"
+                className="px-2.5 py-1 text-[10px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-md uppercase tracking-wider transition"
               >
                 Approve
               </button>
               <button
                 onClick={() => onToggleStatus(ws.id, 'ACTIVE')} // calls updateStatus to INACTIVE
-                className="px-2.5 py-1 text-[10px] font-bold bg-red-650 hover:bg-red-750 text-white rounded-md uppercase tracking-wider transition"
+                className="px-2.5 py-1 text-[10px] font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-md uppercase tracking-wider transition"
               >
                 Reject
               </button>
@@ -190,7 +190,7 @@ export default function WorkspacesTab({
               checked={isActive}
               onChange={() => setConfirmToggleStatusWorkspace(ws)}
             />
-            <span className={`text-xs px-2.5 py-1 rounded-md font-semibold uppercase tracking-wider ${isActive ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400'}`}>
+            <span className={`badge ${isActive ? 'badge-emerald' : 'badge-rose'}`}>
               {ws.status}
             </span>
           </div>
@@ -207,7 +207,7 @@ export default function WorkspacesTab({
             <Button
               variant="secondary"
               onClick={() => setViewingDetailsWorkspace(ws)}
-              className="p-2 text-xs bg-gray-800 hover:bg-gray-700 text-white rounded-lg flex items-center justify-center"
+              className="p-2 text-xs rounded-lg flex items-center justify-center border border-[var(--border-subtle)]"
               title="View details"
             >
               <Eye className="w-4 h-4" />
@@ -215,7 +215,7 @@ export default function WorkspacesTab({
             <Button
               variant="secondary"
               onClick={() => handleEditClick(ws)}
-              className="p-2 text-xs bg-gray-800 hover:bg-gray-700 text-white rounded-lg flex items-center justify-center"
+              className="p-2 text-xs rounded-lg flex items-center justify-center border border-[var(--border-subtle)]"
               title="Edit workspace"
             >
               <Edit2 className="w-4 h-4" />
@@ -232,11 +232,11 @@ export default function WorkspacesTab({
       <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-2xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">Registered Workspace Companies</h2>
+            <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Registered Workspace Companies</h2>
             <p className="text-xs text-[var(--text-muted)] mt-1">Audit, activate, or deactivate client tenant profiles globally.</p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold px-2 py-1 bg-gray-800 rounded-md">{workspaces.length} total</span>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-md border border-[var(--border-subtle)]" style={{ background: 'var(--bg-card-alt)', color: 'var(--text-primary)' }}>{workspaces.length} total</span>
             <Button
               onClick={() => setIsFormOpen(true)}
               className="py-1.5 px-3 text-xs"
@@ -324,7 +324,7 @@ export default function WorkspacesTab({
             <option value="">-- Select Billing Plan --</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} (${Number(p.price).toFixed(2)} / seat)
+                {p.name} (₹{Number(p.pricePerUser || p.price || 0).toFixed(2)} / seat)
               </option>
             ))}
           </Select>
@@ -392,7 +392,7 @@ export default function WorkspacesTab({
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Price Per Seat:</span>
-                        <span className="font-semibold text-white print:text-black">${Number(plan.price).toFixed(2)} / month</span>
+                        <span className="font-semibold text-white print:text-black">₹{Number(plan.pricePerUser || plan.price || 0).toFixed(2)} / month</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Billing Cycle:</span>
@@ -428,7 +428,7 @@ export default function WorkspacesTab({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[var(--text-secondary)] print:text-[var(--text-muted)]">Monthly Recurring Revenue (MRR):</span>
-                      <span className="font-semibold text-emerald-400 print:text-emerald-700 font-mono">${stats.monthlyRevenue.toFixed(2)} / mo</span>
+                      <span className="font-semibold text-emerald-400 print:text-emerald-700 font-mono">₹{stats.monthlyRevenue.toFixed(2)} / mo</span>
                     </div>
                   </div>
                 </div>

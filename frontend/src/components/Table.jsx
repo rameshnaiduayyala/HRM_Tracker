@@ -69,7 +69,7 @@ export default function Table({ data = [], columns = [], emptyMessage = 'No reco
                     <td
                       key={cell.id}
                       className="px-4 py-3.5"
-                      style={{ fontSize: '12px', color: 'var(--text-muted)', verticalAlign: 'middle' }}
+                      style={{ fontSize: '12px', color: 'var(--text-primary)', verticalAlign: 'middle' }}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Label } from './Typography';
 
 export default function Select({
   label,
@@ -12,11 +13,7 @@ export default function Select({
 }) {
   return (
     <div className={`space-y-1.5 ${className}`}>
-      {label && (
-        <label className="block text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
-          {label} {required && <span className="text-rose-400">*</span>}
-        </label>
-      )}
+      {label && <Label required={required}>{label}</Label>}
       <select
         required={required}
         disabled={disabled}

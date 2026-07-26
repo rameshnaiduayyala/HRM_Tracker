@@ -11,6 +11,8 @@ export class TenantsService {
     adminFirstName?: string;
     adminLastName?: string;
     planId?: string;
+    selectedModules?: string[];
+    userCount?: number;
     status?: string;
   }) {
     const existingTenant = await prisma.tenant.findUnique({
@@ -29,7 +31,6 @@ export class TenantsService {
 
     const passwordHash = await bcrypt.hash(data.adminPassword || 'admin123', 10);
 
-    // Run creation in a single transaction
     return prisma.$transaction(async (tx) => {
       // 1. Create Tenant
       const tenant = await tx.tenant.create({
@@ -50,10 +51,13 @@ export class TenantsService {
 
       // 3. Create Default Roles
       const adminRole = await tx.role.create({
-        data: { name: 'ADMIN', description: 'Administrator with full access', tenantId: tenant.id },
+        data: { name: 'COMPANY_ADMIN', description: 'Company Administrator with full company access', tenantId: tenant.id },
       });
       await tx.role.create({
-        data: { name: 'MANAGER', description: 'Manager with team level access', tenantId: tenant.id },
+        data: { name: 'HR', description: 'HR Manager for employees and leaves', tenantId: tenant.id },
+      });
+      await tx.role.create({
+        data: { name: 'MANAGER', description: 'Team and Project Manager', tenantId: tenant.id },
       });
       await tx.role.create({
         data: { name: 'EMPLOYEE', description: 'Standard employee account', tenantId: tenant.id },
@@ -82,24 +86,40 @@ export class TenantsService {
         },
       });
 
-      // 6. Create Subscription for Company
-      let targetPlanId = data.planId;
-      if (!targetPlanId) {
-        const defaultPlan = await tx.plan.findFirst({
-          orderBy: { price: 'asc' },
-        });
-        if (defaultPlan) {
-          targetPlanId = defaultPlan.id;
-        }
+      // 6. Create Subscription for Company based on Plan & Modules
+      let targetPlan = null;
+      if (data.planId) {
+        targetPlan = await tx.plan.findUnique({ where: { id: data.planId } });
       }
 
-      if (targetPlanId) {
+      if (!targetPlan && data.selectedModules && data.selectedModules.length > 0) {
+        // Find or create dynamically matching plan for selected modules
+        targetPlan = await tx.plan.findFirst({
+          where: {
+            modules: { hasEvery: data.selectedModules },
+          },
+        });
+      }
+
+      if (!targetPlan) {
+        // Fallback default starter plan
+        targetPlan = await tx.plan.findFirst({
+          orderBy: { pricePerUser: 'asc' },
+        });
+      }
+
+      if (targetPlan) {
+        const seats = data.userCount || 5;
+        const totalPrice = Number(targetPlan.pricePerUser) * seats;
         const endDate = new Date();
-        endDate.setFullYear(endDate.getFullYear() + 1); // 1 year default subscription
+        endDate.setFullYear(endDate.getFullYear() + 1);
+
         await tx.subscription.create({
           data: {
             companyId: company.id,
-            planId: targetPlanId,
+            planId: targetPlan.id,
+            userCount: seats,
+            totalPrice,
             status: data.status === 'ACTIVE' ? 'ACTIVE' : 'PENDING',
             startDate: new Date(),
             endDate,
@@ -111,10 +131,11 @@ export class TenantsService {
     });
   }
 
-  async activateSubscription(companyId: string, planId: string) {
+  async activateSubscription(companyId: string, planId: string, userCount: number = 5) {
     const plan = await prisma.plan.findUnique({ where: { id: planId } });
     if (!plan) throw new Error('Selected plan not found');
 
+    const totalPrice = Number(plan.pricePerUser) * userCount;
     const endDate = new Date();
     endDate.setFullYear(endDate.getFullYear() + 1);
 
@@ -127,6 +148,8 @@ export class TenantsService {
         where: { id: existing.id },
         data: {
           planId,
+          userCount,
+          totalPrice,
           status: 'ACTIVE',
           endDate,
         },
@@ -136,6 +159,8 @@ export class TenantsService {
         data: {
           companyId,
           planId,
+          userCount,
+          totalPrice,
           status: 'ACTIVE',
           endDate,
         },
@@ -263,7 +288,7 @@ export class TenantsService {
     });
     
     const totalRevenue = activeSubscriptions.reduce((sum, sub) => {
-      return sum + Number(sub.plan.price);
+      return sum + Number(sub.totalPrice || Number(sub.plan.pricePerUser) * sub.userCount);
     }, 0);
 
     const activeSessions = await prisma.workSession.count({
@@ -284,6 +309,42 @@ export class TenantsService {
       orderBy: { createdAt: 'desc' },
       take: 200, // Limit to recent 200 logs
     });
+  }
+
+  async getTenantBranding(tenantId?: string, subdomain?: string) {
+    if (!tenantId && !subdomain) {
+      return null;
+    }
+
+    const tenant = await prisma.tenant.findFirst({
+      where: {
+        OR: [
+          ...(tenantId ? [{ id: tenantId }] : []),
+          ...(subdomain ? [{ subdomain }] : []),
+        ],
+      },
+      include: {
+        companies: {
+          select: {
+            id: true,
+            name: true,
+            logo: true,
+          },
+        },
+      },
+    });
+
+    if (!tenant) return null;
+
+    return {
+      tenantId: tenant.id,
+      tenantName: tenant.name,
+      subdomain: tenant.subdomain,
+      logo: tenant.logo || `/uploads/tenants/${tenant.id}/logo.png`,
+      favicon: tenant.favicon,
+      primaryColor: tenant.primaryColor,
+      companies: tenant.companies,
+    };
   }
 }
 

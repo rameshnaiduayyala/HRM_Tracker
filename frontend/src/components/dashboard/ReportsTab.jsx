@@ -179,8 +179,8 @@ export default function ReportsTab({ employees = [], onRefresh, onViewReport }) 
             <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
               <span className="text-[9px] font-bold uppercase tracking-wider ml-1" style={{ color: 'var(--text-muted)' }}>Department</span>
               <select
-                className="w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-3 py-1.5 text-xs outline-none focus:border-indigo-500"
-                style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+                className="w-full rounded-lg px-3 py-1.5 text-xs outline-none focus:border-indigo-600 transition-all font-medium"
+                style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
                 value={teamFilter}
                 onChange={(e) => setTeamFilter(e.target.value)}
               >
@@ -193,8 +193,8 @@ export default function ReportsTab({ employees = [], onRefresh, onViewReport }) 
             <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
               <span className="text-[9px] font-bold uppercase tracking-wider ml-1" style={{ color: 'var(--text-muted)' }}>Current Status</span>
               <select
-                className="w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-3 py-1.5 text-xs outline-none focus:border-indigo-500"
-                style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+                className="w-full rounded-lg px-3 py-1.5 text-xs outline-none focus:border-indigo-600 transition-all font-medium"
+                style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -211,8 +211,8 @@ export default function ReportsTab({ employees = [], onRefresh, onViewReport }) 
               <div className="relative">
                 <Laptop className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
                 <input
-                  className="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-900 border rounded-lg text-xs focus:outline-none transition-all"
-                  style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+                  className="w-full pl-9 pr-4 py-1.5 rounded-lg text-xs focus:outline-none focus:border-indigo-600 transition-all font-medium"
+                  style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
                   placeholder="Search name or task..."
                   type="text"
                   onChange={(e) => {

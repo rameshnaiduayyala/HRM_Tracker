@@ -23,6 +23,7 @@ import PrintPayslipView from '../components/dashboard/PrintPayslipView';
 import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import EmployeeProfileView from '../components/dashboard/EmployeeProfileView';
 import EmployeeReportView from '../components/dashboard/EmployeeReportView';
+import SystemMonitoringTab from '../components/dashboard/SystemMonitoringTab';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -74,6 +75,7 @@ export default function Dashboard() {
     'print-payslip',
     'employee-profile',
     'employee-report',
+    'system-ops',
   ];
   const activeTab = validTabs.includes(lastPathPart) ? lastPathPart : 'analytics';
 
@@ -408,8 +410,8 @@ export default function Dashboard() {
                       </span>
                       <h4 className="text-base font-extrabold mt-3 uppercase tracking-wide" style={{ color: 'var(--text-primary)' }}>{p.name}</h4>
                       <div className="mt-4 flex items-baseline justify-center gap-1">
-                        <span className="text-3xl font-black" style={{ color: 'var(--text-primary)' }}>${Number(p.price)}</span>
-                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>/ month</span>
+                        <span className="text-3xl font-black" style={{ color: 'var(--text-primary)' }}>₹{Number(p.pricePerUser || p.price || 0)}</span>
+                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>/ seat / month</span>
                       </div>
                       <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>Up to {p.employeeLimit} employees allowed</p>
                       
@@ -516,6 +518,10 @@ export default function Dashboard() {
                     onDeletePlan={handleDeletePlan}
                     loading={loading}
                   />
+                )}
+
+                {isSuperAdmin && activeTab === 'system-ops' && (
+                  <SystemMonitoringTab />
                 )}
 
                 {!isSuperAdmin && activeTab === 'employees' && (

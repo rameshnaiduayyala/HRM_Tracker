@@ -3,23 +3,27 @@ import { prisma } from '../../shared/database';
 export class PlansService {
   async listPlans() {
     return prisma.plan.findMany({
-      orderBy: { price: 'asc' },
+      orderBy: { pricePerUser: 'asc' },
     });
   }
 
   async createPlan(data: { 
     name: string; 
-    price: number; 
+    pricePerUser: number; 
+    currency?: string;
     billingCycle?: string; 
     employeeLimit?: number; 
+    modules: string[];
     features?: string[] 
   }) {
     return prisma.plan.create({
       data: {
-        name: data.name.toUpperCase(),
-        price: data.price,
+        name: data.name,
+        pricePerUser: data.pricePerUser,
+        currency: data.currency || 'INR',
         billingCycle: data.billingCycle || 'MONTHLY',
-        employeeLimit: data.employeeLimit || 5,
+        employeeLimit: data.employeeLimit || 100,
+        modules: data.modules,
         features: data.features || [],
       },
     });
@@ -27,30 +31,28 @@ export class PlansService {
 
   async updatePlan(id: string, data: { 
     name?: string; 
-    price?: number; 
+    pricePerUser?: number;
+    currency?: string;
     billingCycle?: string; 
-    employeeLimit?: number; 
+    employeeLimit?: number;
+    modules?: string[];
     features?: string[] 
   }) {
     if (data.name) {
-      const normalizedName = data.name.toUpperCase();
       const existing = await prisma.plan.findFirst({
         where: {
-          name: normalizedName,
+          name: data.name,
           id: { not: id },
         },
       });
       if (existing) {
-        throw new Error(`A billing plan with the name "${normalizedName}" already exists.`);
+        throw new Error(`A billing plan with the name "${data.name}" already exists.`);
       }
     }
 
     return prisma.plan.update({
       where: { id },
-      data: {
-        ...data,
-        ...(data.name && { name: data.name.toUpperCase() }),
-      },
+      data,
     });
   }
 

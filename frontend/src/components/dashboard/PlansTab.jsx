@@ -71,15 +71,31 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
       accessorKey: 'name',
       header: 'Plan Name',
       cell: (info) => (
-        <span className="font-bold text-white uppercase tracking-wider text-xs px-2.5 py-1 bg-indigo-950/80 border border-indigo-800 text-indigo-400 rounded-md">
+        <span className="badge badge-indigo">
           {info.getValue()}
         </span>
       ),
     },
     {
-      accessorKey: 'price',
-      header: 'Price per Seat',
-      cell: (info) => <span className="font-bold font-mono text-emerald-400">${Number(info.getValue()).toFixed(2)}</span>,
+      header: 'Per User Price',
+      accessorKey: 'pricePerUser',
+      cell: (info) => <span className="font-bold font-mono text-emerald-600 dark:text-emerald-400">₹{Number(info.getValue() || info.row.original.price || 0).toFixed(2)}</span>,
+    },
+    {
+      header: 'Allowed Modules',
+      accessorKey: 'modules',
+      cell: (info) => {
+        const mods = info.getValue() || [];
+        return (
+          <div className="flex flex-wrap gap-1">
+            {mods.map((m) => (
+              <span key={m} className="badge badge-violet text-[9px]">
+                {m}
+              </span>
+            ))}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'billingCycle',
@@ -99,7 +115,7 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
         return (
           <div className="flex flex-wrap gap-1 max-w-xs">
             {feats.map((f, idx) => (
-              <span key={idx} className="text-[10px] bg-gray-800 text-[var(--text-secondary)] px-1.5 py-0.5 rounded">
+              <span key={idx} className="text-[10px] px-2 py-0.5 rounded font-medium border border-[var(--border-subtle)]" style={{ background: 'var(--bg-card-alt)', color: 'var(--text-primary)' }}>
                 {f}
               </span>
             ))}
@@ -117,7 +133,7 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
             <Button
               variant="secondary"
               onClick={() => setViewingDetailsPlan(plan)}
-              className="p-2 text-xs bg-gray-800 hover:bg-gray-700 text-white rounded-lg flex items-center justify-center"
+              className="p-2 text-xs rounded-lg flex items-center justify-center border border-[var(--border-subtle)]"
               title="View details"
             >
               <Eye className="w-4 h-4" />
@@ -186,12 +202,12 @@ export default function PlansTab({ plans = [], onCreatePlan, onUpdatePlan, onDel
           />
 
           <Input
-            label="Seat Price ($ / month)"
+            label="Seat Price (₹ INR / month)"
             required
             type="number"
             min="0"
             step="0.01"
-            placeholder="29.00"
+            placeholder="199.00"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
