@@ -5,9 +5,29 @@ import { prisma } from '../../shared/database';
 import { entitlementsService } from '../tenants/entitlements.service';
 
 export class EmployeesService {
-  async getEmployeesByCompany(companyId: string) {
+  async getEmployeesByCompany(companyId: string, managerUserId?: string) {
+    let whereCondition: any = { companyId };
+    
+    if (managerUserId) {
+      // Find the employee record corresponding to this manager user
+      const managerEmp = await prisma.employee.findFirst({
+        where: { userId: managerUserId, companyId },
+        select: { id: true }
+      });
+
+      if (managerEmp) {
+        whereCondition = {
+          companyId,
+          OR: [
+            { managerId: managerEmp.id },
+            { id: managerEmp.id }
+          ]
+        };
+      }
+    }
+
     return prisma.employee.findMany({
-      where: { companyId },
+      where: whereCondition,
       include: {
         user: {
           select: {

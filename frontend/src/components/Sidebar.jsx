@@ -1,7 +1,8 @@
 import React from 'react';
-import { Building, Users, Briefcase, Settings, LayoutGrid, BarChart3, Clock, FileText, Building2, Calendar, Bell, CheckSquare, Sparkles, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Select from './Select';
 import { useEntitlements } from '../contexts/EntitlementContext';
+import { ROLE_NAV_CONFIG } from '../config/roleNavigation';
 
 const NavItem = ({ icon: Icon, label, active, onClick, iconColor }) => (
   <button
@@ -32,11 +33,10 @@ export default function Sidebar({
   selectedCompanyId = '',
   setSelectedCompanyId
 }) {
-  const isSuperAdmin   = user?.role === 'SUPER_ADMIN';
-  const isCompanyAdmin = ['ADMIN', 'MANAGER', 'HR'].includes(user?.role);
-  const isStaff        = user?.role === 'EMPLOYEE';
-  const isHR           = user?.role === 'HR';
-  const { canUse }     = useEntitlements();
+  const role = user?.role || 'EMPLOYEE';
+  const roleConfig = ROLE_NAV_CONFIG[role] || ROLE_NAV_CONFIG.EMPLOYEE;
+  const isCompanyAdmin = ['ADMIN', 'MANAGER', 'HR'].includes(role);
+  const { canUse } = useEntitlements();
 
   return (
     <aside
@@ -72,87 +72,30 @@ export default function Sidebar({
         </div>
       )}
 
-      {/* ── Navigation ── */}
+      {/* Dynamic Scalable Role Navigation */}
       <nav className="space-y-5 flex-1 overflow-y-auto pr-1">
+        {roleConfig.sections.map((section, sIdx) => {
+          const visibleItems = section.items.filter(item => !item.module || canUse(item.module));
+          if (visibleItems.length === 0) return null;
 
-        {/* Admin overview */}
-        {!isStaff && (
-          <NavSection label="Overview">
-            {isHR ? (
-              canUse('hrm') && <NavItem icon={LayoutGrid} label="HRM Core Hub" active={activeTab === 'hrm-dashboard'} onClick={() => setActiveTab('hrm-dashboard')} iconColor="#818cf8" />
-            ) : (
-              <NavItem icon={BarChart3} label="Overview Dashboard" active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
-            )}
-
-            {!isSuperAdmin && !isHR && canUse('tracking') && (
-              <NavItem icon={Sparkles} label="AI Copilot" active={activeTab === 'ai-analytics'} onClick={() => setActiveTab('ai-analytics')} iconColor="#a78bfa" />
-            )}
-          </NavSection>
-        )}
-
-        {/* Super Admin only */}
-        {isSuperAdmin && (
-          <NavSection label="Platform">
-            <NavItem icon={LayoutGrid}  label="Registered Workspaces" active={activeTab === 'workspaces'} onClick={() => setActiveTab('workspaces')} />
-            <NavItem icon={Building}    label="Billing Plans"          active={activeTab === 'plans'}      onClick={() => setActiveTab('plans')} />
-            <NavItem icon={BarChart3}   label="System Ops & Audit"     active={activeTab === 'system-ops'} onClick={() => setActiveTab('system-ops')} iconColor="#a78bfa" />
-          </NavSection>
-        )}
-
-        {/* Company Admin / HR */}
-        {isCompanyAdmin && (
-          <>
-            {canUse('hrm') && (
-              <NavSection label="People">
-                <NavItem icon={Users} label="Staff Directory" active={activeTab === 'employees'} onClick={() => setActiveTab('employees')} />
-
-                {!isHR && (
-                  <>
-                    <NavItem icon={Building2}   label="Departments"     active={activeTab === 'departments'} onClick={() => setActiveTab('departments')} />
-                    <NavItem icon={Users}        label="Teams"           active={activeTab === 'teams'}       onClick={() => setActiveTab('teams')} />
-                  </>
-                )}
-              </NavSection>
-            )}
-
-            {!isHR && canUse('projects') && (
-              <NavSection label="Work">
-                <NavItem icon={Briefcase}   label="Projects & Boards" active={activeTab === 'projects'} onClick={() => setActiveTab('projects')} />
-                <NavItem icon={CheckSquare} label="Task Board"        active={activeTab === 'tasks'}    onClick={() => setActiveTab('tasks')} />
-              </NavSection>
-            )}
-
-            <NavSection label="HR & Payroll">
-              {canUse('leave') && <NavItem icon={Calendar}  label="Leave Management"   active={activeTab === 'leaves'}        onClick={() => setActiveTab('leaves')} />}
-              <NavItem icon={Bell}      label="Communications"     active={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} />
-              {canUse('reports') && <NavItem icon={Clock}     label="Time Reports"       active={activeTab === 'reports'}       onClick={() => setActiveTab('reports')} />}
-              {canUse('timesheets') && <NavItem icon={FileText} label="Timesheet Review"   active={activeTab === 'timesheets'}    onClick={() => setActiveTab('timesheets')} />}
-              {canUse('hrm') && (user?.role === 'ADMIN' || isHR) && (
-                <NavItem icon={FileText} label="Payslip Management" active={activeTab === 'payslips' || activeTab === 'print-payslip'} onClick={() => setActiveTab('payslips')} iconColor="#a78bfa" />
-              )}
+          return (
+            <NavSection key={sIdx} label={section.label}>
+              {visibleItems.map(item => (
+                <NavItem
+                  key={item.id}
+                  icon={item.icon}
+                  label={item.label}
+                  active={activeTab === item.id || (item.id === 'payslips' && activeTab === 'print-payslip')}
+                  onClick={() => setActiveTab(item.id)}
+                  iconColor={item.iconColor}
+                />
+              ))}
             </NavSection>
-
-            {(user?.role === 'ADMIN' || isHR) && (
-              <NavSection label="System">
-                <NavItem icon={Settings} label="Settings & Policies" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
-              </NavSection>
-            )}
-          </>
-        )}
-
-        {/* Staff (Employee) */}
-        {isStaff && (
-          <NavSection label="My Workspace">
-            {canUse('attendance') && <NavItem icon={Clock}       label="Shift Attendance" active={activeTab === 'attendance'}   onClick={() => setActiveTab('attendance')} />}
-            {canUse('projects') && <NavItem icon={CheckSquare} label="My Tasks"         active={activeTab === 'tasks'}        onClick={() => setActiveTab('tasks')} />}
-            {canUse('leave') && <NavItem icon={Calendar}    label="My Leaves"        active={activeTab === 'leaves'}       onClick={() => setActiveTab('leaves')} />}
-            {canUse('timesheets') && <NavItem icon={Clock}     label="My Timesheets"     active={activeTab === 'timesheets'}   onClick={() => setActiveTab('timesheets')} />}
-            <NavItem icon={Bell}        label="Communications"   active={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} />
-          </NavSection>
-        )}
+          );
+        })}
       </nav>
 
-      {/* Bottom version tag */}
+      {/* Footer System Version Tag */}
       <div className="px-3 pb-1">
         <span className="block text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>TaskTracky v2.0 · Enterprise</span>
       </div>

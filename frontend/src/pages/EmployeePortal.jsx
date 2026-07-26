@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { attendanceApi } from '../services';
 import { useAuthStore } from '../store/useAuthStore';
 import Header from '../components/Header';
@@ -13,8 +13,16 @@ import { toast } from 'react-hot-toast';
 
 export default function EmployeePortal() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('attendance'); // attendance, tasks, leaves, notifications, timesheets
+
+  const lastPathPart = location.pathname.split('/').pop();
+  const validTabs = ['attendance', 'tasks', 'leaves', 'timesheets', 'notifications'];
+  const activeTab = validTabs.includes(lastPathPart) ? lastPathPart : 'attendance';
+
+  const setActiveTab = (tab) => {
+    navigate(`/employee/${tab}`);
+  };
 
   const [attendance, setAttendance] = useState(null);
   const [clockedIn, setClockedIn] = useState(false);

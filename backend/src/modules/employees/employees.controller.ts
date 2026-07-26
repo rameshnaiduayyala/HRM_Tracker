@@ -44,7 +44,11 @@ export class EmployeesController {
         return next(new BadRequestError('companyId query parameter is required'));
       }
 
-      const employees = await employeesService.getEmployeesByCompany(companyId);
+      const isManager = req.userRole === 'MANAGER';
+      const employees = await employeesService.getEmployeesByCompany(
+        companyId, 
+        isManager ? req.userId : undefined
+      );
       return res.status(200).json({
         status: 'success',
         data: { employees },

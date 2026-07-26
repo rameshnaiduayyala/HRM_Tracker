@@ -9,6 +9,8 @@ import LeavesTab from '../components/dashboard/LeavesTab';
 import PayslipsTab from '../components/dashboard/PayslipsTab';
 import ReportsTab from '../components/dashboard/ReportsTab';
 import SettingsTab from '../components/dashboard/SettingsTab';
+import ProjectsTab from '../components/dashboard/ProjectsTab';
+import TasksTab from '../components/dashboard/TasksTab';
 import PrintPayslipView from '../components/dashboard/PrintPayslipView';
 import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import HRMDashboardTab from '../components/dashboard/HRMDashboardTab';
@@ -26,6 +28,10 @@ export default function HRPortal() {
   const validTabs = [
     'hrm-dashboard',
     'employees',
+    'departments',
+    'teams',
+    'projects',
+    'tasks',
     'leaves',
     'notifications',
     'payslips',
@@ -201,6 +207,23 @@ export default function HRPortal() {
               onDeleteEmployee={handleEmployeeDelete}
               onViewProfile={(emp) => navigate(`/hr/employee-profile?employeeId=${emp.id}`)}
               loading={loading}
+            />
+          )}
+
+          {/* 2.2 Projects Management Tab */}
+          {activeTab === 'projects' && (
+            <ProjectsTab
+              projects={[]}
+              onCreateProject={() => {}}
+              loading={loading}
+            />
+          )}
+
+          {/* 2.5 Task Execution Board Tab */}
+          {activeTab === 'tasks' && (
+            <TasksTab
+              companyId={selectedCompanyId}
+              employees={employees}
             />
           )}
 

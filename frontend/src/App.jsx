@@ -52,9 +52,9 @@ export default function App() {
             />
             
             <Route
-              path="/employee"
+              path="/employee/*"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['EMPLOYEE']}>
                   <EmployeePortal />
                 </ProtectedRoute>
               }

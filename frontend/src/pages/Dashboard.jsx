@@ -526,7 +526,7 @@ export default function Dashboard() {
                   <SystemMonitoringTab />
                 )}
 
-                {user?.role === 'HR' && activeTab === 'hrm-dashboard' && (
+                {(user?.role === 'HR' || user?.role === 'ADMIN') && activeTab === 'hrm-dashboard' && (
                   <HRMDashboardTab
                     companyId={selectedCompanyId}
                     employees={employees}
