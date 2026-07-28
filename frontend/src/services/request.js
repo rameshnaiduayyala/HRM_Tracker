@@ -88,9 +88,8 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
-      toast.error('Your company workspace has been deactivated.', { id: 'workspace-deactivated', duration: 5000 });
       setTimeout(() => {
-        window.location.href = '/login?deactivated=1';
+        window.location.href = `/login?expired=1&message=${encodeURIComponent(errMsg || 'Your company workspace has been deactivated.')}`;      
       }, 1500);
       return Promise.reject(error);
     }
@@ -114,9 +113,10 @@ axiosInstance.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) {
         // No refresh token, force logout
+        const msg = error.response?.data?.message || 'Your session has expired. Please sign in again.';
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login?expired=1';
+        window.location.href = `/login?expired=1&message=${encodeURIComponent(msg)}`;
         return Promise.reject(error);
       }
 
@@ -137,13 +137,13 @@ axiosInstance.interceptors.response.use(
         isRefreshing = false;
 
         // Refresh failed, clear session
+        const msg = refreshError?.response?.data?.message || 'Your session has expired. Please sign in again.';
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        toast.error('Session expired. Please log in again.', { id: 'session-expired' });
         setTimeout(() => {
-          window.location.href = '/login?expired=1';
-        }, 1500);
+          window.location.href = `/login?expired=1&message=${encodeURIComponent(msg)}`;
+        }, 500);
         return Promise.reject(refreshError);
       }
     }

@@ -16,9 +16,7 @@ export default function Login() {
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [sessionExpired, setSessionExpired] = useState(false);
-  const [workspaceDeactivated, setWorkspaceDeactivated] = useState(false);
-  const [employeeRelieved, setEmployeeRelieved] = useState(false);
+  const [redirectMessage, setRedirectMessage] = useState(null);
   const [showPassword, setShowPassword] = useState(false)
 
   // Login Form State
@@ -28,17 +26,12 @@ export default function Login() {
   // Dynamic Tenant Branding State
   const [branding, setBranding] = useState(null);
 
-  // Detect redirect from expired token or deactivated workspace and fetch tenant branding
+  // Detect redirect from expired/failed session and show backend message
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('expired') === '1') {
-      setSessionExpired(true);
-    }
-    if (params.get('deactivated') === '1') {
-      setWorkspaceDeactivated(true);
-    }
-    if (params.get('relieved') === '1') {
-      setEmployeeRelieved(true);
+      const msg = params.get('message');
+      setRedirectMessage(msg || 'Your session timed out. Please sign in again.');
     }
 
     // Fetch tenant branding dynamically
@@ -187,18 +180,18 @@ export default function Login() {
               </p>
             </div>
 
-            {/* Session Expired Banner */}
-            {sessionExpired && (
-              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 text-xs text-amber-800">
+            {/* Redirect/Session Banner - shows dynamic backend message */}
+            {redirectMessage && (
+              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 text-xs text-amber-900">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block font-semibold">Session Expired</strong>
-                  <span className="text-[11px] text-amber-700">Your session timed out. Please sign in again.</span>
+                  <strong className="block font-semibold text-amber-800">Session Expired</strong>
+                  <span className="text-[11px] text-amber-700">{redirectMessage}</span>
                 </div>
               </div>
             )}
 
-            {/* Dynamic Backend Error Banner */}
+            {/* Dynamic Backend Error Banner (login attempt errors) */}
             {error && (
               <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-900">
                 <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
@@ -208,8 +201,6 @@ export default function Login() {
                 </div>
               </div>
             )}
-
-
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">Email Address</label>
