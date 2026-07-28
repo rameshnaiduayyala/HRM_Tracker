@@ -222,6 +222,7 @@ export default function HRPortal() {
             <OnboardingTab
               companyId={selectedCompanyId}
               departments={[]}
+              employees={employees}
               onEmployeeConverted={() => fetchCompanySpecificData(selectedCompanyId)}
             />
           )}
@@ -303,9 +304,21 @@ export default function HRPortal() {
           )}
 
           {/* 7. Employee Profile View */}
-          {activeTab === 'employee-profile' && (
-            <EmployeeProfileView />
-          )}
+          {activeTab === 'employee-profile' && (() => {
+            const searchParams = new URLSearchParams(location.search);
+            const empId = searchParams.get('employeeId');
+            const selectedEmp = employees.find(e => e.id === empId) || employees[0];
+            return (
+              <EmployeeProfileView
+                employee={selectedEmp}
+                onBack={() => navigate('/hr/people/employees')}
+                onEdit={() => {}}
+                onReset={(emp) => handleEmployeeReset(emp.id)}
+                onDelete={(emp) => handleEmployeeDelete(emp.id)}
+                loading={loading}
+              />
+            );
+          })()}
 
           {/* 8. Employee Activity & Attendance Report View */}
           {activeTab === 'employee-report' && (

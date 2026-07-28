@@ -556,6 +556,7 @@ export default function Dashboard() {
                   <OnboardingTab
                     companyId={selectedCompanyId}
                     departments={[]}
+                    employees={employees}
                     onEmployeeConverted={fetchCompanyData}
                   />
                 )}
@@ -647,6 +648,22 @@ export default function Dashboard() {
                 {!isSuperAdmin && activeTab === 'timesheets' && (
                   <TimesheetsTab />
                 )}
+
+                {!isSuperAdmin && activeTab === 'employee-profile' && (() => {
+                  const searchParams = new URLSearchParams(location.search);
+                  const empId = searchParams.get('employeeId');
+                  const selectedEmp = employees.find(e => e.id === empId) || employees[0];
+                  return (
+                    <EmployeeProfileView
+                      employee={selectedEmp}
+                      onBack={() => navigate('/dashboard/employees')}
+                      onEdit={() => {}}
+                      onReset={(emp) => handleEmployeeReset(emp.id)}
+                      onDelete={(emp) => handleEmployeeDelete(emp.id)}
+                      loading={loading}
+                    />
+                  );
+                })()}
 
                 {!isSuperAdmin && activeTab === 'reports' && (
                   <ReportsTab

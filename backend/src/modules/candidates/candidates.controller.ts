@@ -164,24 +164,28 @@ export class CandidatesController {
   async convertToEmployee(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const { employeeNum: customEmpNum, joiningDate: customJoiningDate, designation: customDesignation, managerId, roleName } = req.body || {};
+
       const candidate = await prisma.candidate.findUnique({
         where: { id },
         include: { company: true },
       });
 
       if (!candidate) throw new NotFoundError('Candidate not found');
-      if (candidate.offerStatus === 'JOINED') {
-        throw new BadRequestError('Candidate has already been converted to employee');
+      if (candidate.offerStatus !== 'ACCEPTED') {
+        throw new BadRequestError('Candidate must accept the offer letter in portal before HR can complete joining conversion');
       }
 
-      const employeeNum = `EMP-${Math.floor(1000 + Math.random() * 9000)}`;
+      const employeeNum = customEmpNum || `EMP-${Math.floor(1000 + Math.random() * 9000)}`;
+      const joiningDate = customJoiningDate ? new Date(customJoiningDate) : candidate.expectedJoiningDate;
+      const designation = customDesignation || candidate.designation;
       const defaultPassword = 'Password@123';
       const passwordHash = await bcrypt.hash(defaultPassword, 10);
 
       // Create User & Employee in transaction
       const result = await prisma.$transaction(async (tx) => {
         let role = await tx.role.findFirst({
-          where: { name: 'EMPLOYEE' },
+          where: { name: roleName || 'EMPLOYEE' },
         });
 
         const user = await tx.user.create({
@@ -201,8 +205,9 @@ export class CandidatesController {
             userId: user.id,
             companyId: candidate.companyId,
             departmentId: candidate.departmentId,
-            designation: candidate.designation,
-            joiningDate: candidate.expectedJoiningDate,
+            designation,
+            joiningDate,
+            managerId: managerId || undefined,
             status: 'ACTIVE',
           },
         });

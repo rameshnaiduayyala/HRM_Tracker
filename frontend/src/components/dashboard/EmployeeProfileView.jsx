@@ -1,6 +1,8 @@
 import React from 'react';
-import { Edit2, Mail, Bookmark, Calendar, CheckCircle2, Monitor } from 'lucide-react';
+import FocusTrackLogo from '../../assets/focustrack-logo.png';
+import { Printer, Shield, QrCode, Edit2, Mail, Bookmark, Calendar, CheckCircle2, Monitor } from 'lucide-react';
 import Button from '../Button';
+import EnterpriseIDCard from './EnterpriseIDCard';
 
 // Safe coercion: Prisma relations (department/team) come back as full objects.
 const toStr = (val, fallback = '') =>
@@ -10,10 +12,16 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
   if (!employee) return null;
   const initials = `${employee.user?.firstName?.[0] || ''}${employee.user?.lastName?.[0] || ''}`.toUpperCase();
 
+  const companyLogo = employee.company?.logoUrl || employee.company?.logo
+    ? (employee.company?.logoUrl || employee.company?.logo).startsWith('http') || (employee.company?.logoUrl || employee.company?.logo).startsWith('data:')
+      ? (employee.company?.logoUrl || employee.company?.logo)
+      : `http://localhost:5000${employee.company?.logoUrl || employee.company?.logo}`
+    : FocusTrackLogo;
+
   return (
     <div className="space-y-6 animate-fade-up">
       {/* Breadcrumb / Back Button */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between no-print">
         <button 
           onClick={onBack}
           className="px-3 py-1.5 border border-[var(--border-subtle)] text-[12px] font-semibold rounded-lg hover:bg-[var(--bg-card-alt)] transition-colors"
@@ -23,7 +31,7 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
       </div>
 
       {/* Profile Header Block */}
-      <div className="glass-card flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="glass-card flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-black text-white shrink-0"
             style={{ background: 'linear-gradient(135deg,#4f46e5,#6063ee)', boxShadow: '0 4px 10px rgba(79,70,229,0.2)' }}>
@@ -42,7 +50,7 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button onClick={() => onEdit(employee)}>
             <Edit2 className="w-3.5 h-3.5" /> Edit Profile
           </Button>
@@ -64,16 +72,16 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
       {/* Bento Grid Canvas */}
       <div className="bento-grid">
         
-        {/* Contact Info Card (col-span-4) */}
+        {/* Contact & Bio (col-span-4) */}
         <div className="col-span-12 md:col-span-4 space-y-6">
           <div className="glass-card">
             <h3 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-              <Mail className="w-4 h-4 text-indigo-500" /> Contact Info
+              <Mail className="w-4 h-4 text-indigo-500" /> Identity Contact
             </h3>
             <div className="space-y-4 text-xs">
               <div>
                 <span className="block font-bold text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Email Address</span>
-                <span className="block mt-1 font-semibold break-all" style={{ color: 'var(--text-secondary)' }}>{employee.user?.email}</span>
+                <span className="block mt-1 font-semibold" style={{ color: 'var(--text-secondary)' }}>{employee.user?.email}</span>
               </div>
               <div>
                 <span className="block font-bold text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Workspace Status</span>
@@ -191,15 +199,15 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
                 <div className="border-l-2 pl-3 pb-2 relative" style={{ borderColor: 'var(--border-subtle)' }}>
                   <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-slate-400" />
                   <p className="text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>Completed Task</p>
-                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Jira-like issue resolved</p>
-                  <span className="text-[9px] font-bold" style={{ color: 'var(--text-tertiary)' }}>Yesterday</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
+
+      {/* Standalone Reusable Enterprise ID Card */}
+      <EnterpriseIDCard employee={employee} companyLogo={companyLogo} />
     </div>
   );
 }

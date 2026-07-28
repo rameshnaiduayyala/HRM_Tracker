@@ -6,7 +6,7 @@ import Drawer from '../Drawer';
 import EmployeeForm from '../EmployeeForm';
 import FilterBar from '../FilterBar';
 
-export default function EmployeesTab({ employees = [], onSubmitEmployee, onResetEmployee, onDeleteEmployee, onViewProfile, loading }) {
+export default function EmployeesTab({ user, employees = [], onSubmitEmployee, onResetEmployee, onDeleteEmployee, onViewProfile, loading }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,8 +208,8 @@ export default function EmployeesTab({ employees = [], onSubmitEmployee, onReset
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <span className="badge badge-indigo">{employees.length} Members</span>
-          <Button onClick={handleHireClick}>
-            <UserPlus className="w-3.5 h-3.5" /> Onboard Employee
+          <Button onClick={() => window.location.href = user?.role === 'HR' ? '/hr/onboarding' : '/dashboard/onboarding'}>
+            <UserPlus className="w-3.5 h-3.5" /> Onboard Candidate First
           </Button>
         </div>
       </div>

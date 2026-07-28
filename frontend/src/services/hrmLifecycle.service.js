@@ -6,7 +6,7 @@ export const hrmLifecycleService = {
   createCandidate: (candidateData) => api.post('/candidates', candidateData),
   getOfferByToken: (token) => api.get(`/candidates/portal/offer/${token}`),
   respondToOffer: (token, action) => api.post(`/candidates/portal/offer/${token}/respond`, { action }),
-  convertToEmployee: (candidateId) => api.post(`/candidates/${candidateId}/convert`),
+  convertToEmployee: (candidateId, payload = {}) => api.post(`/candidates/${candidateId}/convert`, payload),
   updateOnboardingTask: (taskId, status) => api.patch(`/candidates/tasks/${taskId}`, { status }),
 
   // Offboarding & Relieving
