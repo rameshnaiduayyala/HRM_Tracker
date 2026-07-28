@@ -164,7 +164,7 @@ export class CandidatesController {
   async convertToEmployee(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { employeeNum: customEmpNum, joiningDate: customJoiningDate, designation: customDesignation, managerId, roleName } = req.body || {};
+      const { employeeNum: customEmpNum, joiningDate: customJoiningDate, designation: customDesignation, profilePic, managerId, roleName } = req.body || {};
 
       const candidate = await prisma.candidate.findUnique({
         where: { id },
@@ -207,6 +207,7 @@ export class CandidatesController {
             departmentId: candidate.departmentId,
             designation,
             joiningDate,
+            profilePic: profilePic || undefined,
             managerId: managerId || undefined,
             status: 'ACTIVE',
           },

@@ -13,6 +13,7 @@ import {
   LayoutGrid,
   UserPlus,
   UserMinus,
+  Shield,
 } from 'lucide-react';
 import { MODULE_KEYS } from './entitlements';
 
@@ -215,6 +216,7 @@ export const ROLE_NAV_CONFIG = {
           { id: 'attendance', label: 'Shift Attendance', icon: Clock, module: MODULE_KEYS.ATTENDANCE, path: '/employee/attendance', alwaysShow: true },
           { id: 'tasks', label: 'My Assigned Tasks', icon: CheckSquare, module: MODULE_KEYS.TASKS, path: '/employee/tasks', alwaysShow: true },
           { id: 'leaves', label: 'My Leave Requests', icon: Calendar, module: MODULE_KEYS.LEAVE, path: '/employee/leave', alwaysShow: true },
+          { id: 'idcard', label: 'My Staff ID Badge', icon: Shield, path: '/employee/idcard', alwaysShow: true },
           { id: 'timesheets', label: 'My Timesheets', icon: Clock, module: MODULE_KEYS.TIMESHEETS, path: '/employee/timesheet', alwaysShow: true },
           { id: 'notifications', label: 'Announcements', icon: Bell, path: '/employee/notifications', alwaysShow: true },
         ],

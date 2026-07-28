@@ -41,24 +41,24 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
   });
 
   return (
-    <div className="glass-card p-6 space-y-4">
+    <div className="space-y-4">
       {/* Top Header & Print Action Button */}
-      <div className="flex items-center justify-between no-print border-b border-slate-700/50 pb-4">
+      <div className="flex items-center justify-between no-print border-b border-slate-700/50 pb-3">
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-white">Official Printable Staff ID Badge</h3>
-          <p className="text-xs text-slate-400">Clean white enterprise design (Front & Back Printable)</p>
+          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">Printable Staff ID Passcard</h4>
+          <p className="text-[11px] text-[var(--text-muted)]">Clean white PVC card layout (Front & Back)</p>
         </div>
         <button
           type="button"
           onClick={() => handlePrint()}
-          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg transition uppercase tracking-wider cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition uppercase tracking-wider cursor-pointer"
         >
-          <Printer className="w-4 h-4" /> Print ID Card
+          <Printer className="w-3.5 h-3.5" /> Print Passcard
         </button>
       </div>
 
       {/* Outer wrapper to center cards */}
-      <div className="flex justify-center py-4 bg-slate-950/40 rounded-2xl border border-slate-800">
+      <div className="flex justify-center">
         <div
           ref={cardRef}
           style={{
@@ -122,29 +122,29 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
                   src={photoSrc}
                   alt="Employee"
                   style={{
-                    width: '85px',
-                    height: '85px',
+                    width: '110px',
+                    height: '110px',
                     borderRadius: '50%',
                     objectFit: 'cover',
-                    border: '3px solid #4f46e5',
-                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)'
+                    border: '3.5px solid #4f46e5',
+                    boxShadow: '0 6px 14px rgba(79, 70, 229, 0.25)'
                   }}
                 />
               ) : (
                 <div
                   style={{
-                    width: '85px',
-                    height: '85px',
+                    width: '110px',
+                    height: '110px',
                     borderRadius: '50%',
                     backgroundColor: '#4f46e5',
                     color: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
-                    justify: 'center',
-                    fontSize: '28px',
+                    justifyContent: 'center',
+                    fontSize: '36px',
                     fontWeight: '800',
-                    border: '3px solid #6366f1',
-                    boxShadow: '0 4px 10px rgba(79, 70, 229, 0.25)'
+                    border: '3.5px solid #6366f1',
+                    boxShadow: '0 6px 14px rgba(79, 70, 229, 0.3)'
                   }}
                 >
                   {initials}
@@ -159,7 +159,7 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
                 <p style={{ margin: '0 0 8px 0', fontSize: '11px', fontWeight: '600', color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {employee.designation || 'Staff Member'}
                 </p>
-                
+
                 <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '5px 12px', display: 'inline-block' }}>
                   <span style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginRight: '6px' }}>ID:</span>
                   <span style={{ fontSize: '12px', fontWeight: '800', fontFamily: 'monospace', color: '#0f172a' }}>{employee.employeeNum || 'EMP-1001'}</span>
@@ -207,13 +207,17 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
             </div>
 
             {/* Company Address & Return Notice */}
-            <div style={{ width: '100%', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '8px 10px', fontSize: '9.5px', textAlign: 'center', color: '#334155', lineHeight: '1.35', marginBottom: '8px' }}>
-              <p style={{ margin: '0 0 3px 0', fontWeight: '800', color: '#0f172a' }}>{companyName}</p>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '8.5px' }}>
-                {company?.address ? `${company.address} • ` : ''}
-                HR Contact: {company?.email || `hr@${companyName.toLowerCase().replace(/\s+/g, '')}.com`}
-                {company?.phone ? ` • Tel: ${company.phone}` : ''}
+            <div style={{ width: '100%', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px', fontSize: '9.5px', textAlign: 'center', color: '#334155', lineHeight: '1.4', marginBottom: '6px' }}>
+              <p style={{ margin: '0 0 4px 0', fontWeight: '800', color: '#0f172a', fontSize: '11px' }}>{companyName}</p>
+              <p style={{ margin: '0 0 4px 0', color: '#475569', fontSize: '9px', fontWeight: '500' }}>
+                {company?.address || '100 Enterprise Tower, Corporate Boulevard, Suite 500'}
               </p>
+              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '4px', marginTop: '4px' }}>
+                <p style={{ margin: 0, color: '#64748b', fontSize: '8.5px', fontWeight: '600' }}>
+                  If found, return to HR • {company?.email || `hr@${companyName.toLowerCase().replace(/\s+/g, '')}.com`}
+                  {company?.phone ? ` • ${company.phone}` : ''}
+                </p>
+              </div>
             </div>
 
             {/* Authorized HR Signature */}

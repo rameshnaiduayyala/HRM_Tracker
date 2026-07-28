@@ -653,9 +653,11 @@ export default function Dashboard() {
                   const searchParams = new URLSearchParams(location.search);
                   const empId = searchParams.get('employeeId');
                   const selectedEmp = employees.find(e => e.id === empId) || employees[0];
+                  const currentCompany = companies.find(c => c.id === selectedCompanyId) || selectedEmp?.company;
+                  const updatedEmp = selectedEmp ? { ...selectedEmp, company: currentCompany || selectedEmp.company } : null;
                   return (
                     <EmployeeProfileView
-                      employee={selectedEmp}
+                      employee={updatedEmp}
                       onBack={() => navigate('/dashboard/employees')}
                       onEdit={() => {}}
                       onReset={(emp) => handleEmployeeReset(emp.id)}

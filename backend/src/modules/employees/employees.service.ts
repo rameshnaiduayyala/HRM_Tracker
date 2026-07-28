@@ -192,6 +192,7 @@ export class EmployeesService {
       teamId?: string | null;
       managerId?: string | null;
       designation?: string | null;
+      profilePic?: string | null;
       status?: string;
       // Optional user details to update
       email?: string;
@@ -212,6 +213,7 @@ export class EmployeesService {
       if (data.teamId !== undefined) empUpdate.teamId = data.teamId || null;
       if (data.managerId !== undefined) empUpdate.managerId = data.managerId || null;
       if (data.designation !== undefined) empUpdate.designation = data.designation || null;
+      if (data.profilePic !== undefined) empUpdate.profilePic = data.profilePic || null;
       if (data.status) empUpdate.status = data.status;
 
       await tx.employee.update({

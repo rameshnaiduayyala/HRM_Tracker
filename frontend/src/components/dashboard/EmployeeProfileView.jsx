@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import FocusTrackLogo from '../../assets/focustrack-logo.png';
-import { Printer, Shield, QrCode, Edit2, Mail, Bookmark, Calendar, CheckCircle2, Monitor } from 'lucide-react';
+import { Edit2, Mail, Bookmark, Calendar, CheckCircle2, Printer } from 'lucide-react';
 import Button from '../Button';
+import Drawer from '../Drawer';
+import Modal from '../Modal';
+import EmployeeForm from '../EmployeeForm';
 import EnterpriseIDCard from './EnterpriseIDCard';
 
 // Safe coercion: Prisma relations (department/team) come back as full objects.
@@ -9,8 +12,17 @@ const toStr = (val, fallback = '') =>
   val?.name ?? (typeof val === 'string' ? val : fallback);
 
 export default function EmployeeProfileView({ employee, onBack, onEdit, onReset, onDelete, loading }) {
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+  const [isIdModalOpen, setIsIdModalOpen] = useState(false);
+
   if (!employee) return null;
   const initials = `${employee.user?.firstName?.[0] || ''}${employee.user?.lastName?.[0] || ''}`.toUpperCase();
+
+  const photoSrc = employee.profilePic
+    ? employee.profilePic.startsWith('http') || employee.profilePic.startsWith('data:')
+      ? employee.profilePic
+      : `http://localhost:5000${employee.profilePic}`
+    : null;
 
   const companyLogo = employee.company?.logoUrl || employee.company?.logo
     ? (employee.company?.logoUrl || employee.company?.logo).startsWith('http') || (employee.company?.logoUrl || employee.company?.logo).startsWith('data:')
@@ -18,11 +30,18 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
       : `http://localhost:5000${employee.company?.logoUrl || employee.company?.logo}`
     : FocusTrackLogo;
 
+  const handleEditSubmit = async (payload) => {
+    const success = await onEdit(employee, payload);
+    if (success !== false) {
+      setIsEditDrawerOpen(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-up">
       {/* Breadcrumb / Back Button */}
       <div className="flex items-center justify-between no-print">
-        <button 
+        <button
           onClick={onBack}
           className="px-3 py-1.5 border border-[var(--border-subtle)] text-[12px] font-semibold rounded-lg hover:bg-[var(--bg-card-alt)] transition-colors"
         >
@@ -33,10 +52,18 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
       {/* Profile Header Block */}
       <div className="glass-card flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-black text-white shrink-0"
-            style={{ background: 'linear-gradient(135deg,#4f46e5,#6063ee)', boxShadow: '0 4px 10px rgba(79,70,229,0.2)' }}>
-            {initials}
-          </div>
+          {photoSrc ? (
+            <img
+              src={photoSrc}
+              alt={`${employee.user?.firstName} ${employee.user?.lastName}`}
+              className="w-16 h-16 rounded-full object-cover shrink-0 border-2 border-indigo-500 shadow-lg shadow-indigo-500/20"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-black text-white shrink-0"
+              style={{ background: 'linear-gradient(135deg,#4f46e5,#6063ee)', boxShadow: '0 4px 10px rgba(79,70,229,0.2)' }}>
+              {initials}
+            </div>
+          )}
           <div>
             <h2 className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>
               {employee.user?.firstName} {employee.user?.lastName}
@@ -51,16 +78,22 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => onEdit(employee)}>
+          <button
+            onClick={() => setIsIdModalOpen(true)}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
+          >
+            <Printer className="w-3.5 h-3.5" /> Print ID Card
+          </button>
+          <Button onClick={() => setIsEditDrawerOpen(true)}>
             <Edit2 className="w-3.5 h-3.5" /> Edit Profile
           </Button>
-          <button 
+          <button
             onClick={() => onReset(employee)}
             className="px-4 py-2 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-xs font-bold rounded-xl hover:bg-yellow-500/10 transition-colors"
           >
             Reset Telemetry
           </button>
-          <button 
+          <button
             onClick={() => onDelete(employee)}
             className="px-4 py-2 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl hover:bg-red-500/10 transition-colors"
           >
@@ -71,7 +104,6 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
 
       {/* Bento Grid Canvas */}
       <div className="bento-grid">
-        
         {/* Contact & Bio (col-span-4) */}
         <div className="col-span-12 md:col-span-4 space-y-6">
           <div className="glass-card">
@@ -206,8 +238,33 @@ export default function EmployeeProfileView({ employee, onBack, onEdit, onReset,
         </div>
       </div>
 
-      {/* Standalone Reusable Enterprise ID Card */}
+      {/* Standalone Reusable Enterprise ID Card Section */}
       <EnterpriseIDCard employee={employee} companyLogo={companyLogo} />
+
+      {/* Print ID Badge Center Modal Popup */}
+      <Modal
+        isOpen={isIdModalOpen}
+        onClose={() => setIsIdModalOpen(false)}
+        title="Official Staff ID Passcard"
+        size="xl"
+      >
+        <div>
+          <EnterpriseIDCard employee={employee} companyLogo={companyLogo} />
+        </div>
+      </Modal>
+
+      {/* Edit Profile Drawer */}
+      <Drawer
+        isOpen={isEditDrawerOpen}
+        onClose={() => setIsEditDrawerOpen(false)}
+        title="Update Profile & Staff Photo"
+      >
+        <EmployeeForm
+          initialData={employee}
+          onSubmit={handleEditSubmit}
+          loading={loading}
+        />
+      </Drawer>
     </div>
   );
 }

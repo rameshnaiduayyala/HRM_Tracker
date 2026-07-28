@@ -16,11 +16,14 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
   const [lastName, setLastName] = useState('');
   const [roleName, setRoleName] = useState('EMPLOYEE');
 
+  const [profilePic, setProfilePic] = useState('');
+
   useEffect(() => {
     if (initialData) {
       setEmployeeNum(initialData.employeeNum || '');
       setDesignation(initialData.designation || '');
       setManagerId(initialData.managerId || '');
+      setProfilePic(initialData.profilePic || '');
       setStatus(initialData.status || 'ACTIVE');
       setFirstName(initialData.user?.firstName || '');
       setLastName(initialData.user?.lastName || '');
@@ -31,6 +34,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
       setEmployeeNum('');
       setDesignation('');
       setManagerId('');
+      setProfilePic('');
       setStatus('ACTIVE');
       setFirstName('');
       setLastName('');
@@ -46,6 +50,7 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
       employeeNum,
       designation,
       managerId: managerId === '' ? null : managerId,
+      profilePic: profilePic === '' ? null : profilePic,
       status,
       firstName,
       lastName,
@@ -88,6 +93,31 @@ export default function EmployeeForm({ initialData, managersList = [], onSubmit,
             className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-white text-sm rounded-lg focus:outline-none focus:border-indigo-500"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium mb-1">Profile Photo (Avatar Image)</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                setProfilePic(reader.result);
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+          className="w-full px-3 py-2 bg-[var(--bg-canvas)] border border-[var(--border-base)] text-[var(--text-secondary)] text-xs rounded-lg focus:outline-none focus:border-indigo-500"
+        />
+        {profilePic && (
+          <div className="mt-2 flex items-center gap-3">
+            <img src={profilePic.startsWith('http') || profilePic.startsWith('data:') ? profilePic : `http://localhost:5000${profilePic}`} alt="Preview" className="w-10 h-10 rounded-full object-cover border border-indigo-500" />
+            <span className="text-[11px] text-emerald-400 font-bold">Photo Loaded Successfully</span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">

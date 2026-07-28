@@ -7,7 +7,7 @@ import Sidebar from '../components/Sidebar';
 import LeavesTab from '../components/dashboard/LeavesTab';
 import TasksTab from '../components/dashboard/TasksTab';
 import NotificationsTab from '../components/dashboard/NotificationsTab';
-import TimesheetsTab from '../components/dashboard/TimesheetsTab';
+import EnterpriseIDCard from '../components/dashboard/EnterpriseIDCard';
 import { Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { EMPLOYEE_TAB_ROUTES, getTabRoute, resolveTabFromPath } from '../config/navigationRoutes';
@@ -17,7 +17,7 @@ export default function EmployeePortal() {
   const location = useLocation();
   const { user } = useAuthStore();
 
-  const validTabs = ['dashboard', 'attendance', 'tasks', 'leaves', 'timesheets', 'notifications'];
+  const validTabs = ['dashboard', 'attendance', 'tasks', 'leaves', 'idcard', 'timesheets', 'notifications'];
   const activeTab = resolveTabFromPath(location.pathname, validTabs, 'dashboard');
 
   const setActiveTab = (tab) => {
@@ -159,6 +159,17 @@ export default function EmployeePortal() {
             <NotificationsTab
               companyId={employeeProfile.companyId}
             />
+          )}
+
+          {/* My Staff ID Badge Tab */}
+          {activeTab === 'idcard' && employeeProfile && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-bold text-white tracking-tight">My Official Staff ID Passcard</h2>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Dual-sided digital passcard for corporate security access</p>
+              </div>
+              <EnterpriseIDCard employee={employeeProfile} />
+            </div>
           )}
 
           {/* Timesheets Tab */}

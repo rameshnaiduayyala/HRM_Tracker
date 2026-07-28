@@ -99,6 +99,7 @@ export default function OnboardingTab({ companyId, departments = [], employees =
       joiningDate: cand.expectedJoiningDate ? new Date(cand.expectedJoiningDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       managerId: '',
       roleName: 'EMPLOYEE',
+      profilePic: '',
     });
     setShowJoiningModal(true);
   };
@@ -404,6 +405,25 @@ export default function OnboardingTab({ companyId, departments = [], employees =
                   value={joiningForm.designation}
                   onChange={(e) => setJoiningForm({ ...joiningForm, designation: e.target.value })}
                   style={{ width: '100%', padding: '10px', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#fff', marginTop: '4px' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 'bold' }}>Staff Profile Photo (Avatar Image)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setJoiningForm({ ...joiningForm, profilePic: reader.result });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  style={{ width: '100%', padding: '8px', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#fff', marginTop: '4px', fontSize: '12px' }}
                 />
               </div>
 

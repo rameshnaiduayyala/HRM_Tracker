@@ -79,12 +79,25 @@ export default function EmployeesTab({ user, employees = [], onSubmitEmployee, o
       cell: ({ row }) => {
         const emp = row.original;
         const initials = `${emp.user.firstName?.[0] || ''}${emp.user.lastName?.[0] || ''}`.toUpperCase();
+        const photoSrc = emp.profilePic
+          ? emp.profilePic.startsWith('http') || emp.profilePic.startsWith('data:')
+            ? emp.profilePic
+            : `http://localhost:5000${emp.profilePic}`
+          : null;
         return (
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 text-white"
-              style={{ background: 'linear-gradient(135deg,#4f46e5,#6063ee)', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.15)' }}>
-              {initials || '?'}
-            </div>
+            {photoSrc ? (
+              <img
+                src={photoSrc}
+                alt={`${emp.user.firstName} ${emp.user.lastName}`}
+                className="w-9 h-9 rounded-full object-cover shrink-0 border border-indigo-500/30"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 text-white"
+                style={{ background: 'linear-gradient(135deg,#4f46e5,#6063ee)', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.15)' }}>
+                {initials || '?'}
+              </div>
+            )}
             <div>
               <span className="block text-[13px] font-bold" style={{ color: 'var(--text-primary)' }}>
                 {emp.user.firstName} {emp.user.lastName}

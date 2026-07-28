@@ -27,6 +27,7 @@ const updateEmployeeSchema = z.object({
   teamId: z.string().uuid().nullable().optional(),
   managerId: z.string().uuid().nullable().optional(),
   designation: z.string().optional(),
+  profilePic: z.string().nullable().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE', 'LEAVE']).optional(),
   
   // Optional User Details Update

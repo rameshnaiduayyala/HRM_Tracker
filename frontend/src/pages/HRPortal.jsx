@@ -127,12 +127,17 @@ export default function HRPortal() {
     }
   };
 
-  const handleEmployeeSubmit = async (data) => {
+  const handleEmployeeSubmit = async (employee, payload) => {
     try {
       setLoading(true);
-      if (data.id) {
+      const data = payload || employee;
+      const targetId = employee?.id || data?.id;
+      if (targetId) {
         // Edit Employee
-        await employeeApi.update(data.id, data);
+        await employeeApi.update(targetId, {
+          ...data,
+          companyId: selectedCompanyId,
+        });
         toast.success('Employee record updated successfully.');
       } else {
         // Onboard New Employee
@@ -308,11 +313,13 @@ export default function HRPortal() {
             const searchParams = new URLSearchParams(location.search);
             const empId = searchParams.get('employeeId');
             const selectedEmp = employees.find(e => e.id === empId) || employees[0];
+            const currentCompany = companies.find(c => c.id === selectedCompanyId) || selectedEmp?.company;
+            const updatedEmp = selectedEmp ? { ...selectedEmp, company: currentCompany || selectedEmp.company } : null;
             return (
               <EmployeeProfileView
-                employee={selectedEmp}
+                employee={updatedEmp}
                 onBack={() => navigate('/hr/people/employees')}
-                onEdit={() => {}}
+                onEdit={(emp, payload) => handleEmployeeSubmit(emp, payload)}
                 onReset={(emp) => handleEmployeeReset(emp.id)}
                 onDelete={(emp) => handleEmployeeDelete(emp.id)}
                 loading={loading}

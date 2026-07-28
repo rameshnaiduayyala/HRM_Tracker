@@ -38,6 +38,7 @@ export const EMPLOYEE_TAB_ROUTES = {
   attendance: '/employee/attendance',
   tasks: '/employee/tasks',
   leaves: '/employee/leave',
+  idcard: '/employee/idcard',
   timesheets: '/employee/timesheet',
   notifications: '/employee/notifications',
 };
