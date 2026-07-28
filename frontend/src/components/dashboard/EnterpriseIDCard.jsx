@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { useReactToPrint } from 'react-to-print';
 import { QRCodeSVG } from 'qrcode.react';
 import { Printer } from 'lucide-react';
@@ -6,6 +7,7 @@ import FocusTrackLogo from '../../assets/focustrack-logo.png';
 
 export default function EnterpriseIDCard({ employee, companyLogo }) {
   const cardRef = useRef(null);
+  const reduxCompany = useSelector((state) => state.auth.company);
 
   const handlePrint = useReactToPrint({
     contentRef: cardRef,
@@ -14,7 +16,14 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
 
   if (!employee) return null;
 
-  const logoSrc = companyLogo || FocusTrackLogo;
+  const company = employee.company || reduxCompany;
+  const rawLogo = companyLogo || company?.logoUrl || company?.logo;
+  const logoSrc = rawLogo
+    ? rawLogo.startsWith('http') || rawLogo.startsWith('data:')
+      ? rawLogo
+      : `http://localhost:5000${rawLogo}`
+    : FocusTrackLogo;
+
   const photoSrc = employee.profilePic
     ? employee.profilePic.startsWith('http') || employee.profilePic.startsWith('data:')
       ? employee.profilePic
@@ -22,12 +31,13 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
     : null;
 
   const initials = `${employee.user?.firstName?.[0] || ''}${employee.user?.lastName?.[0] || ''}`.toUpperCase();
+  const companyName = company?.name || 'Corporate HQ';
 
   const qrData = JSON.stringify({
     id: employee.id,
     empNum: employee.employeeNum,
     name: `${employee.user?.firstName} ${employee.user?.lastName}`,
-    company: employee.company?.name || 'Company',
+    company: companyName,
   });
 
   return (
@@ -75,17 +85,17 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
             }
           `}</style>
 
-          {/* ── FRONT SIDE (Clean Minimal White Design) ── */}
+          {/* ── FRONT SIDE (Clean Balanced White Design) ── */}
           <div
             className="printable-card-side"
             style={{
               width: '260px',
-              height: '410px',
+              height: '380px',
               backgroundColor: '#ffffff',
               borderRadius: '16px',
               border: '1.5px solid #e2e8f0',
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-              padding: '20px',
+              padding: '18px 16px',
               display: 'flex',
               flexDirection: 'column',
               justify: 'space-between',
@@ -96,24 +106,24 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
             }}
           >
             {/* Top Company Logo */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '45px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '42px', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
               <img
                 src={logoSrc}
                 alt="Company Logo"
-                style={{ maxHeight: '36px', maxWidth: '180px', objectFit: 'contain' }}
+                style={{ maxHeight: '34px', maxWidth: '180px', objectFit: 'contain' }}
                 onError={(e) => { e.currentTarget.src = FocusTrackLogo; }}
               />
             </div>
 
             {/* Employee Photo or Initials */}
-            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: 'auto 0' }}>
               {photoSrc ? (
                 <img
                   src={photoSrc}
                   alt="Employee"
                   style={{
-                    width: '90px',
-                    height: '90px',
+                    width: '85px',
+                    height: '85px',
                     borderRadius: '50%',
                     objectFit: 'cover',
                     border: '3px solid #4f46e5',
@@ -123,15 +133,15 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
               ) : (
                 <div
                   style={{
-                    width: '90px',
-                    height: '90px',
+                    width: '85px',
+                    height: '85px',
                     borderRadius: '50%',
                     backgroundColor: '#4f46e5',
                     color: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '30px',
+                    justify: 'center',
+                    fontSize: '28px',
                     fontWeight: '800',
                     border: '3px solid #6366f1',
                     boxShadow: '0 4px 10px rgba(79, 70, 229, 0.25)'
@@ -140,20 +150,20 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
                   {initials}
                 </div>
               )}
-            </div>
 
-            {/* Employee Name & ID & Designation */}
-            <div style={{ textAlign: 'center', marginTop: '10px', width: '100%' }}>
-              <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px' }}>
-                {employee.user?.firstName} {employee.user?.lastName}
-              </h2>
-              <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {employee.designation || 'Staff Member'}
-              </p>
-              
-              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 12px', display: 'inline-block' }}>
-                <span style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginRight: '6px' }}>ID:</span>
-                <span style={{ fontSize: '12px', fontWeight: '800', fontFamily: 'monospace', color: '#0f172a' }}>{employee.employeeNum || 'EMP-1001'}</span>
+              {/* Employee Name & ID & Designation */}
+              <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                <h2 style={{ margin: '0 0 3px 0', fontSize: '17px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px' }}>
+                  {employee.user?.firstName} {employee.user?.lastName}
+                </h2>
+                <p style={{ margin: '0 0 8px 0', fontSize: '11px', fontWeight: '600', color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {employee.designation || 'Staff Member'}
+                </p>
+                
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '5px 12px', display: 'inline-block' }}>
+                  <span style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginRight: '6px' }}>ID:</span>
+                  <span style={{ fontSize: '12px', fontWeight: '800', fontFamily: 'monospace', color: '#0f172a' }}>{employee.employeeNum || 'EMP-1001'}</span>
+                </div>
               </div>
             </div>
 
@@ -166,12 +176,12 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
             className="printable-card-side"
             style={{
               width: '260px',
-              height: '410px',
+              height: '380px',
               backgroundColor: '#ffffff',
               borderRadius: '16px',
               border: '1.5px solid #e2e8f0',
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-              padding: '20px',
+              padding: '18px 16px',
               display: 'flex',
               flexDirection: 'column',
               justify: 'space-between',
@@ -189,31 +199,27 @@ export default function EnterpriseIDCard({ employee, companyLogo }) {
             </div>
 
             {/* QR Code */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: 'auto 0' }}>
               <div style={{ border: '1px solid #e2e8f0', padding: '6px', borderRadius: '10px', backgroundColor: '#ffffff' }}>
-                <QRCodeSVG value={qrData} size={85} level="H" includeMargin={false} />
+                <QRCodeSVG value={qrData} size={82} level="H" includeMargin={false} />
               </div>
               <span style={{ fontSize: '9px', fontWeight: '600', color: '#94a3b8', marginTop: '4px' }}>Scan for Authentication</span>
             </div>
 
             {/* Company Address & Return Notice */}
-            <div style={{ width: '100%', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px', fontSize: '10px', textAlign: 'center', color: '#334155', lineHeight: '1.4' }}>
-              <p style={{ margin: '0 0 4px 0', fontWeight: '800', color: '#0f172a' }}>{employee.company?.name || 'Workspace Enterprise'}</p>
-              {employee.company?.address && (
-                <p style={{ margin: '0 0 4px 0', color: '#475569', fontSize: '9px' }}>
-                  {employee.company.address}
-                </p>
-              )}
-              <p style={{ margin: 0, color: '#64748b', fontSize: '9px' }}>
-                If found, return to HR • {employee.company?.email || 'hr@company.com'}<br/>
-                {employee.company?.phone ? `Tel: ${employee.company.phone}` : ''}
+            <div style={{ width: '100%', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '8px 10px', fontSize: '9.5px', textAlign: 'center', color: '#334155', lineHeight: '1.35', marginBottom: '8px' }}>
+              <p style={{ margin: '0 0 3px 0', fontWeight: '800', color: '#0f172a' }}>{companyName}</p>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '8.5px' }}>
+                {company?.address ? `${company.address} • ` : ''}
+                HR Contact: {company?.email || `hr@${companyName.toLowerCase().replace(/\s+/g, '')}.com`}
+                {company?.phone ? ` • Tel: ${company.phone}` : ''}
               </p>
             </div>
 
             {/* Authorized HR Signature */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingTop: '10px' }}>
-              <div style={{ width: '120px', borderTop: '1.5px solid #94a3b8', marginTop: '12px' }} />
-              <span style={{ fontSize: '9px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginTop: '4px' }}>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto' }}>
+              <div style={{ width: '110px', borderTop: '1.5px solid #94a3b8', marginTop: '4px' }} />
+              <span style={{ fontSize: '8.5px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginTop: '3px' }}>
                 Authorized HR Signature
               </span>
             </div>

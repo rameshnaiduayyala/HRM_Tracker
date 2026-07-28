@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setAuthCredentials } from '../store/slices/authSlice';
 import { authApi, tenantApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import { KeyRound, Mail, LogIn, AlertTriangle, Eye, EyeOff } from 'lucide-react';
@@ -9,6 +11,7 @@ import FocusTrackLogo from "../assets/focustrack-logo.png"
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const [error, setError] = useState(null);
@@ -60,6 +63,12 @@ export default function Login() {
     try {
       const response = await authApi.login(email, password);
       setAuth(response.data.accessToken, response.data.user, response.data.refreshToken);
+      dispatch(setAuthCredentials({
+        token: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
+        user: response.data.user,
+        company: response.data.user?.company,
+      }));
 
       const isHR = response.data.user.role === 'HR';
       const isManagement = ['ADMIN', 'SUPER_ADMIN', 'MANAGER'].includes(response.data.user.role);
@@ -81,6 +90,12 @@ export default function Login() {
     try {
       const response = await authApi.login(targetEmail, targetPassword);
       setAuth(response.data.accessToken, response.data.user, response.data.refreshToken);
+      dispatch(setAuthCredentials({
+        token: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
+        user: response.data.user,
+        company: response.data.user?.company,
+      }));
 
       const isHR = response.data.user.role === 'HR';
       const isManagement = ['ADMIN', 'SUPER_ADMIN', 'MANAGER'].includes(response.data.user.role);

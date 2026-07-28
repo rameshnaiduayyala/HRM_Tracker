@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { LogOut, User, Bell, ChevronDown, Shield, Zap, Sun, Moon } from 'lucide-react';
+import { LogOut, User, Bell, ChevronDown, Shield, Zap, Sun, Moon, Building2 } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setGlobalTheme, logoutSession } from '../store/slices/authSlice';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { useNavigate } from 'react-router-dom';
@@ -15,16 +17,32 @@ const ROLE_CONFIG = {
 
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user, logout } = useAuthStore();
+  const dispatch = useDispatch();
+  const reduxAuth = useSelector((state) => state.auth);
+  
+  const { user: zustandUser, logout: zustandLogout } = useAuthStore();
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const navigate = useNavigate();
+
+  const user = reduxAuth.user || zustandUser;
+  const company = reduxAuth.company || user?.company;
 
   const role = user?.role || 'EMPLOYEE';
   const cfg = ROLE_CONFIG[role] || ROLE_CONFIG.EMPLOYEE;
   const initials = `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || 'U'}`.toUpperCase();
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleLogout = () => {
+    dispatch(logoutSession());
+    zustandLogout();
+    navigate('/login');
+  };
+
+  const handleThemeToggle = () => {
+    toggleTheme();
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    dispatch(setGlobalTheme(newTheme));
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full flex items-center justify-between px-5 py-3"
@@ -35,8 +53,14 @@ export default function Header() {
         borderBottom: '1px solid var(--border-subtle)',
       }}
     >
-      {/* ── Brand ── */}
+      {/* ── Brand & Company Badge ── */}
       <div className="flex items-center gap-3">
+        {company?.name && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+            <Building2 className="w-4 h-4 text-indigo-500" />
+            <span className="text-xs font-bold text-[var(--text-primary)]">{company.name}</span>
+          </div>
+        )}
       </div>
 
       {/* ── Right Controls ── */}
@@ -52,7 +76,7 @@ export default function Header() {
 
         {/* Theme toggle */}
         <button
-          onClick={toggleTheme}
+          onClick={handleThemeToggle}
           className="p-2 rounded-xl transition-colors"
           style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}
           data-tooltip={theme === 'dark' ? 'Light theme' : 'Dark theme'}

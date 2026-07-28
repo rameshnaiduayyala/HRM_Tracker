@@ -156,6 +156,19 @@ export class AuthService {
       },
     });
 
+    const employee = await prisma.employee.findFirst({
+      where: { userId: user.id },
+      include: { company: true }
+    });
+
+    let company = employee?.company || null;
+
+    if (!company && user.tenantId) {
+      company = await prisma.company.findFirst({
+        where: { tenantId: user.tenantId }
+      });
+    }
+
     return {
       accessToken,
       refreshToken,
@@ -165,6 +178,11 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role?.name,
+        company: company ? {
+          id: company.id,
+          name: company.name,
+          logoUrl: company.logo,
+        } : null,
       },
     };
   }
