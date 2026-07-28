@@ -85,21 +85,25 @@ export default function EmployeesTab({ user, employees = [], onSubmitEmployee, o
             : `http://localhost:5000${emp.profilePic}`
           : null;
         return (
-          <div className="flex items-center gap-3">
+          <div 
+            onClick={() => onViewProfile(emp)}
+            className="flex items-center gap-3 cursor-pointer group hover:opacity-90 transition-opacity"
+            title={`View profile for ${emp.user.firstName} ${emp.user.lastName}`}
+          >
             {photoSrc ? (
               <img
                 src={photoSrc}
                 alt={`${emp.user.firstName} ${emp.user.lastName}`}
-                className="w-9 h-9 rounded-full object-cover shrink-0 border border-indigo-500/30"
+                className="w-9 h-9 rounded-full object-cover shrink-0 border border-indigo-500/30 group-hover:border-indigo-500 transition-colors"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 text-white"
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 text-white transition-transform group-hover:scale-105"
                 style={{ background: 'linear-gradient(135deg,#4f46e5,#6063ee)', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.15)' }}>
                 {initials || '?'}
               </div>
             )}
             <div>
-              <span className="block text-[13px] font-bold" style={{ color: 'var(--text-primary)' }}>
+              <span className="block text-[13px] font-bold group-hover:text-indigo-400 transition-colors" style={{ color: 'var(--text-primary)' }}>
                 {emp.user.firstName} {emp.user.lastName}
               </span>
               <span className="block text-[10px]" style={{ color: 'var(--text-muted)' }}>
@@ -180,9 +184,6 @@ export default function EmployeesTab({ user, employees = [], onSubmitEmployee, o
         return (
           <div className="flex items-center justify-end gap-1.5">
             {[{
-              icon: Eye,   title: 'View profile details',     color: '#4f46e5',
-              action: () => onViewProfile(emp)
-            },{
               icon: Edit2, title: 'Edit details',    color: '#10b981',
               action: () => handleEditClick(emp)
             },{
