@@ -7,6 +7,7 @@ import FilterBar from '../FilterBar';
 import { attendanceApi, leaveApi, payslipApi } from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { formatCurrency } from '../../utils/currency';
+import EmployeesTab from './EmployeesTab';
 
 export default function HRMDashboardTab({ companyId, employees = [], departments = [], teams = [], onNavigateTab }) {
   const [attendance, setAttendance] = useState([]);
@@ -203,35 +204,16 @@ export default function HRMDashboardTab({ companyId, employees = [], departments
         </button>
       </div>
 
-      {/* Staff Roster & Quick Directory */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-2xl space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <Heading level={3}>Organization Staff Directory</Heading>
-            <Text variant="muted" size="xs" className="mt-1">
-              Active company workforce members across all departments.
-            </Text>
-          </div>
-          <Badge variant="indigo">{filteredEmployees.length} Members</Badge>
-        </div>
-
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search staff by name or email..."
-          statusValue={statusFilter}
-          onStatusChange={setStatusFilter}
-          statusOptions={[
-            { label: 'All Staff', value: 'ALL' },
-            { label: 'Active', value: 'ACTIVE' },
-            { label: 'On Leave', value: 'ON_LEAVE' },
-          ]}
-        />
-
-        <Table
-          data={filteredEmployees}
-          columns={employeeColumns}
-          emptyMessage="No employees found in directory."
+      {/* Reusable Full Employees Tab Component embedded under Organization Staff Directory */}
+      <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-2xl">
+        <EmployeesTab
+          employees={employees}
+          companyId={companyId}
+          onViewProfile={(emp) => {
+            const isHr = window.location.pathname.startsWith('/hr');
+            const basePath = isHr ? '/hr/employee-profile' : '/dashboard/employee-profile';
+            window.location.href = `${basePath}?employeeId=${emp.id}`;
+          }}
         />
       </div>
     </div>

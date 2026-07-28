@@ -1,17 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, Edit2, Eye, Trash2, Search, RefreshCw } from 'lucide-react';
 import Table from '../Table';
 import Button from '../Button';
 import Drawer from '../Drawer';
 import EmployeeForm from '../EmployeeForm';
 import FilterBar from '../FilterBar';
+import { employeeApi, companyApi } from '../../services/api';
+import { toast } from 'react-hot-toast';
 
-export default function EmployeesTab({ user, employees = [], onSubmitEmployee, onResetEmployee, onDeleteEmployee, onViewProfile, loading }) {
+export default function EmployeesTab({ user, employees: propEmployees, companyId: propCompanyId, onSubmitEmployee, onResetEmployee, onDeleteEmployee, onViewProfile, loading: propLoading }) {
+  const [internalEmployees, setInternalEmployees] = useState([]);
+  const [internalLoading, setInternalLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+
+  const employees = propEmployees && propEmployees.length > 0 ? propEmployees : internalEmployees;
+  const loading = propLoading !== undefined ? propLoading : internalLoading;
+
+  const fetchInternalEmployees = async () => {
+    try {
+      setInternalLoading(true);
+      let targetCompanyId = propCompanyId;
+      if (!targetCompanyId) {
+        const compRes = await companyApi.list();
+        targetCompanyId = compRes.data?.companies?.[0]?.id;
+      }
+      if (targetCompanyId) {
+        const res = await employeeApi.list(targetCompanyId);
+        setInternalEmployees(res.data?.employees || []);
+      }
+    } catch (err) {
+      console.error('Failed to load employees in EmployeesTab', err);
+    } finally {
+      setInternalLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!propEmployees || propEmployees.length === 0) {
+      fetchInternalEmployees();
+    }
+  }, [propCompanyId, propEmployees]);
 
   const handleHireClick = () => {
     setSelectedEmployee(null);
@@ -25,21 +57,55 @@ export default function EmployeesTab({ user, employees = [], onSubmitEmployee, o
 
   const handleResetClick = (emp) => {
     if (window.confirm(`Are you sure you want to CLEAR ALL tracking data for ${emp.user.firstName} ${emp.user.lastName}? This action is irreversible.`)) {
-      onResetEmployee(emp.id);
+      if (onResetEmployee) {
+        onResetEmployee(emp.id);
+      } else {
+        employeeApi.reset(emp.id).then(() => {
+          toast.success('Employee credentials reset successfully.');
+          fetchInternalEmployees();
+        }).catch(err => toast.error(err.message || 'Failed to reset credentials'));
+      }
     }
   };
 
   const handleDeleteClick = (emp) => {
     if (window.confirm(`Permanently DELETE employee ${emp.user.firstName} ${emp.user.lastName} and their user account? This cannot be undone.`)) {
-      onDeleteEmployee(emp.id);
+      if (onDeleteEmployee) {
+        onDeleteEmployee(emp.id);
+      } else {
+        employeeApi.delete(emp.id, propCompanyId).then(() => {
+          toast.success('Employee offboarded successfully.');
+          fetchInternalEmployees();
+        }).catch(err => toast.error(err.message || 'Failed to offboard employee'));
+      }
     }
   };
 
   const handleSubmit = async (payload) => {
-    const success = await onSubmitEmployee(selectedEmployee, payload);
-    if (success) {
-      setIsDrawerOpen(false);
-      setSelectedEmployee(null);
+    if (onSubmitEmployee) {
+      const success = await onSubmitEmployee(selectedEmployee, payload);
+      if (success) {
+        setIsDrawerOpen(false);
+        setSelectedEmployee(null);
+      }
+    } else {
+      try {
+        setInternalLoading(true);
+        if (selectedEmployee) {
+          await employeeApi.update(selectedEmployee.id, payload);
+          toast.success('Employee updated successfully.');
+        } else {
+          await employeeApi.create(payload);
+          toast.success('Employee created successfully.');
+        }
+        setIsDrawerOpen(false);
+        setSelectedEmployee(null);
+        fetchInternalEmployees();
+      } catch (err) {
+        toast.error(err.message || 'Failed to save employee.');
+      } finally {
+        setInternalLoading(false);
+      }
     }
   };
 
@@ -84,9 +150,19 @@ export default function EmployeesTab({ user, employees = [], onSubmitEmployee, o
             ? emp.profilePic
             : `http://localhost:5000${emp.profilePic}`
           : null;
+        const handleProfileClick = () => {
+          if (onViewProfile) {
+            onViewProfile(emp);
+          } else {
+            const isHr = window.location.pathname.startsWith('/hr');
+            const basePath = isHr ? '/hr/employee-profile' : '/dashboard/employee-profile';
+            window.location.href = `${basePath}?employeeId=${emp.id}`;
+          }
+        };
+
         return (
           <div 
-            onClick={() => onViewProfile(emp)}
+            onClick={handleProfileClick}
             className="flex items-center gap-3 cursor-pointer group hover:opacity-90 transition-opacity"
             title={`View profile for ${emp.user.firstName} ${emp.user.lastName}`}
           >
