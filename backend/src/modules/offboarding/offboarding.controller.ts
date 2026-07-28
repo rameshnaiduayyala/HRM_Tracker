@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
-import { generateRelievingLetterHTML, generateExperienceLetterHTML } from '../../shared/utils/documentTemplates';
+import { generateRelievingLetterHTML, generateExperienceLetterHTML, generateRelievingLetterEmailHTML } from '../../shared/utils/documentTemplates';
 import { BadRequestError, NotFoundError } from '../../shared/errors';
+import { sendEmail } from '../../shared/utils/email';
 
 const prisma = new PrismaClient();
 
@@ -126,6 +127,39 @@ export class OffboardingController {
 
         return completedRecord;
       });
+
+      // Send Relieving and Experience Letter Email asynchronously via Mail Broker
+      try {
+        const fullRecord = await prisma.offboardingRecord.findUnique({
+          where: { id },
+          include: {
+            company: true,
+            employee: { include: { user: true, department: true } },
+          },
+        });
+
+        if (fullRecord) {
+          const relievingHtml = generateRelievingLetterEmailHTML({
+            employeeName: `${fullRecord.employee.user.firstName} ${fullRecord.employee.user.lastName}`,
+            employeeNum: fullRecord.employee.employeeNum,
+            designation: fullRecord.employee.designation || 'Team Member',
+            department: fullRecord.employee.department ? fullRecord.employee.department.name : 'General',
+            companyName: fullRecord.company.name,
+            companyLogo: fullRecord.company.logo || undefined,
+            joiningDate: fullRecord.employee.joiningDate.toISOString(),
+            lastWorkingDay: fullRecord.lastWorkingDay.toISOString(),
+            resignationDate: fullRecord.resignationDate.toISOString(),
+          });
+
+          sendEmail({
+            to: fullRecord.employee.user.email,
+            subject: `Official Relieving & Service Letter - ${fullRecord.company.name}`,
+            html: relievingHtml,
+          });
+        }
+      } catch (emailErr) {
+        console.error('Failed to queue relieving letter email:', emailErr);
+      }
 
       return res.status(200).json({
         status: 'success',

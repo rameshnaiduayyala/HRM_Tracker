@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../../shared/database';
+import { sendEmail } from '../../shared/utils/email';
+import { generateWorkspaceApprovedEmailHTML, generateWorkspaceRejectedEmailHTML } from '../../shared/templates/emails';
 import { ConflictError } from '../../shared/errors';
 
 export class TenantsService {
@@ -208,11 +210,54 @@ export class TenantsService {
     });
   }
 
-  async updateTenantStatus(id: string, status: string) {
-    return prisma.tenant.update({
+  async updateTenantStatus(id: string, status: string, reason?: string) {
+    const updatedTenant = await prisma.tenant.update({
       where: { id },
       data: { status },
+      include: {
+        users: {
+          where: { role: { name: 'ADMIN' } },
+        },
+      },
     });
+
+    // Send automated decision email to company administrator asynchronously via Mail Broker
+    const adminUser = updatedTenant.users?.[0];
+    if (adminUser?.email) {
+      try {
+        const adminName = `${adminUser.firstName} ${adminUser.lastName}`.trim();
+        let emailHtml = '';
+        let subject = '';
+
+        if (status === 'ACTIVE') {
+          subject = `Workspace Approved - ${updatedTenant.name}`;
+          emailHtml = generateWorkspaceApprovedEmailHTML({
+            adminName,
+            workspaceName: updatedTenant.name,
+            subdomain: updatedTenant.subdomain,
+            companyLogo: updatedTenant.logo || undefined,
+          });
+        } else {
+          subject = `Workspace Status Notice - ${updatedTenant.name}`;
+          emailHtml = generateWorkspaceRejectedEmailHTML({
+            adminName,
+            workspaceName: updatedTenant.name,
+            reason,
+            companyLogo: updatedTenant.logo || undefined,
+          });
+        }
+
+        sendEmail({
+          to: adminUser.email,
+          subject,
+          html: emailHtml,
+        });
+      } catch (mailErr) {
+        console.error('Failed to dispatch tenant status email:', mailErr);
+      }
+    }
+
+    return updatedTenant;
   }
 
   async updateTenant(

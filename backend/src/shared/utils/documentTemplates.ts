@@ -463,3 +463,6 @@ export function generatePayslipHTML(params: PayslipParams): string {
 </html>
   `;
 }
+
+// Export clean modular email templates from dedicated templates directory
+export * from '../templates/emails';

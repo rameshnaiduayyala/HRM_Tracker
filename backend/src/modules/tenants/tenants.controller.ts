@@ -84,12 +84,12 @@ export class TenantsController {
   async updateStatus(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { status } = req.body;
+      const { status, reason } = req.body;
       if (!status || !['ACTIVE', 'INACTIVE'].includes(status)) {
         return next(new ValidationError({ status: { _errors: ['Invalid status. Must be ACTIVE or INACTIVE'] } }));
       }
 
-      const tenant = await tenantsService.updateTenantStatus(id, status);
+      const tenant = await tenantsService.updateTenantStatus(id, status, reason);
       return res.status(200).json({
         status: 'success',
         data: { tenant },

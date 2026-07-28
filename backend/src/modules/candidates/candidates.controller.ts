@@ -2,8 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { generateOfferLetterHTML } from '../../shared/utils/documentTemplates';
+import { generateOfferLetterHTML, generateOfferLetterEmailHTML } from '../../shared/utils/documentTemplates';
 import { BadRequestError, NotFoundError } from '../../shared/errors';
+import { sendEmail } from '../../shared/utils/email';
 
 const prisma = new PrismaClient();
 
@@ -72,6 +73,29 @@ export class CandidatesController {
           onboardingTasks: true,
         },
       });
+
+      // Dispatch Offer Letter Email asynchronously via Mail Broker
+      try {
+        const company = await prisma.company.findUnique({ where: { id: candidate.companyId } });
+        const offerHtml = generateOfferLetterEmailHTML({
+          candidateName: `${candidate.firstName} ${candidate.lastName}`,
+          designation: candidate.designation,
+          department: candidate.department?.name || 'General',
+          companyName: company?.name || 'FocusTrack Enterprise',
+          companyLogo: company?.logo || undefined,
+          ctc: Number(candidate.ctc),
+          expectedJoiningDate: candidate.expectedJoiningDate.toISOString(),
+          offerToken: candidate.offerToken,
+        });
+
+        sendEmail({
+          to: candidate.email,
+          subject: `Job Offer Letter - ${candidate.designation} at ${company?.name || 'FocusTrack'}`,
+          html: offerHtml,
+        });
+      } catch (emailErr) {
+        console.error('Failed to queue offer letter email:', emailErr);
+      }
 
       return res.status(201).json({ status: 'success', data: { candidate } });
     } catch (err) {

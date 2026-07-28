@@ -95,6 +95,8 @@ model User {
   sessions     Session[]
   devices      Device[]
   employees    Employee[]
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 

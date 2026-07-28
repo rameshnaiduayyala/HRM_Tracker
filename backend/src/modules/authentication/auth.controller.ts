@@ -28,6 +28,20 @@ const refreshSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters long'),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters long'),
+});
+
 export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
@@ -149,6 +163,61 @@ export class AuthController {
       return res.status(200).json({
         status: 'success',
         message: 'Logged out successfully',
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = forgotPasswordSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return next(new ValidationError(parsed.error.format()));
+      }
+
+      await authService.forgotPassword(parsed.data.email);
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'If the email exists, a password reset link has been sent to your inbox.',
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = resetPasswordSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return next(new ValidationError(parsed.error.format()));
+      }
+
+      await authService.resetPassword(parsed.data.token, parsed.data.newPassword);
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Password has been reset successfully. You can now log in.',
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = changePasswordSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return next(new ValidationError(parsed.error.format()));
+      }
+
+      const userId = (req as any).user?.id || (req as any).userId;
+      await authService.changePassword(userId, parsed.data.currentPassword, parsed.data.newPassword);
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Password changed successfully.',
       });
     } catch (error) {
       return next(error);

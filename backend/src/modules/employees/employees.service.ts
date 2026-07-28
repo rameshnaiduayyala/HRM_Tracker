@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { prisma } from '../../shared/database';
 import { entitlementsService } from '../tenants/entitlements.service';
+import { sendEmail } from '../../shared/utils/email';
+import { generateWelcomeEmailHTML } from '../../shared/utils/documentTemplates';
 
 export class EmployeesService {
   async getEmployeesByCompany(companyId: string, managerUserId?: string) {
@@ -168,7 +170,7 @@ export class EmployeesService {
         throw new Error('Either userId or complete user details (email, password, names) must be provided.');
       }
 
-      return tx.employee.create({
+      const createdEmp = await tx.employee.create({
         data: {
           employeeNum: data.employeeNum,
           userId: finalUserId,
@@ -180,6 +182,31 @@ export class EmployeesService {
           status: 'ACTIVE',
         },
       });
+
+      // Dispatch Welcome Onboarding Email asynchronously via Mail Broker
+      if (data.email) {
+        try {
+          const comp = await tx.company.findUnique({ where: { id: data.companyId } });
+          const welcomeHtml = generateWelcomeEmailHTML({
+            employeeName: `${data.firstName || 'Team Member'} ${data.lastName || ''}`.trim(),
+            employeeNum: data.employeeNum,
+            designation: data.designation || 'Staff Member',
+            email: data.email,
+            companyName: comp?.name || 'FocusTrack Enterprise',
+            companyLogo: comp?.logo || undefined,
+          });
+
+          sendEmail({
+            to: data.email,
+            subject: `Welcome to ${comp?.name || 'FocusTrack'} - Your Employee Account`,
+            html: welcomeHtml,
+          });
+        } catch (mailErr) {
+          console.error('Failed to dispatch welcome email:', mailErr);
+        }
+      }
+
+      return createdEmp;
     });
   }
 

@@ -17,7 +17,17 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [redirectMessage, setRedirectMessage] = useState(null);
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Forgot Password / Reset Password Modal States
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSuccessMsg, setForgotSuccessMsg] = useState(null);
+  const [resetTokenInput, setResetTokenInput] = useState('');
+  const [newPasswordInput, setNewPasswordInput] = useState('');
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
+  const [resetSuccessMsg, setResetSuccessMsg] = useState(null);
 
   // Login Form State
   const [email, setEmail] = useState('');
@@ -26,12 +36,17 @@ export default function Login() {
   // Dynamic Tenant Branding State
   const [branding, setBranding] = useState(null);
 
-  // Detect redirect from expired/failed session and show backend message
+  // Detect redirect from expired/failed session and show backend message or reset token
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('expired') === '1') {
       const msg = params.get('message');
       setRedirectMessage(msg || 'Your session timed out. Please sign in again.');
+    }
+    const tokenParam = params.get('resetToken');
+    if (tokenParam) {
+      setResetTokenInput(tokenParam);
+      setIsResetModalOpen(true);
     }
 
     // Fetch tenant branding dynamically
@@ -219,28 +234,35 @@ export default function Login() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <KeyRound className="w-4 h-4" />
-                  </span>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    placeholder="Enter Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#5850EC] focus:ring-1 focus:ring-[#5850EC] transition text-sm font-medium bg-slate-50/50"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+              <div className="flex items-center justify-between">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600">Password</label>
+                <button
+                  type="button"
+                  onClick={() => setIsForgotModalOpen(true)}
+                  className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              <div className="relative mt-1.5">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <KeyRound className="w-4 h-4" />
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="Enter Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#5850EC] focus:ring-1 focus:ring-[#5850EC] transition text-sm font-medium bg-slate-50/50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
 
               <button
@@ -311,6 +333,199 @@ export default function Login() {
         </div>
 
       </div>
+      {/* Forgot Password Modal */}
+      {isForgotModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl border border-slate-100 space-y-4">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Forgot Password?</h3>
+              <p className="text-xs text-slate-500 mt-1">Enter your registered email address and we will send you a password reset link.</p>
+            </div>
+
+            {forgotSuccessMsg ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3 text-emerald-900">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
+                  <div className="text-xs leading-relaxed font-semibold">
+                    {forgotSuccessMsg}
+                  </div>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsForgotModalOpen(false);
+                      setForgotSuccessMsg(null);
+                      setForgotEmail('');
+                    }}
+                    className="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition"
+                  >
+                    Got It, Back to Login
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  try {
+                    setLoading(true);
+                    const res = await authApi.forgotPassword(forgotEmail);
+                    const msg = res?.message || 'If the email exists, a password reset link has been sent to your inbox.';
+                    setForgotSuccessMsg(msg);
+                    toast.success(msg);
+                  } catch (err) {
+                    toast.error(err.message || 'Failed to send reset link.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-slate-600 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600"
+                  />
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotModalOpen(false)}
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl"
+                  >
+                    Send Reset Link
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl border border-slate-100 space-y-4">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Set New Password</h3>
+              <p className="text-xs text-slate-500 mt-1">Please enter and confirm your new password to complete the reset.</p>
+            </div>
+
+            {resetSuccessMsg ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3 text-emerald-900">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 mt-1" />
+                  <div className="text-xs leading-relaxed font-semibold">
+                    {resetSuccessMsg}
+                  </div>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsResetModalOpen(false);
+                      setResetSuccessMsg(null);
+                      setNewPasswordInput('');
+                      setConfirmPasswordInput('');
+                      navigate('/login', { replace: true });
+                    }}
+                    className="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition"
+                  >
+                    Proceed to Login
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (newPasswordInput !== confirmPasswordInput) {
+                    toast.error('Passwords do not match. Please check and try again.');
+                    return;
+                  }
+                  try {
+                    setLoading(true);
+                    const res = await authApi.resetPassword(resetTokenInput, newPasswordInput);
+                    const msg = res?.message || 'Password has been reset successfully. You can now log in.';
+                    setResetSuccessMsg(msg);
+                    toast.success(msg);
+                  } catch (err) {
+                    toast.error(err.message || 'Failed to reset password.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-slate-600 mb-1">New Password</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={8}
+                    value={newPasswordInput}
+                    onChange={(e) => setNewPasswordInput(e.target.value)}
+                    placeholder="Minimum 8 characters"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-slate-600 mb-1">Confirm New Password</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={8}
+                    value={confirmPasswordInput}
+                    onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                    placeholder="Re-enter new password"
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium text-slate-800 focus:outline-none transition ${
+                      confirmPasswordInput && confirmPasswordInput !== newPasswordInput
+                        ? 'border-rose-300 bg-rose-50/40 focus:border-rose-500'
+                        : 'border-slate-200 focus:border-indigo-600'
+                    }`}
+                  />
+                  {confirmPasswordInput && confirmPasswordInput !== newPasswordInput && (
+                    <span className="text-[10px] text-rose-500 font-semibold mt-1 block">
+                      Passwords do not match
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsResetModalOpen(false)}
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading || (confirmPasswordInput && confirmPasswordInput !== newPasswordInput)}
+                    className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-xl"
+                  >
+                    Update Password
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

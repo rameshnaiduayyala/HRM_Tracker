@@ -1,10 +1,15 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../shared/database';
+import crypto from 'crypto';
 import {
   ConflictError,
   UnauthorizedError,
+  NotFoundError,
+  BadRequestError,
 } from '../../shared/errors';
+import { sendEmail } from '../../shared/utils/email';
+import { generateForgotPasswordEmailHTML, generatePasswordUpdatedEmailHTML } from '../../shared/templates/emails';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret';
@@ -333,13 +338,159 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    const session = await prisma.session.findUnique({
+    await prisma.session.deleteMany({
       where: { token: refreshToken },
     });
 
-    if (session) {
-      await prisma.session.delete({ where: { id: session.id } });
+    return true;
+  }
+
+  /**
+   * 1. Request Password Reset (Forgot Password)
+   */
+  async forgotPassword(email: string) {
+    const user = await prisma.user.findFirst({
+      where: { email },
+    });
+
+    if (!user) {
+      // Return success to avoid email enumeration attacks
+      return true;
     }
+
+    // Generate random secure token & 1 hour expiry
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 Hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken: resetTokenHash,
+        resetPasswordExpires: expiresAt,
+      },
+    });
+
+    // Fetch company details for branding
+    const employee = await prisma.employee.findFirst({
+      where: { userId: user.id },
+      include: { company: true },
+    });
+    const compName = employee?.company?.name || 'FocusTrack Enterprise';
+    const compLogo = employee?.company?.logo || undefined;
+    const resetUrl = `http://localhost:5173/login?resetToken=${resetToken}`;
+
+    const emailHtml = generateForgotPasswordEmailHTML({
+      userName: `${user.firstName} ${user.lastName}`,
+      resetUrl,
+      companyName: compName,
+      companyLogo: compLogo,
+    });
+
+    sendEmail({
+      to: user.email,
+      subject: `Password Reset Request - ${compName}`,
+      html: emailHtml,
+    });
+
+    return true;
+  }
+
+  /**
+   * 2. Reset Password with Token
+   */
+  async resetPassword(token: string, newPasswordHash: string) {
+    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await prisma.user.findFirst({
+      where: {
+        resetPasswordToken: resetTokenHash,
+        resetPasswordExpires: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestError('Password reset token is invalid or has expired.');
+    }
+
+    const passwordHash = await bcrypt.hash(newPasswordHash, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+      },
+    });
+
+    // Fetch company details for branding
+    const employee = await prisma.employee.findFirst({
+      where: { userId: user.id },
+      include: { company: true },
+    });
+    const compName = employee?.company?.name || 'FocusTrack Enterprise';
+    const compLogo = employee?.company?.logo || undefined;
+
+    // Send confirmation email
+    const confirmHtml = generatePasswordUpdatedEmailHTML({
+      userName: `${user.firstName} ${user.lastName}`,
+      companyName: compName,
+      companyLogo: compLogo,
+    });
+
+    sendEmail({
+      to: user.email,
+      subject: `Security Alert: Password Updated - ${compName}`,
+      html: confirmHtml,
+    });
+
+    return true;
+  }
+
+  /**
+   * 3. Change Password (Authenticated User)
+   */
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isValid) {
+      throw new BadRequestError('Current password provided is incorrect.');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+
+    // Send security notification email
+    const changeHtml = `
+      <div style="font-family: Arial, sans-serif; padding: 24px; color: #0f172a; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; borderRadius: 12px;">
+        <h2 style="color: #4f46e5; margin-bottom: 8px;">Security Alert: Password Changed</h2>
+        <p style="font-size: 14px;">Hi <strong>${user.firstName} ${user.lastName}</strong>,</p>
+        <p style="font-size: 14px; color: #475569;">Your FocusTrack account password was just changed from account settings.</p>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 16px;">If you did not make this change, please inform your HR or IT team immediately.</p>
+      </div>
+    `;
+
+    sendEmail({
+      to: user.email,
+      subject: 'Security Alert: Account Password Changed',
+      html: changeHtml,
+    });
+
+    return true;
   }
 }
 
