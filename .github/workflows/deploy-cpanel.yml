@@ -1,0 +1,74 @@
+name: Deploy to cPanel via SSH
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚀 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # ── 1. BUILD FRONTEND ──
+      - name: 📦 Build Frontend Asset Bundle
+        env:
+          VITE_API_BASE_URL: ${{ secrets.PROD_API_BASE_URL }}
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      # ── 2. BUILD BACKEND ──
+      - name: ⚙️ Build Backend TypeScript
+        run: |
+          cd backend
+          npm ci
+          npx prisma generate
+          npm run build
+
+      # ── 3. DEPLOY VIA SSH TO CPANEL ──
+      - name: 🚚 Deploy Bundle to cPanel Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.CPANEL_SERVER_IP }}
+          username: ${{ secrets.CPANEL_SSH_USER }}
+          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.CPANEL_SSH_PORT || 22 }}
+          source: "frontend/dist/*,backend/dist/*,backend/package.json,backend/package-lock.json,backend/prisma/*"
+          target: "~/app-deployment/"
+
+      # ── 4. EXECUTE REMOTE CPANEL SERVER COMMANDS ──
+      - name: ⚡ Execute cPanel Remote Commands (Migrations & Node Restart)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.CPANEL_SERVER_IP }}
+          username: ${{ secrets.CPANEL_SSH_USER }}
+          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.CPANEL_SSH_PORT || 22 }}
+          script: |
+            # 1. Deploy Frontend static build to public_html domain root
+            mkdir -p ~/public_html/
+            rsync -avz --delete ~/app-deployment/frontend/dist/ ~/public_html/
+
+            # 2. Deploy Backend dist & install production dependencies
+            mkdir -p ~/nodeapp/
+            rsync -avz ~/app-deployment/backend/ ~/nodeapp/
+            cd ~/nodeapp/
+            npm install --production
+            npx prisma db push --skip-generate
+
+            # 3. Restart cPanel Node.js Application or PM2 process
+            touch tmp/restart.txt || pm2 restart task-tracky-backend || true

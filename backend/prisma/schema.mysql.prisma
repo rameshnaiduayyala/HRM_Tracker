@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -56,8 +56,8 @@ model Plan {
   currency      String         @default("INR") // INR (₹)
   billingCycle  String         @default("MONTHLY") // MONTHLY, YEARLY
   employeeLimit Int            @default(100)
-  modules       String[]       // e.g. ["HRM"], ["PROJECTS_TASKS"], ["WORK_TRACKER"]
-  features      String[]
+  modules       Json       // e.g. ["HRM"], ["PROJECTS_TASKS"], ["WORK_TRACKER"]
+  features      Json
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   subscriptions Subscription[]
