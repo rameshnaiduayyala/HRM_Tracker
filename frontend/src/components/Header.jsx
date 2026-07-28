@@ -31,6 +31,12 @@ export default function Header() {
   const role = user?.role || 'EMPLOYEE';
   const cfg = ROLE_CONFIG[role] || ROLE_CONFIG.EMPLOYEE;
   const initials = `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || 'U'}`.toUpperCase();
+  const rawPic = user?.profilePic;
+  const photoSrc = rawPic
+    ? rawPic.startsWith('data:') || rawPic.startsWith('http')
+      ? rawPic
+      : `http://localhost:5000${rawPic}`
+    : null;
 
   const handleLogout = () => {
     dispatch(logoutSession());
@@ -94,11 +100,21 @@ export default function Header() {
             style={{ background: dropdownOpen ? 'rgba(99,102,241,0.10)' : 'var(--bg-card)', border: '1px solid var(--border-muted)' }}
           >
             {/* Avatar */}
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-black tracking-wide shadow-lg"
-              style={{ background: 'linear-gradient(135deg,#4f46e5 0%,#818cf8 100%)', boxShadow: '0 0 10px rgba(99,102,241,0.30)' }}
-            >
-              {initials}
-            </div>
+            {photoSrc ? (
+              <img
+                src={photoSrc}
+                alt={initials}
+                className="w-7 h-7 rounded-lg object-cover"
+                style={{ border: '1.5px solid rgba(99,102,241,0.4)' }}
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ) : (
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-black tracking-wide shadow-lg"
+                style={{ background: 'linear-gradient(135deg,#4f46e5 0%,#818cf8 100%)', boxShadow: '0 0 10px rgba(99,102,241,0.30)' }}
+              >
+                {initials}
+              </div>
+            )}
             <div className="hidden sm:block text-left leading-none">
               <span className="block text-[12px] font-semibold" style={{ color: 'var(--text-primary)' }}>{user?.firstName} {user?.lastName}</span>
               <span className="block text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>{user?.email}</span>
@@ -115,9 +131,19 @@ export default function Header() {
                 {/* User info header */}
                 <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                   <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[11px] font-black"
-                      style={{ background: 'linear-gradient(135deg,#4f46e5,#818cf8)' }}
-                    >{initials}</div>
+                    {photoSrc ? (
+                      <img
+                        src={photoSrc}
+                        alt={initials}
+                        className="w-8 h-8 rounded-lg object-cover"
+                        style={{ border: '1.5px solid rgba(99,102,241,0.35)' }}
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[11px] font-black"
+                        style={{ background: 'linear-gradient(135deg,#4f46e5,#818cf8)' }}
+                      >{initials}</div>
+                    )}
                     <div>
                       <span className="block text-[12px] font-bold" style={{ color: 'var(--text-primary)' }}>{user?.firstName} {user?.lastName}</span>
                       <span className={`badge ${cfg.color} mt-0.5`}><span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />{cfg.label}</span>

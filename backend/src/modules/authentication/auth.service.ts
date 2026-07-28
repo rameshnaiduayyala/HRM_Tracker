@@ -185,6 +185,7 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role?.name,
+        profilePic: employee?.profilePic || null,
         company: company ? {
           id: company.id,
           name: company.name,
