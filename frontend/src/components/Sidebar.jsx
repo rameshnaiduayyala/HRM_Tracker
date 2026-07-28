@@ -1,55 +1,12 @@
-import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, Building2, LogOut, ChevronUp } from 'lucide-react';
+import React from 'react';
+import { Sidebar as ProSidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+import { LogOut, Building2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Select from './Select';
 import { useEntitlements } from '../contexts/EntitlementContext';
 import { ROLE_NAV_CONFIG } from '../config/roleNavigation';
 import { useAuthStore } from '../store/useAuthStore';
 import FocusTrackLogo from '../assets/focustrack-logo.png';
-
-const NavItem = ({ icon: Icon, label, active, onClick, iconColor, indent = false }) => (
-  <button
-    onClick={onClick}
-    className={`w-full flex items-center gap-3 ${indent ? 'pl-7 pr-3' : 'px-3'} py-2 rounded-lg text-xs font-medium tracking-tight transition-all duration-150 ${active
-      ? 'font-bold'
-      : 'hover:opacity-100'
-      }`}
-    style={{
-      background: active ? 'var(--bg-elevated, rgba(99,102,241,0.12))' : 'transparent',
-      color: active ? 'var(--text-primary, #ffffff)' : 'var(--text-secondary, #94a3b8)',
-      borderLeft: active ? '2px solid var(--accent-primary, #6366f1)' : '2px solid transparent',
-    }}
-  >
-    <Icon
-      className="w-4 h-4 shrink-0 transition-colors"
-      style={{ color: active ? 'var(--accent-primary, #818cf8)' : iconColor || 'var(--text-muted, #64748b)' }}
-    />
-    <span className="flex-1 text-left truncate">{label}</span>
-    {active && <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-50" />}
-  </button>
-);
-
-const NavSection = ({ label, children, isCollapsible = false, isOpen = true, onToggle }) => (
-  <div className="space-y-1">
-    <div
-      onClick={isCollapsible ? onToggle : undefined}
-      className={`px-3 mb-1.5 flex items-center justify-between ${isCollapsible ? 'cursor-pointer hover:text-white select-none' : ''}`}
-    >
-      <span
-        className="text-[9px] font-black uppercase tracking-widest"
-        style={{ color: 'var(--text-muted, #64748b)' }}
-      >
-        {label}
-      </span>
-      {isCollapsible && (
-        <span className="text-slate-500 hover:text-slate-300 transition-transform">
-          {isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-        </span>
-      )}
-    </div>
-    {isOpen && children}
-  </div>
-);
 
 export default function Sidebar({
   user,
@@ -66,21 +23,6 @@ export default function Sidebar({
   const { canUse } = useEntitlements();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Collapsible section state (default all open)
-  const [openSections, setOpenSections] = useState({
-    'Company & Structure': true,
-    'Candidate Lifecycle & Recruitment': true,
-    'Talent Acquisition & Onboarding': true,
-    'Workforce & Exit Management': true,
-    'Projects & Work Execution': true,
-    'Leave & Attendance': true,
-    'Compensation & Comms': true,
-  });
-
-  const toggleSection = (label) => {
-    setOpenSections(prev => ({ ...prev, [label]: !prev[label] }));
-  };
 
   const handleNavigate = (item) => {
     if (item.path) {
@@ -102,107 +44,181 @@ export default function Sidebar({
 
   return (
     <aside
-      className="w-full md:w-60 flex-shrink-0 flex flex-col justify-between p-4 h-auto md:h-screen md:sticky md:top-0 select-none transition-colors duration-200 border-r"
+      className="theme-adaptive-sidebar"
       style={{
-        background: 'var(--bg-surface, #0f172a)',
-        borderColor: 'var(--border-subtle, rgba(255,255,255,0.08))',
-        fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+        display: 'flex',
+        height: '100vh',
+        position: 'sticky',
+        top: 0,
+        backgroundColor: 'var(--bg-surface)',
+        borderRight: '1px solid var(--border-subtle)',
+        fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif'
       }}
     >
-      <div className="space-y-6 flex-1 overflow-y-auto">
-        {/* Tenant Workspace Brand Header */}
-        <div className="flex items-center justify-start px-3 py-3 border-b" style={{ borderColor: 'var(--border-subtle, rgba(255,255,255,0.06))' }}>
-          <img
-            src={tenantLogo}
-            alt={companyName}
-            className="h-9 w-auto max-w-[175px] object-contain shrink-0"
-            onError={(e) => {
-              e.currentTarget.src = FocusTrackLogo;
-            }}
-          />
+      <ProSidebar
+        backgroundColor="transparent"
+        width="260px"
+        rootStyles={{
+          color: 'var(--text-secondary)',
+          borderRight: 'none',
+        }}
+      >
+        {/* Header Branding Container */}
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '16px', borderBottom: '1px solid var(--border-subtle)' }}>
+            <img
+              src={tenantLogo}
+              alt={companyName}
+              style={{ maxHeight: '38px', maxWidth: '190px', objectFit: 'contain' }}
+              onError={(e) => {
+                e.currentTarget.src = FocusTrackLogo;
+              }}
+            />
+          </div>
+
+          {/* Workspace Dropdown */}
+          {!isSuperAdmin && isCompanyAdmin && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '9px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Building2 size={12} /> Active Workspace
+              </span>
+              {companies.length === 0 ? (
+                <div style={{ fontSize: '11px', fontStyle: 'italic', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-card-alt)', color: 'var(--text-muted)' }}>
+                  Unassigned
+                </div>
+              ) : (
+                <Select
+                  value={selectedCompanyId}
+                  onChange={(e) => setSelectedCompanyId(e.target.value)}
+                  className="w-full text-xs font-semibold rounded-lg border py-2 px-3 transition"
+                  style={{
+                    background: 'var(--bg-canvas)',
+                    color: 'var(--text-primary)',
+                    borderColor: 'var(--border-base)',
+                  }}
+                >
+                  {companies.map((c) => (
+                    <option key={c.id} value={c.id} style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}>{c.name}</option>
+                  ))}
+                </Select>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Workspace Selector */}
-        {!isSuperAdmin && isCompanyAdmin && (
-          <div className="space-y-1.5 px-1">
-            <label className="block text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted, #64748b)' }}>
-              Workspace
-            </label>
-            {companies.length === 0 ? (
-              <div className="text-[11px] italic px-3 py-1.5 rounded" style={{ color: 'var(--text-muted)', background: 'var(--bg-card-alt)' }}>
-                Unassigned
-              </div>
-            ) : (
-              <Select
-                value={selectedCompanyId}
-                onChange={e => setSelectedCompanyId(e.target.value)}
-                className="w-full text-xs font-medium rounded border py-1.5"
-                style={{
-                  background: 'var(--bg-canvas, #020617)',
-                  color: 'var(--text-primary, #f8fafc)',
-                  borderColor: 'var(--border-base, #1e293b)',
-                }}
-              >
-                {companies.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </Select>
-            )}
-          </div>
-        )}
-
-        {/* Role Navigation */}
-        <nav className="space-y-4 pr-1">
+        {/* Enterprise Menu connected with Light & Dark Theme Context */}
+        <Menu
+          menuItemStyles={{
+            button: ({ active }) => ({
+              fontSize: '12px',
+              fontWeight: active ? '700' : '500',
+              color: active ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              backgroundColor: active ? 'var(--accent-primary-glow)' : 'transparent',
+              borderLeft: active ? '3px solid var(--accent-primary)' : '3px solid transparent',
+              borderRadius: '8px',
+              margin: '3px 10px',
+              padding: '9px 12px',
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                backgroundColor: 'var(--accent-primary-subtle)',
+                color: 'var(--text-primary)',
+              },
+            }),
+            subMenu: {
+              backgroundColor: 'transparent',
+            },
+          }}
+        >
           {roleConfig.sections.map((section, sIdx) => {
             const visibleItems = section.items.filter(item => item.alwaysShow || !item.module || canUse(item.module));
             if (visibleItems.length === 0) return null;
 
-            const isSectionOpen = openSections[section.label] !== false;
+            // Check if any sub-item inside this section is currently active
+            const hasActiveChild = visibleItems.some(item =>
+              (item.path && location.pathname === item.path) ||
+              activeTab === item.id ||
+              (item.id === 'payslips' && activeTab === 'print-payslip')
+            );
 
+            // Default ALL CLOSED unless a child inside is currently active
             return (
-              <NavSection
+              <SubMenu
                 key={sIdx}
                 label={section.label}
-                isCollapsible={true}
-                isOpen={isSectionOpen}
-                onToggle={() => toggleSection(section.label)}
+                defaultOpen={hasActiveChild}
+                rootStyles={{
+                  '& .ps-submenu-content': {
+                    backgroundColor: 'var(--bg-card-alt) !important',
+                    borderLeft: '1px solid var(--border-subtle)',
+                    marginLeft: '18px',
+                    borderRadius: '0 0 10px 10px',
+                  },
+                  '& .ps-menu-button': {
+                    fontSize: '10px',
+                    fontWeight: '900',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1.2px',
+                    color: hasActiveChild ? 'var(--accent-primary) !important' : 'var(--text-muted) !important',
+                    margin: '8px 10px 2px 10px',
+                    borderRadius: '8px',
+                    '&:hover': {
+                      color: 'var(--accent-primary) !important',
+                      backgroundColor: 'var(--accent-primary-subtle) !important',
+                    }
+                  }
+                }}
               >
-                {visibleItems.map(item => {
-                  const isActive = (item.path && location.pathname === item.path) ||
+                {visibleItems.map((item) => {
+                  const IconComp = item.icon;
+                  const isActive =
+                    (item.path && location.pathname === item.path) ||
                     activeTab === item.id ||
                     (item.id === 'payslips' && activeTab === 'print-payslip');
 
                   return (
-                    <NavItem
+                    <MenuItem
                       key={item.id}
-                      icon={item.icon}
-                      label={item.label}
                       active={isActive}
+                      icon={<IconComp size={15} color={isActive ? 'var(--accent-primary)' : item.iconColor || 'var(--text-muted)'} />}
                       onClick={() => handleNavigate(item)}
-                      iconColor={item.iconColor}
-                      indent={true}
-                    />
+                    >
+                      {item.label}
+                    </MenuItem>
                   );
                 })}
-              </NavSection>
+              </SubMenu>
             );
           })}
-        </nav>
-      </div>
+        </Menu>
 
-      {/* Sidebar Footer Logout Button */}
-      <div className="pt-3 mt-4 border-t" style={{ borderColor: 'var(--border-subtle, rgba(255,255,255,0.06))' }}>
-        <button
-          onClick={() => {
-            useAuthStore.getState().logout();
-            navigate('/login');
-          }}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 transition-all duration-150"
-        >
-          <LogOut className="w-4 h-4 shrink-0" />
-          <span>Logout</span>
-        </button>
-      </div>
+        {/* Premium Sidebar Footer */}
+        <div style={{ padding: '16px', borderTop: '1px solid var(--border-subtle)', marginTop: 'auto' }}>
+          <button
+            onClick={() => {
+              useAuthStore.getState().logout();
+              navigate('/login');
+            }}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '10px 14px',
+              borderRadius: '10px',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              background: 'rgba(239, 68, 68, 0.08)',
+              color: '#f87171',
+              fontSize: '12px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <LogOut size={16} /> Logout Account
+          </button>
+        </div>
+      </ProSidebar>
     </aside>
   );
 }

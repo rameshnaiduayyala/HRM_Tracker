@@ -237,6 +237,48 @@ p {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* ─── Adaptive Theme-Aware Pro Sidebar Overrides ────────────────────────── */
+.theme-adaptive-sidebar,
+.theme-adaptive-sidebar .ps-sidebar-container {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-secondary) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-adaptive-sidebar .ps-menu-button {
+  background-color: transparent !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.15s ease;
+}
+
+.theme-adaptive-sidebar .ps-menu-button:hover {
+  background-color: var(--accent-primary-subtle) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-adaptive-sidebar .ps-menuitem-root.ps-active > .ps-menu-button,
+.theme-adaptive-sidebar .ps-menu-button.ps-active {
+  background-color: var(--accent-primary-glow) !important;
+  color: var(--accent-primary) !important;
+  font-weight: 700 !important;
+  border-left: 3px solid var(--accent-primary) !important;
+}
+
+.theme-adaptive-sidebar .ps-submenu-content {
+  background-color: var(--bg-card-alt) !important;
+  border-left: 1px solid var(--border-subtle) !important;
+}
+
+.theme-adaptive-sidebar .ps-submenu-root > .ps-menu-button {
+  color: var(--text-muted) !important;
+}
+
+.theme-adaptive-sidebar .ps-submenu-root > .ps-menu-button:hover {
+  color: var(--accent-primary) !important;
+  background-color: var(--accent-primary-subtle) !important;
+}
+
 /* ─── Sidebar Navigation ────────────────────────────────────────────────── */
 .nav-item-active {
   background: linear-gradient(90deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.04) 100%);
