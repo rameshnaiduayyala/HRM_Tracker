@@ -209,6 +209,15 @@ export default function OffboardingTab({ companyId, employees = [] }) {
                           <ExternalLink size={14} /> Relieving Letter
                         </a>
 
+                        <a
+                          href={`http://localhost:5000/api/v1/offboarding/${rec.id}/experience-letter`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ background: '#4f46e5', color: '#fff', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <FileText size={14} /> Experience Letter
+                        </a>
+
                         {rec.status !== 'COMPLETED' && (
                           <button
                             onClick={() => handleCompleteOffboarding(rec.id)}

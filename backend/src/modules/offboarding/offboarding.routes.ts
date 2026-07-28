@@ -10,5 +10,6 @@ router.post('/initiate', authenticate, controller.initiateOffboarding.bind(contr
 router.patch('/:id/clearance', authenticate, controller.updateClearance.bind(controller));
 router.post('/:id/complete', authenticate, controller.completeOffboardingAndDeactivate.bind(controller));
 router.get('/:id/relieving-letter', controller.renderRelievingLetterHTML.bind(controller));
+router.get('/:id/experience-letter', controller.renderExperienceLetterHTML.bind(controller));
 
 export default router;

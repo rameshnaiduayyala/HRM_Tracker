@@ -18,6 +18,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
   const [workspaceDeactivated, setWorkspaceDeactivated] = useState(false);
+  const [employeeRelieved, setEmployeeRelieved] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
 
   // Login Form State
@@ -35,6 +36,9 @@ export default function Login() {
     }
     if (params.get('deactivated') === '1') {
       setWorkspaceDeactivated(true);
+    }
+    if (params.get('relieved') === '1') {
+      setEmployeeRelieved(true);
     }
 
     // Fetch tenant branding dynamically
@@ -78,7 +82,8 @@ export default function Login() {
         navigate(isManagement ? '/dashboard/analytics' : '/employee', { replace: true });
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please verify credentials.');
+      const msg = err?.response?.data?.message || err.message || 'Login failed. Please verify credentials.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -193,22 +198,17 @@ export default function Login() {
               </div>
             )}
 
-            {/* Workspace Deactivated Banner */}
-            {workspaceDeactivated && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-800">
-                <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            {/* Dynamic Backend Error Banner */}
+            {error && (
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-900">
+                <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block font-semibold">Workspace Deactivated</strong>
-                  <span className="text-[11px] text-red-700">Please contact support or your system administrator.</span>
+                  <strong className="block font-semibold text-rose-800">Login Failed</strong>
+                  <span className="text-[11px] text-rose-700">{error}</span>
                 </div>
               </div>
             )}
 
-            {error && (
-              <div className="mb-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-medium">
-                {error}
-              </div>
-            )}
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>

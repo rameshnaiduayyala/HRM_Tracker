@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
-import { generateRelievingLetterHTML } from '../../shared/utils/documentTemplates';
+import { generateRelievingLetterHTML, generateExperienceLetterHTML } from '../../shared/utils/documentTemplates';
 import { BadRequestError, NotFoundError } from '../../shared/errors';
 
 const prisma = new PrismaClient();
@@ -157,6 +157,44 @@ export class OffboardingController {
       if (!record) throw new NotFoundError('Offboarding record not found');
 
       const html = generateRelievingLetterHTML({
+        employeeName: `${record.employee.user.firstName} ${record.employee.user.lastName}`,
+        employeeNum: record.employee.employeeNum,
+        designation: record.employee.designation || 'Team Member',
+        department: record.employee.department ? record.employee.department.name : 'General',
+        companyName: record.company.name,
+        companyLogo: record.company.logo || undefined,
+        joiningDate: record.employee.joiningDate.toISOString(),
+        lastWorkingDay: record.lastWorkingDay.toISOString(),
+        resignationDate: record.resignationDate.toISOString(),
+      });
+
+      res.setHeader('Content-Type', 'text/html');
+      return res.status(200).send(html);
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  async renderExperienceLetterHTML(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const record = await prisma.offboardingRecord.findUnique({
+        where: { id },
+        include: {
+          company: true,
+          employee: {
+            include: {
+              user: true,
+              department: true,
+            },
+          },
+        },
+      });
+
+      if (!record) throw new NotFoundError('Offboarding record not found');
+
+      const html = generateExperienceLetterHTML({
         employeeName: `${record.employee.user.firstName} ${record.employee.user.lastName}`,
         employeeNum: record.employee.employeeNum,
         designation: record.employee.designation || 'Team Member',

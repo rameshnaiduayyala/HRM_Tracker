@@ -161,6 +161,13 @@ export class AuthService {
       include: { company: true }
     });
 
+    // Block login for employees who have been offboarded / relieved
+    if (employee && employee.status === 'INACTIVE') {
+      throw new UnauthorizedError(
+        'Your employment has been relieved. Access to this system has been revoked. Please contact HR for further assistance.'
+      );
+    }
+
     let company = employee?.company || null;
 
     if (!company && user.tenantId) {
