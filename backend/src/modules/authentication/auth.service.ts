@@ -378,7 +378,8 @@ export class AuthService {
     });
     const compName = employee?.company?.name || 'FocusTrack Enterprise';
     const compLogo = employee?.company?.logo || undefined;
-    const resetUrl = `http://localhost:5173/login?resetToken=${resetToken}`;
+    const frontendUrl = process.env.APP_FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/login?resetToken=${resetToken}`;
 
     const emailHtml = generateForgotPasswordEmailHTML({
       userName: `${user.firstName} ${user.lastName}`,

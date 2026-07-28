@@ -6,7 +6,8 @@ export function generateWorkspaceApprovedEmailHTML(params: {
   subdomain: string;
   companyLogo?: string;
 }): string {
-  const loginUrl = `http://localhost:5173/login`;
+  const frontendUrl = process.env.APP_FRONTEND_URL || 'http://localhost:5173';
+  const loginUrl = `${frontendUrl}/login`;
 
   return generateEnterpriseEmailLayout({
     companyName: params.workspaceName,

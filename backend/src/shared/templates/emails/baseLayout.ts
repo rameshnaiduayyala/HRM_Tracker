@@ -14,10 +14,11 @@ export interface EnterpriseEmailLayoutProps {
  * Master Enterprise Email Layout Wrapper
  */
 export function generateEnterpriseEmailLayout(props: EnterpriseEmailLayoutProps): string {
+  const backendUrl = process.env.APP_BACKEND_URL || 'http://localhost:5000';
   const logoSrc = props.companyLogo
     ? props.companyLogo.startsWith('http') || props.companyLogo.startsWith('data:')
       ? props.companyLogo
-      : `http://localhost:5000${props.companyLogo}`
+      : `${backendUrl}${props.companyLogo}`
     : null;
 
   return `

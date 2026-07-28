@@ -2,7 +2,8 @@ import { generateEnterpriseEmailLayout } from './baseLayout';
 import { OfferLetterParams } from '../../utils/documentTemplates';
 
 export function generateOfferLetterEmailHTML(params: OfferLetterParams): string {
-  const offerUrl = `http://localhost:5173/candidate-portal/${params.offerToken}`;
+  const frontendUrl = process.env.APP_FRONTEND_URL || 'http://localhost:5173';
+  const offerUrl = `${frontendUrl}/candidate-portal/${params.offerToken}`;
   return generateEnterpriseEmailLayout({
     companyName: params.companyName,
     companyLogo: params.companyLogo,

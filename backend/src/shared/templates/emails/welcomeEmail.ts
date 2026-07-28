@@ -38,7 +38,7 @@ export function generateWelcomeEmailHTML(params: {
     `,
     actionButton: {
       text: 'Sign In To Workspace',
-      url: 'http://localhost:5173/login',
+      url: `${process.env.APP_FRONTEND_URL || 'http://localhost:5173'}/login`,
     },
     footerNote: 'Welcome aboard! If you have any questions, please reach out to your HR specialist or manager.',
   });
