@@ -10,6 +10,9 @@ const updateSettingsSchema = z.object({
   timezone: z.string().min(1).optional(),
   shiftStart: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid shift start format (HH:MM)').optional(),
   shiftEnd: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid shift end format (HH:MM)').optional(),
+  customOfferHeader: z.string().optional(),
+  customOfferTerms: z.string().optional(),
+  customOfferSignatory: z.string().optional(),
 });
 
 export class SettingsController {

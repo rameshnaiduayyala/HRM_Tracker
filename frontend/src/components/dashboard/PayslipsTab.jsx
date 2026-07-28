@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { payslipApi } from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { DollarSign, Plus, Trash2, Printer, Eye, X } from 'lucide-react';
+import { DollarSign, Plus, Trash2, Printer, Eye, X, FileText } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import Table from '../Table';
 import Button from '../Button';
@@ -141,6 +141,15 @@ export default function PayslipsTab({ companyId, employees = [], onViewPayslip }
         const payslip = row.original;
         return (
           <div className="flex items-center justify-end gap-2">
+            <a
+              href={`http://localhost:5000/api/v1/employees/payslips/${payslip.id}/render`}
+              target="_blank"
+              rel="noreferrer"
+              className="p-2 text-xs bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 rounded-lg flex items-center justify-center"
+              title="Render HTML Payslip Document"
+            >
+              <FileText className="w-4 h-4" />
+            </a>
             <Button
               variant="secondary"
               onClick={() => {

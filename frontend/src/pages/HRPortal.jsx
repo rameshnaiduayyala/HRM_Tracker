@@ -16,6 +16,9 @@ import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import HRMDashboardTab from '../components/dashboard/HRMDashboardTab';
 import EmployeeProfileView from '../components/dashboard/EmployeeProfileView';
 import EmployeeReportView from '../components/dashboard/EmployeeReportView';
+import OnboardingTab from '../components/dashboard/OnboardingTab';
+import OffboardingTab from '../components/dashboard/OffboardingTab';
+import VisualOfferBuilder from '../components/dashboard/VisualOfferBuilder';
 import { Users, Calendar, Clock, DollarSign, ArrowUpRight, TrendingUp, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { HR_TAB_ROUTES, getTabRoute, resolveTabFromPath } from '../config/navigationRoutes';
@@ -28,6 +31,9 @@ export default function HRPortal() {
   const validTabs = [
     'hrm-dashboard',
     'employees',
+    'onboarding',
+    'offer-template',
+    'offboarding',
     'departments',
     'teams',
     'projects',
@@ -208,6 +214,30 @@ export default function HRPortal() {
               onDeleteEmployee={handleEmployeeDelete}
               onViewProfile={(emp) => navigate(`/hr/employee-profile?employeeId=${emp.id}`)}
               loading={loading}
+            />
+          )}
+
+          {/* 2.1 Onboarding & Offer Letters Tab */}
+          {activeTab === 'onboarding' && (
+            <OnboardingTab
+              companyId={selectedCompanyId}
+              departments={[]}
+              onEmployeeConverted={() => fetchCompanySpecificData(selectedCompanyId)}
+            />
+          )}
+
+          {/* 2.15 Visual Drag & Drop Offer Template Builder Tab */}
+          {activeTab === 'offer-template' && (
+            <VisualOfferBuilder
+              companyId={selectedCompanyId}
+            />
+          )}
+
+          {/* 2.2 Offboarding & Exit Management Tab */}
+          {activeTab === 'offboarding' && (
+            <OffboardingTab
+              companyId={selectedCompanyId}
+              employees={employees}
             />
           )}
 

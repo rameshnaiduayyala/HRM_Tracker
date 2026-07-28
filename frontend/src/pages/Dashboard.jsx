@@ -23,6 +23,9 @@ import PrintPayslipView from '../components/dashboard/PrintPayslipView';
 import TimesheetsTab from '../components/dashboard/TimesheetsTab';
 import EmployeeProfileView from '../components/dashboard/EmployeeProfileView';
 import EmployeeReportView from '../components/dashboard/EmployeeReportView';
+import OnboardingTab from '../components/dashboard/OnboardingTab';
+import OffboardingTab from '../components/dashboard/OffboardingTab';
+import VisualOfferBuilder from '../components/dashboard/VisualOfferBuilder';
 import SystemMonitoringTab from '../components/dashboard/SystemMonitoringTab';
 import HRMDashboardTab from '../components/dashboard/HRMDashboardTab';
 import { AlertCircle } from 'lucide-react';
@@ -63,6 +66,8 @@ export default function Dashboard() {
     'workspaces',
     'plans',
     'employees',
+    'onboarding',
+    'offboarding',
     'departments',
     'teams',
     'projects',
@@ -97,17 +102,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchPlans();
-    fetchCompanies();
     if (isSuperAdmin) {
       fetchWorkspaces();
+    } else {
+      fetchCompanies();
     }
   }, []);
 
   useEffect(() => {
-    if (selectedCompanyId) {
+    if (selectedCompanyId && !isSuperAdmin) {
       fetchCompanyData(selectedCompanyId);
     }
-  }, [selectedCompanyId]);
+  }, [selectedCompanyId, isSuperAdmin]);
 
   const handleSelectPlan = async (planId) => {
     if (!selectedCompanyId) return;
@@ -543,6 +549,27 @@ export default function Dashboard() {
                     onDeleteEmployee={handleEmployeeDelete}
                     onViewProfile={(emp) => navigate(`/dashboard/employee-profile?employeeId=${emp.id}`)}
                     loading={loading}
+                  />
+                )}
+
+                {!isSuperAdmin && activeTab === 'onboarding' && (
+                  <OnboardingTab
+                    companyId={selectedCompanyId}
+                    departments={[]}
+                    onEmployeeConverted={fetchCompanyData}
+                  />
+                )}
+
+                {!isSuperAdmin && activeTab === 'offer-template' && (
+                  <VisualOfferBuilder
+                    companyId={selectedCompanyId}
+                  />
+                )}
+
+                {!isSuperAdmin && activeTab === 'offboarding' && (
+                  <OffboardingTab
+                    companyId={selectedCompanyId}
+                    employees={employees}
                   />
                 )}
 

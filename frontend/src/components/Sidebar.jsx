@@ -1,5 +1,5 @@
-import React from 'react';
-import { ChevronRight, Building2, LogOut } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronRight, ChevronDown, Building2, LogOut, ChevronUp } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Select from './Select';
 import { useEntitlements } from '../contexts/EntitlementContext';
@@ -7,10 +7,10 @@ import { ROLE_NAV_CONFIG } from '../config/roleNavigation';
 import { useAuthStore } from '../store/useAuthStore';
 import FocusTrackLogo from '../assets/focustrack-logo.png';
 
-const NavItem = ({ icon: Icon, label, active, onClick, iconColor }) => (
+const NavItem = ({ icon: Icon, label, active, onClick, iconColor, indent = false }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium tracking-tight transition-all duration-150 ${active
+    className={`w-full flex items-center gap-3 ${indent ? 'pl-7 pr-3' : 'px-3'} py-2 rounded-lg text-xs font-medium tracking-tight transition-all duration-150 ${active
       ? 'font-bold'
       : 'hover:opacity-100'
       }`}
@@ -29,17 +29,25 @@ const NavItem = ({ icon: Icon, label, active, onClick, iconColor }) => (
   </button>
 );
 
-const NavSection = ({ label, children }) => (
+const NavSection = ({ label, children, isCollapsible = false, isOpen = true, onToggle }) => (
   <div className="space-y-1">
-    <div className="px-3 mb-1.5 flex items-center justify-between">
+    <div
+      onClick={isCollapsible ? onToggle : undefined}
+      className={`px-3 mb-1.5 flex items-center justify-between ${isCollapsible ? 'cursor-pointer hover:text-white select-none' : ''}`}
+    >
       <span
         className="text-[9px] font-black uppercase tracking-widest"
         style={{ color: 'var(--text-muted, #64748b)' }}
       >
         {label}
       </span>
+      {isCollapsible && (
+        <span className="text-slate-500 hover:text-slate-300 transition-transform">
+          {isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+        </span>
+      )}
     </div>
-    {children}
+    {isOpen && children}
   </div>
 );
 
@@ -58,6 +66,21 @@ export default function Sidebar({
   const { canUse } = useEntitlements();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Collapsible section state (default all open)
+  const [openSections, setOpenSections] = useState({
+    'Company & Structure': true,
+    'Candidate Lifecycle & Recruitment': true,
+    'Talent Acquisition & Onboarding': true,
+    'Workforce & Exit Management': true,
+    'Projects & Work Execution': true,
+    'Leave & Attendance': true,
+    'Compensation & Comms': true,
+  });
+
+  const toggleSection = (label) => {
+    setOpenSections(prev => ({ ...prev, [label]: !prev[label] }));
+  };
 
   const handleNavigate = (item) => {
     if (item.path) {
@@ -129,13 +152,21 @@ export default function Sidebar({
         )}
 
         {/* Role Navigation */}
-        <nav className="space-y-5 pr-1">
+        <nav className="space-y-4 pr-1">
           {roleConfig.sections.map((section, sIdx) => {
             const visibleItems = section.items.filter(item => item.alwaysShow || !item.module || canUse(item.module));
             if (visibleItems.length === 0) return null;
 
+            const isSectionOpen = openSections[section.label] !== false;
+
             return (
-              <NavSection key={sIdx} label={section.label}>
+              <NavSection
+                key={sIdx}
+                label={section.label}
+                isCollapsible={true}
+                isOpen={isSectionOpen}
+                onToggle={() => toggleSection(section.label)}
+              >
                 {visibleItems.map(item => {
                   const isActive = (item.path && location.pathname === item.path) ||
                     activeTab === item.id ||
@@ -149,6 +180,7 @@ export default function Sidebar({
                       active={isActive}
                       onClick={() => handleNavigate(item)}
                       iconColor={item.iconColor}
+                      indent={true}
                     />
                   );
                 })}

@@ -10,6 +10,10 @@ export class TenantsService {
     adminPassword?: string;
     adminFirstName?: string;
     adminLastName?: string;
+    adminPhone?: string;
+    companyAddress?: string;
+    companySize?: string;
+    industry?: string;
     planId?: string;
     selectedModules?: string[];
     userCount?: number;
@@ -120,7 +124,7 @@ export class TenantsService {
             planId: targetPlan.id,
             userCount: seats,
             totalPrice,
-            status: data.status === 'ACTIVE' ? 'ACTIVE' : 'PENDING',
+            status: 'ACTIVE',
             startDate: new Date(),
             endDate,
           },
@@ -172,10 +176,25 @@ export class TenantsService {
     return prisma.tenant.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
+        users: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            createdAt: true,
+            role: true,
+          },
+        },
         companies: {
           include: {
             _count: {
               select: { employees: true },
+            },
+            employees: {
+              include: {
+                user: true,
+              },
             },
             subscriptions: {
               where: { status: 'ACTIVE' },

@@ -10,7 +10,9 @@ import {
   Clock, 
   FileText, 
   Settings, 
-  LayoutGrid, 
+  LayoutGrid,
+  UserPlus,
+  UserMinus,
 } from 'lucide-react';
 import { MODULE_KEYS } from './entitlements';
 
@@ -52,11 +54,26 @@ export const ROLE_NAV_CONFIG = {
         ],
       },
       {
-        label: 'Workforce & Structure',
+        label: 'Company & Organization',
         items: [
-          { id: 'employees', label: 'Staff Directory', icon: Users, path: '/dashboard/employees' },
           { id: 'departments', label: 'Departments', icon: Building2, path: '/dashboard/departments' },
           { id: 'teams', label: 'Squad Teams', icon: Users, path: '/dashboard/teams' },
+          { id: 'configurations', label: 'Workspace Divisions', icon: Building, path: '/admin/configurations' },
+          { id: 'settings', label: 'Company Settings & Policies', icon: Settings, path: '/admin/settings' },
+        ],
+      },
+      {
+        label: 'Candidate Lifecycle & Recruitment',
+        items: [
+          { id: 'onboarding', label: 'Candidate Onboarding', icon: UserPlus, iconColor: '#6366f1', path: '/dashboard/onboarding' },
+          { id: 'offer-template', label: 'Offer Template Builder', icon: FileText, iconColor: '#818cf8', path: '/dashboard/offer-template' },
+        ],
+      },
+      {
+        label: 'Workforce & Exit Management',
+        items: [
+          { id: 'employees', label: 'Staff Directory', icon: Users, path: '/dashboard/employees' },
+          { id: 'offboarding', label: 'Offboarding & Exit', icon: UserMinus, iconColor: '#ef4444', path: '/dashboard/offboarding' },
         ],
       },
       {
@@ -135,15 +152,29 @@ export const ROLE_NAV_CONFIG = {
         ],
       },
       {
-        label: 'Workforce & Structure',
+        label: 'Company & Organization',
         items: [
-          { id: 'employees', label: 'Staff Directory', icon: Users, module: MODULE_KEYS.HRM, path: '/hr/people/employees' },
           { id: 'departments', label: 'Departments', icon: Building2, module: MODULE_KEYS.HRM, path: '/hr/people/departments' },
           { id: 'teams', label: 'Squad Teams', icon: Users, module: MODULE_KEYS.HRM, path: '/hr/people/teams' },
+          { id: 'settings', label: 'HR Policies & Config', icon: Settings, path: '/hr/settings' },
         ],
       },
       {
-        label: 'Work & Projects',
+        label: 'Candidate Lifecycle & Recruitment',
+        items: [
+          { id: 'onboarding', label: 'Candidate Onboarding', icon: UserPlus, iconColor: '#6366f1', module: MODULE_KEYS.HRM, path: '/hr/onboarding' },
+          { id: 'offer-template', label: 'Offer Template Builder', icon: FileText, iconColor: '#818cf8', module: MODULE_KEYS.HRM, path: '/hr/offer-template' },
+        ],
+      },
+      {
+        label: 'Workforce & Exit Management',
+        items: [
+          { id: 'employees', label: 'Staff Directory', icon: Users, module: MODULE_KEYS.HRM, path: '/hr/people/employees' },
+          { id: 'offboarding', label: 'Offboarding & Clearance', icon: UserMinus, iconColor: '#ef4444', module: MODULE_KEYS.HRM, path: '/hr/offboarding' },
+        ],
+      },
+      {
+        label: 'Projects & Work Execution',
         items: [
           { id: 'projects', label: 'Project Boards', icon: Briefcase, module: MODULE_KEYS.PROJECTS, path: '/work/projects', alwaysShow: true },
           { id: 'tasks', label: 'Task Execution Board', icon: CheckSquare, module: MODULE_KEYS.TASKS, path: '/work/tasks', alwaysShow: true },
@@ -160,8 +191,8 @@ export const ROLE_NAV_CONFIG = {
       {
         label: 'Compensation & Comms',
         items: [
-          { id: 'payslips', label: 'Payslip Processing', icon: FileText, iconColor: '#a78bfa', module: MODULE_KEYS.PAYROLL, path: '/payroll/payslips' },
-          { id: 'notifications', label: 'Company Announcements', icon: Bell, path: '/hr/notifications' },
+          { id: 'payslips', label: 'Payroll & Payslips', icon: FileText, iconColor: '#a78bfa', module: MODULE_KEYS.PAYROLL, path: '/payroll/payslips' },
+          { id: 'notifications', label: 'Announcements', icon: Bell, path: '/hr/notifications' },
         ],
       },
       {

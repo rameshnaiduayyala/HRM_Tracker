@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@tanstack/react-table": "^8.21.3",
+    "@tinymce/tinymce-react": "^6.3.0",
     "autoprefixer": "^10.5.4",
     "axios": "^1.18.1",
     "bootstrap": "^5.3.8",

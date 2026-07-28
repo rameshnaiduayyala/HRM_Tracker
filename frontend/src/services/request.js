@@ -148,8 +148,10 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    // Reject with api response message
-    return Promise.reject(new Error(errMsg || 'API request failed'));
+    // Reject with api response message and attach original error details
+    const apiErr = new Error(errMsg || 'API request failed');
+    apiErr.response = error.response;
+    return Promise.reject(apiErr);
   }
 );
 

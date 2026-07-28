@@ -30,6 +30,8 @@ const GuardedRoute = ({ allowedRoles, module, children }) => (
   </ProtectedRoute>
 );
 
+const CandidatePortal = lazy(() => import('./pages/CandidatePortal'));
+
 export default function App() {
   return (
     <EntitlementProvider>
@@ -51,6 +53,7 @@ export default function App() {
               {/* Public Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/candidate-portal/:token" element={<CandidatePortal />} />
 
               {/* Company Admin & Manager Routes */}
               <Route path="/dashboard/*" element={<GuardedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MANAGER', 'HR']}><Dashboard /></GuardedRoute>} />

@@ -28,6 +28,9 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
     timezone: 'UTC',
     allowManualTime: false,
     requireApprovalForOvertime: true,
+    customOfferHeader: '',
+    customOfferTerms: '',
+    customOfferSignatory: '',
   });
 
   useEffect(() => {
@@ -181,6 +184,9 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
           timezone: s.timezone || 'UTC',
           allowManualTime: Boolean(s.allowManualTime),
           requireApprovalForOvertime: s.requireApprovalForOvertime !== false,
+          customOfferHeader: s.customOfferHeader || '',
+          customOfferTerms: s.customOfferTerms || '',
+          customOfferSignatory: s.customOfferSignatory || '',
         });
       }
     } catch (err) {
@@ -212,6 +218,9 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
           screenshotInterval: settings.screenshotInterval,
           idleThreshold: settings.idleThreshold,
           timezone: settings.timezone,
+          customOfferHeader: settings.customOfferHeader,
+          customOfferTerms: settings.customOfferTerms,
+          customOfferSignatory: settings.customOfferSignatory,
         });
       } catch (settingsErr) {
         console.warn('Settings API update warning:', settingsErr);
@@ -533,10 +542,64 @@ export default function SettingsTab({ companyId, onSettingsSaved }) {
             </div>
           </div>
 
+          {/* Section 4: Enterprise Offer Letter Customizer */}
+          <div className="bg-[var(--bg-card)] border border-[var(--border-base)] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Settings className="w-4 h-4 text-indigo-400" />
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Enterprise Offer Letter Customizer</h3>
+            </div>
+            <p className="text-xs text-[var(--text-muted)]">Customize your company's official offer letter text and signatures using dynamic candidate variables.</p>
+
+            <div className="bg-indigo-950/40 border border-indigo-800/40 p-3 rounded-xl text-xs text-indigo-300 flex flex-wrap gap-2">
+              <span className="font-bold text-white">Dynamic Variables:</span>
+              <code className="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 font-mono text-indigo-200">{"{{candidateName}}"}</code>
+              <code className="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 font-mono text-indigo-200">{"{{designation}}"}</code>
+              <code className="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 font-mono text-indigo-200">{"{{department}}"}</code>
+              <code className="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 font-mono text-indigo-200">{"{{companyName}}"}</code>
+              <code className="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 font-mono text-indigo-200">{"{{joiningDate}}"}</code>
+              <code className="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 font-mono text-indigo-200">{"{{ctc}}"}</code>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className={labelClass}>Custom Opening Paragraph / Header HTML</label>
+                <textarea
+                  rows={3}
+                  className={inputClass}
+                  placeholder="<p>Dear <strong>{{candidateName}}</strong>,</p><p>We are pleased to offer you the position of {{designation}} at {{companyName}}...</p>"
+                  value={settings.customOfferHeader}
+                  onChange={(e) => setSettings({ ...settings, customOfferHeader: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Custom Closing Terms & Conditions</label>
+                <textarea
+                  rows={2}
+                  className={inputClass}
+                  placeholder="By accepting this offer, you agree to complete background verification and join on {{joiningDate}}."
+                  value={settings.customOfferTerms}
+                  onChange={(e) => setSettings({ ...settings, customOfferTerms: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>HR Signatory Title / Signature Block</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder="Authorized HR Signatory<br/><small>Human Resources Division</small>"
+                  value={settings.customOfferSignatory}
+                  onChange={(e) => setSettings({ ...settings, customOfferSignatory: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-indigo-600/20 uppercase tracking-wider"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-indigo-500/20 disabled:opacity-50"
           >
             <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Settings'}
           </button>

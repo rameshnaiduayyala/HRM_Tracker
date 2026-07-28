@@ -36,12 +36,17 @@ router.use('/notifications', authenticate, notificationsRoutes);
 router.use('/announcements', authenticate, announcementsRoutes);
 router.use('/settings', authenticate, settingsRoutes);
 
+import candidatesRoutes from '../modules/candidates/candidates.routes';
+import offboardingRoutes from '../modules/offboarding/offboarding.routes';
+
 // Module 1: HRM (Human Resource Management)
 router.use('/departments', authenticate, requireModule('HRM'), departmentsRoutes);
 router.use('/teams', authenticate, requireModule('HRM'), teamsRoutes);
 router.use('/attendance', authenticate, requireModule('HRM'), attendanceRoutes);
 router.use('/leave', authenticate, requireModule('HRM'), leaveRoutes);
 router.use('/timesheets', authenticate, requireModule('HRM'), timesheetsRoutes);
+router.use('/candidates', candidatesRoutes);
+router.use('/offboarding', offboardingRoutes);
 
 // Module 2: PROJECTS & TASKS (Jira-like Management)
 router.use('/tasks', authenticate, requireModule('PROJECTS_TASKS'), tasksRoutes);

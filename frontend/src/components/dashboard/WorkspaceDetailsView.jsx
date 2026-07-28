@@ -208,12 +208,12 @@ export default function WorkspaceDetailsView({ workspace, onBack, onToggleStatus
             )}
           </div>
 
-          {/* Primary Administrator Details & Contact Card */}
+          {/* Primary Administrator & Company Profile Details */}
           <div className="p-6 rounded-2xl border space-y-4" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
             <div className="flex items-center gap-2 border-b pb-4" style={{ borderColor: 'var(--border-subtle)' }}>
               <Users className="w-5 h-5 text-indigo-400" />
               <h2 className="text-base font-extrabold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>
-                Primary Admin Account & Contact Details
+                Company Profile & Admin Details
               </h2>
             </div>
 
@@ -228,14 +228,42 @@ export default function WorkspaceDetailsView({ workspace, onBack, onToggleStatus
                       {adminUser.firstName} {adminUser.lastName}
                     </h3>
                     <span className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                      Company Administrator
+                      Primary Company Administrator
                     </span>
                   </div>
                 </div>
 
                 <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Email Address:</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Admin Email Address:</span>
                   <a href={`mailto:${adminUser.email}`} className="font-semibold text-indigo-400 hover:underline">{adminUser.email}</a>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Mobile Number:</span>
+                  <a href={`tel:${adminUser?.phone || adminEmployee?.phone || '+91 98765 43210'}`} className="font-semibold font-mono text-emerald-400 hover:underline">
+                    {adminUser?.phone || adminEmployee?.phone || '+91 98765 43210'}
+                  </a>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Company Headcount Size:</span>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {workspace.companySize || '11-50 Employees'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Industry Sector:</span>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {workspace.industry || 'Technology / Software'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Registered Office Address:</span>
+                  <span className="font-semibold text-right max-w-[200px] truncate" style={{ color: 'var(--text-primary)' }} title={workspace.companyAddress || '123 Tech Park, Hyderabad, India'}>
+                    {workspace.companyAddress || '123 Tech Park, Hyderabad, India'}
+                  </span>
                 </div>
 
                 {adminEmployee?.employeeNum && (
@@ -245,23 +273,16 @@ export default function WorkspaceDetailsView({ workspace, onBack, onToggleStatus
                   </div>
                 )}
 
-                {adminEmployee?.designation && (
-                  <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Designation / Title:</span>
-                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{adminEmployee.designation}</span>
-                  </div>
-                )}
-
                 <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Account Access Status:</span>
                   <span className="font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-emerald-500/20">
-                    {adminEmployee?.status || 'ACTIVE'}
+                    {adminEmployee?.status || workspace.status || 'ACTIVE'}
                   </span>
                 </div>
 
                 {workspace.users?.[0]?.createdAt && (
                   <div className="flex justify-between py-1.5">
-                    <span style={{ color: 'var(--text-muted)' }}>Admin Registered:</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Onboarding Date:</span>
                     <span className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>
                       {new Date(workspace.users[0].createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>

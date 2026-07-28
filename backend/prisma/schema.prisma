@@ -43,6 +43,8 @@ model Company {
   announcements Announcement[]
   invoices      Invoice[]
   shifts        Shift[]
+  candidates    Candidate[]
+  offboardings  OffboardingRecord[]
 
   @@map("companies")
 }
@@ -128,6 +130,8 @@ model Employee {
   projectMembers ProjectMember[]
   payslips       Payslip[]
   timesheets     Timesheet[]
+  onboardingTasks OnboardingTask[]
+  offboardings   OffboardingRecord[]
 
   @@map("employees")
 }
@@ -141,6 +145,7 @@ model Department {
   updatedAt DateTime   @updatedAt
   employees Employee[]
   teams     Team[]
+  candidates Candidate[]
 
   @@unique([name, companyId])
   @@map("departments")
@@ -341,6 +346,9 @@ model CompanySettings {
   timezone           String   @default("UTC")
   shiftStart         String   @default("09:00")
   shiftEnd           String   @default("18:00")
+  customOfferHeader  String?  @db.Text
+  customOfferTerms   String?  @db.Text
+  customOfferSignatory String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -537,19 +545,93 @@ model FeatureFlag {
 }
 
 model Payslip {
-  id           String   @id @default(uuid())
-  employeeId   String
-  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  month        String   // e.g. "July 2026"
-  baseSalary   Float
-  allowance    Float    @default(0)
-  deductions   Float    @default(0)
-  netPay       Float
-  status       String   @default("PAID") // PAID, PENDING
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String   @id @default(uuid())
+  employeeId      String
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  month           String   // e.g. "July 2026"
+  baseSalary      Float
+  hra             Float    @default(0)
+  specialAllowance Float   @default(0)
+  conveyance      Float    @default(0)
+  allowance       Float    @default(0)
+  pfDeduction     Float    @default(0)
+  taxDeduction    Float    @default(0)
+  otherDeductions Float    @default(0)
+  deductions      Float    @default(0)
+  netPay          Float
+  status          String   @default("PAID") // PAID, PENDING
+  payPeriodStart  DateTime?
+  payPeriodEnd    DateTime?
+  paymentDate     DateTime?
+  paymentMethod   String?  @default("BANK_TRANSFER")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("payslips")
 }
+
+model Candidate {
+  id                 String           @id @default(uuid())
+  companyId          String
+  company            Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  departmentId       String?
+  department         Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  firstName          String
+  lastName           String
+  email              String
+  phone              String?
+  designation        String
+  ctc                Float
+  expectedJoiningDate DateTime
+  offerStatus        String           @default("OFFER_SENT") // DRAFT, OFFER_SENT, ACCEPTED, REJECTED, JOINED
+  offerToken         String           @unique @default(uuid())
+  joinedEmployeeId   String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  onboardingTasks    OnboardingTask[]
+
+  @@map("candidates")
+}
+
+model OnboardingTask {
+  id          String     @id @default(uuid())
+  candidateId String?
+  candidate   Candidate? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  employeeId  String?
+  employee    Employee?  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  category    String     @default("DOCUMENTATION") // DOCUMENTATION, HARDWARE, IT_ACCESS, TRAINING
+  status      String     @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  dueDate     DateTime?
+  assignedTo  String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("onboarding_tasks")
+}
+
+model OffboardingRecord {
+  id               String    @id @default(uuid())
+  employeeId       String
+  employee         Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  companyId        String
+  company          Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  resignationDate  DateTime  @default(now())
+  lastWorkingDay   DateTime
+  reason           String?
+  noticePeriodDays Int       @default(30)
+  status           String    @default("INITIATED") // INITIATED, CLEARANCE_PENDING, APPROVED, COMPLETED
+  exitInterviewNotes String?
+  itClearance      Boolean   @default(false)
+  hrClearance      Boolean   @default(false)
+  financeClearance Boolean   @default(false)
+  relievingLetterUrl String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("offboarding_records")
+}
+
 
 

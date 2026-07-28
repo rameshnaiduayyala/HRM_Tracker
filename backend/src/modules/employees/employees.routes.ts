@@ -6,6 +6,9 @@ import { companyGuard } from '../../shared/middlewares/companyGuard';
 
 const router = Router();
 
+// Public / Printable document render route
+router.get('/payslips/:id/render', payslipsController.renderHTML);
+
 router.use(authenticate);
 router.use(companyGuard);
 
